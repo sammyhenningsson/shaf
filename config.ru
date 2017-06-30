@@ -1,8 +1,4 @@
-$LOAD_PATH << File.expand_path('.')
-require 'rubygems'
-require 'bundler'
-require 'config/init.rb'
-require './app/server'
-require './app/routes'
+$:.unshift __dir__
+require 'config/bootstrap'
 
-run Server
+run App.instance

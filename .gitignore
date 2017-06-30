@@ -1,0 +1,6 @@
+.bundle
+logs/**
+db/*.sqlite3*
+.rake_tasks~
+.byebug_history
+todo.md

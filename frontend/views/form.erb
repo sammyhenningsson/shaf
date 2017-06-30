@@ -1,0 +1,16 @@
+<% @page_title = form.title || "HAL Form" %>
+<div class="container">
+  <section class="section">
+    <div class="hal-form">
+      <h1><%= form.title %></h1>
+      <div class="hal-form--form">
+        <%= form.to_html %>
+      </div>
+    </div>
+  </section>
+  <section class="section">
+    <div class="hal-payload">
+      <%= json2html(serialized) %>
+    </div>
+  </section>
+</div>

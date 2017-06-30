@@ -1,0 +1,3 @@
+#!/bin/bash
+
+RACK_ENV=${RACK_ENV:-development} /usr/bin/env irb -I. -Iconfig -rbootstrap
