@@ -1,5 +1,5 @@
 require 'fileutils'
-require 'byebug'
+require 'shaf/generator'
 
 module Shaf
   module Command
@@ -9,13 +9,12 @@ module Shaf
       end
       
       def self.usage
-        'generate [scaffold|resource|migration|controller] NAME'
+        Generator::Registry.usage
       end
 
       def call
-        puts "Not implemented yet"
+        Generator::Factory.create(*args).call
       end
-
     end
   end
 end

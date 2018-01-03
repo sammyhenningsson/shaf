@@ -1,14 +1,16 @@
+require 'fileutils'
+
 module Shaf
-  module Command
+  module Generator
     class Registry
-      @commands = []
+      @generators = []
 
       def self.register(clazz)
-        @commands << clazz
+        @generators << clazz
       end
 
       def self.lookup(str)
-        @commands.detect do |clazz|
+        @generators.detect do |clazz|
           return unless clazz.respond_to? :identified_by
           pattern = clazz.identified_by or return
           pattern = %r(\A#{pattern}\Z) if pattern.is_a? String
@@ -17,23 +19,21 @@ module Shaf
       end
 
       def self.usage
-        @commands.map(&:usage).compact
+        @generators.map(&:usage).compact
       end
     end
 
     class Factory
       def self.create(str, *args)
         clazz = Registry.lookup(str)
-        raise NotFoundError.new(%Q(Command '#{str}' is not supported)) unless clazz
+        raise NotFoundError.new(%Q(Generator '#{str}' is not supported)) unless clazz
         clazz.new(*args)
       end
     end
 
     class NotFoundError < StandardError; end
-    class ArgumentError < StandardError; end
 
-    class BaseCommand
-
+    class BaseGenerator
       attr_reader :args
 
       def self.inherited(child)
@@ -49,6 +49,8 @@ module Shaf
       end
     end
 
-    Dir[File.join(__dir__, 'command', '*.rb')].each { |file| require file }
+    Dir[File.join(__dir__, 'generator', '*.rb')].each do |file|
+      require file
+    end
   end
 end
