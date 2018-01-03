@@ -1,0 +1,26 @@
+#!/usr/bin/env ruby
+
+require 'shaf/command'
+
+module Shaf
+  def self.run
+    cmd = ARGV.shift
+    return show_help if cmd =~ /-h/
+    command = Shaf::Command::Factory.create(cmd, *ARGV)
+    command.call
+  rescue Command::NotFoundError, Command::ArgumentError => e
+    puts e.message, "\n"
+    show_help
+    exit 1
+  end
+
+  def self.show_help
+    filename = File.basename $0
+    puts <<~EOS
+      Usage: #{filename} #{Command::Registry.usage.join("\n            ")}
+    EOS
+  end
+
+end
+
+Shaf.run
