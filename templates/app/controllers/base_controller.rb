@@ -1,7 +1,6 @@
-require 'app/lib/resource_uris'
-require 'app/lib/errors'
-
 class BaseController < Sinatra::Base
+
+  include Shaf::Errors
 
   configure do
     disable :static
@@ -16,13 +15,13 @@ class BaseController < Sinatra::Base
   end
 
   use Rack::Deflater
+  register Shaf::ResourceUris
 
   def self.inherited(controller)
     super
     App.use controller
   end
 
-  register Sinatra::ResourceUris
 
   def log
     $logger

@@ -1,4 +1,6 @@
-module Sinatra
+require 'sinatra/base'
+
+module Shaf
   module ResourceUris
     def resource_uris_for(*args)
       CreateUriMethods.new(*args).call
@@ -14,7 +16,7 @@ module Sinatra
     end
   end
 
-  register ResourceUris
+  Sinatra.register ResourceUris
 end
 
 module UriHelperMethods

@@ -3,6 +3,7 @@
 source "https://rubygems.org"
 ruby '2.4.1'
 
+gem 'shaf'
 gem 'sinatra', require: 'sinatra/base'
 gem 'rake'
 gem 'thin'

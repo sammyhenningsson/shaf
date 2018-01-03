@@ -1,6 +1,7 @@
 require 'sinatra/base'
 require 'sequel'
 require 'config/constants'
+require 'fileutils'
 
 CONFIG = {
 
@@ -36,5 +37,7 @@ unless CONFIG[env]
 end
 
 MIGRATIONS_DIR = File.join(APP_ROOT, 'db', 'migrations')
+FileUtils.mkdir_p(MIGRATIONS_DIR) unless Dir.exist?(MIGRATIONS_DIR)
+
 DB = Sequel.connect(CONFIG[env])
 

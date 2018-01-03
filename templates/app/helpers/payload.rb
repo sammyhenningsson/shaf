@@ -82,7 +82,7 @@ module Payload
     log.debug "Responding with html: #{resource.class})"
     content_type :html
     case resource
-    when Formable::Form
+    when Shaf::Formable::Form
       body erb(:form, locals: {form: resource, serialized: serialized})
     else
       body erb(:payload, locals: {serialized: serialized})

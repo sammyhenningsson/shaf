@@ -1,10 +1,10 @@
-require 'lib/formable'
+require 'shaf/formable'
 
 module Serializers
   class Form
     extend HALDecorator
 
-    model Formable::Form
+    model Shaf::Formable::Form
 
     attribute :method do
       (options[:method] || resource&.method || 'POST').to_s.upcase

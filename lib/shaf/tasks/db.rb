@@ -71,7 +71,6 @@ namespace :db do
       File.write filename, <<~EOS
       Sequel.migration do
         change do
-          end
         end
       end
       EOS

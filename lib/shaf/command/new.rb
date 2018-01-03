@@ -24,13 +24,9 @@ module Shaf
 
       def create_dir(name)
         return if Dir.exist? name
-        parent = File.dirname(name)
-        create_dir(parent) if parent && !Dir.exist?(parent)
-        begin
-          Dir.mkdir name
-        rescue SystemCallError
-          exit_with_error("Failed to create directory #{name}", 2)
-        end
+        FileUtils.mkdir_p(name)
+      rescue SystemCallError
+        exit_with_error("Failed to create directory #{name}", 2)
       end
 
       def copy_templates
@@ -48,7 +44,9 @@ module Shaf
       end
 
       def template_files
-        Dir["#{template_dir}/**/*.rb"]
+        Dir["#{template_dir}/**/*"].reject do |file|
+          File.directory?(file)
+        end
       end
 
       def target_for(template)

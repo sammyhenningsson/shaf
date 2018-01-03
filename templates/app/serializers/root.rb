@@ -1,5 +1,3 @@
-require 'models/user'
-
 module Serializers
   class Root
     extend HALDecorator
