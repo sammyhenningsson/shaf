@@ -1,104 +1,99 @@
 require 'test_helper'
 
-module Lib
-  class FormableTest < MiniTest::Test
-
-    def setup
-      @class = Class.new do
-        include Formable
-      end
+describe Shaf::Formable do
+  before do
+    @class = Class.new do
+      include Shaf::Formable
     end
+  end
 
-    def test_it_adds_form_class_method
-      assert @class.respond_to? :form
-    end
+  it "adds form class method" do
+    assert @class.respond_to? :form
+  end
 
-    def test_creates_duplicate_create_and_edit_forms
-      @class.form do
-        name 'Foo'
-        fields(
-          {
-            foo: {
-              type: "string",
-              label: 'Foo'
-            },
-            bar: {
-              type: "string",
-              label: 'Bar'
-            }
+  it "creates duplicate create and edit forms" do
+    @class.form do
+      name 'Foo'
+      fields(
+        {
+          foo: {
+            type: "string",
+            label: 'Foo'
+          },
+          bar: {
+            type: "string",
+            label: 'Bar'
           }
-        )
+        }
+      )
+    end
+    assert_instance_of(Shaf::Formable::Form, @class.create_form)
+    assert_instance_of(Shaf::Formable::Form, @class.edit_form)
+    refute_equal @class.edit_form.object_id, @class.create_form.object_id
+    assert_equal 'Foo', @class.create_form.name
+    assert_equal 'Foo', @class.edit_form.name
+  end
+
+  it "creates a create form" do
+    @class.form do
+      create do
+        name 'Create Form'
+        title 'create-form'
       end
-      assert_instance_of(Formable::Form, @class.create_form)
-      assert_instance_of(Formable::Form, @class.edit_form)
-      refute_equal @class.edit_form.object_id, @class.create_form.object_id
-      assert_equal 'Foo', @class.create_form.name
-      assert_equal 'Foo', @class.edit_form.name
     end
 
-    def test_creates_create_form
-      @class.form do
-        create do
-          name 'Create Form'
-          title 'create-form'
-        end
-      end
+    assert_nil @class.edit_form
+    assert_instance_of(Shaf::Formable::Form, @class.create_form)
+    assert_equal 'Create Form', @class.create_form.name
+    assert_equal 'create-form', @class.create_form.title
+  end
 
-      assert_nil @class.edit_form
-      assert_instance_of(Formable::Form, @class.create_form)
-      assert_equal 'Create Form', @class.create_form.name
-      assert_equal 'create-form', @class.create_form.title
+  it "creates a edit form" do
+    @class.form do
+      edit do
+        name 'Edit Form'
+        title 'edit-form'
+      end
     end
 
-    def test_creates_edit_form
-      @class.form do
-        edit do
-          name 'Edit Form'
-          title 'edit-form'
-        end
+    assert_nil @class.create_form
+    assert_instance_of(Shaf::Formable::Form, @class.edit_form)
+    assert_equal 'Edit Form', @class.edit_form.name
+    assert_equal 'edit-form', @class.edit_form.title
+  end
+
+  it "creates different create and edit forms" do
+    @class.form do
+      name 'Common Name'
+      create do
+        method :post
+        type :foo
       end
 
-      assert_nil @class.create_form
-      assert_instance_of(Formable::Form, @class.edit_form)
-      assert_equal 'Edit Form', @class.edit_form.name
-      assert_equal 'edit-form', @class.edit_form.title
-    end
-
-    def test_creates_different_create_and_edit_forms
-      @class.form do
-        name 'Common Name'
-        create do
-          method :post
-          type :foo
-        end
-
-        edit do
-          method :patch
-          type :bar
-        end
+      edit do
+        method :patch
+        type :bar
       end
-      assert_equal 'Common Name', @class.create_form.name
-      assert_equal 'Common Name', @class.edit_form.name
-      assert_equal :foo, @class.create_form.type
-      assert_equal :bar, @class.edit_form.type
-      assert_equal 'POST', @class.create_form.method
-      assert_equal 'PATCH', @class.edit_form.method
     end
+    assert_equal 'Common Name', @class.create_form.name
+    assert_equal 'Common Name', @class.edit_form.name
+    assert_equal :foo, @class.create_form.type
+    assert_equal :bar, @class.edit_form.type
+    assert_equal 'POST', @class.create_form.method
+    assert_equal 'PATCH', @class.edit_form.method
+  end
 
-    def test_instances_can_return_edit_form
-      @class.form do
-        edit do
-          name 'Edit Form'
-          title 'edit-form'
-        end
+  it "is possible to get the edit form from instances" do
+    @class.form do
+      edit do
+        name 'Edit Form'
+        title 'edit-form'
       end
-
-      object = @class.new
-      assert_instance_of(Formable::Form, object.edit_form)
-      assert_equal 'Edit Form', object.edit_form.name
-      assert_equal object, object.edit_form.resource
     end
 
+    object = @class.new
+    assert_instance_of(Shaf::Formable::Form, object.edit_form)
+    assert_equal 'Edit Form', object.edit_form.name
+    assert_equal object, object.edit_form.resource
   end
 end
-
