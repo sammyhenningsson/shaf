@@ -4,13 +4,9 @@ require 'shaf/generator'
 module Shaf
   module Command
     class Generate < BaseCommand
-      def self.identified_by
-        'generate'
-      end
-      
-      def self.usage
-        Generator::Registry.usage
-      end
+
+      identifier /gen(erate)?/
+      usage Generator::Registry.usage
 
       def call
         Generator::Factory.create(*args).call

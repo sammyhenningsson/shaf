@@ -3,18 +3,15 @@ require 'fileutils'
 module Shaf
   module Command
     class New < BaseCommand
-      def self.identified_by
-        'new'
-      end
 
-      def self.usage
-        'new PROJECT_NAME'
-      end
+      identifier :new
+      usage 'new PROJECT_NAME'
 
       def call
         @project_name = args.shift
         if @project_name.nil? || @project_name.empty?
-          raise ArgumentError, "Please provide a project name when using command 'new'!"
+          raise ArgumentError,
+            "Please provide a project name when using command 'new'!"
         end
 
         create_dir @project_name

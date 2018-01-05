@@ -1,13 +1,9 @@
 module Shaf
   module Generator
     class Scaffold < BaseGenerator
-      def self.identified_by
-        'scaffold'
-      end
 
-      def self.usage
-        'generate scaffold RESOURCE_NAME'
-      end
+      identifier :scaffold
+      usage 'generate scaffold RESOURCE_NAME'
 
       def call
         name = args.shift

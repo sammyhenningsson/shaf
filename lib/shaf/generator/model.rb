@@ -1,13 +1,9 @@
 module Shaf
   module Generator
     class Model < BaseGenerator
-      def self.identified_by
-        'model'
-      end
 
-      def self.usage
-        'generate model MODEL_NAME'
-      end
+      identifier :model
+      usage 'generate model MODEL_NAME'
 
       def call
         @model_name = args.shift

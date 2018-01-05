@@ -1,13 +1,9 @@
 module Shaf
   module Generator
     class Controller < BaseGenerator
-      def self.identified_by
-        'controller'
-      end
 
-      def self.usage
-        'generate controller RESOURCE_NAME'
-      end
+      identifier :controller
+      usage 'generate controller RESOURCE_NAME'
 
       def call
         @controller_name = args.shift

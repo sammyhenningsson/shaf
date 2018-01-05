@@ -9,15 +9,15 @@ module Shaf
 
       def self.lookup(str)
         @commands.detect do |clazz|
-          return unless clazz.respond_to? :identified_by
-          pattern = clazz.identified_by or return
+          pattern = clazz.instance_eval { @id }
+          return if pattern.nil? || pattern.empty?
           pattern = %r(\A#{pattern}\Z) if pattern.is_a? String
           str.match(pattern)
         end
       end
 
       def self.usage
-        @commands.map(&:usage).compact
+        @commands.map {|cmd| cmd.instance_eval { @usage } }.compact
       end
     end
 
@@ -36,12 +36,22 @@ module Shaf
 
       attr_reader :args
 
-      def self.inherited(child)
-        Registry.register(child)
-      end
+      class << self
+        def inherited(child)
+          Registry.register(child)
+        end
 
-      def self.usage
-        nil
+        def identifier(id)
+          @id = id.to_s
+        end
+
+        def usage(str)
+          @usage = str
+        end
+
+        def description(str)
+          @description = str
+        end
       end
 
       def initialize(*args)
