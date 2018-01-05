@@ -3,9 +3,9 @@ require 'shaf/generator'
 
 module Shaf
   module Command
-    class Generate < BaseCommand
+    class Generate < Base
 
-      identifier /gen(erate)?/
+      identifier %r(gen(erate)?)
       usage Generator::Registry.usage
 
       def call

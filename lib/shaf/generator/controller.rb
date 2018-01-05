@@ -1,6 +1,6 @@
 module Shaf
   module Generator
-    class Controller < BaseGenerator
+    class Controller < Base
 
       identifier :controller
       usage 'generate controller RESOURCE_NAME'

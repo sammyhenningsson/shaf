@@ -1,26 +1,10 @@
 require 'fileutils'
+require 'shaf/registrable'
 
 module Shaf
   module Generator
     class Registry
-      @generators = []
-
-      def self.register(clazz)
-        @generators << clazz
-      end
-
-      def self.lookup(str)
-        @generators.detect do |clazz|
-          pattern = clazz.instance_eval { @id }
-          return if pattern.nil? || pattern.empty?
-          pattern = %r(\A#{pattern}\Z) if pattern.is_a? String
-          str.match(pattern)
-        end
-      end
-
-      def self.usage
-        @generators.map {|gen| gen.instance_eval { @usage } }.compact
-      end
+      extend Registrable
     end
 
     class Factory
@@ -31,7 +15,7 @@ module Shaf
       end
     end
 
-    class BaseGenerator
+    class Base
       attr_reader :args
 
       class << self

@@ -2,7 +2,7 @@ require 'fileutils'
 
 module Shaf
   module Command
-    class New < BaseCommand
+    class New < Base
 
       identifier :new
       usage 'new PROJECT_NAME'

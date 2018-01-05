@@ -1,6 +1,6 @@
 module Shaf
   module Generator
-    class Scaffold < BaseGenerator
+    class Scaffold < Base
 
       identifier :scaffold
       usage 'generate scaffold RESOURCE_NAME'

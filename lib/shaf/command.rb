@@ -1,24 +1,9 @@
+require 'shaf/registrable'
+
 module Shaf
   module Command
     class Registry
-      @commands = []
-
-      def self.register(clazz)
-        @commands << clazz
-      end
-
-      def self.lookup(str)
-        @commands.detect do |clazz|
-          pattern = clazz.instance_eval { @id }
-          return if pattern.nil? || pattern.empty?
-          pattern = %r(\A#{pattern}\Z) if pattern.is_a? String
-          str.match(pattern)
-        end
-      end
-
-      def self.usage
-        @commands.map {|cmd| cmd.instance_eval { @usage } }.compact
-      end
+      extend Registrable
     end
 
     class Factory
@@ -32,7 +17,7 @@ module Shaf
     class NotFoundError < StandardError; end
     class ArgumentError < StandardError; end
 
-    class BaseCommand
+    class Base
 
       attr_reader :args
 

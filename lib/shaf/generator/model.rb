@@ -1,6 +1,6 @@
 module Shaf
   module Generator
-    class Model < BaseGenerator
+    class Model < Base
 
       identifier :model
       usage 'generate model MODEL_NAME'
