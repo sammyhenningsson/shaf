@@ -6,8 +6,7 @@ module Shaf
   def self.run
     cmd = ARGV.shift
     return show_help if cmd =~ /-h/
-    command = Shaf::Command::Factory.create(cmd, *ARGV)
-    command.call
+    Command::Factory.create(cmd, *ARGV).call
   rescue Command::NotFoundError, Command::ArgumentError => e
     puts e.message, "\n"
     show_help
@@ -15,12 +14,16 @@ module Shaf
   end
 
   def self.show_help
-    filename = File.basename $0
-    puts <<~EOS
-      Usage: #{filename} #{Command::Registry.usage.join("\n            ")}
-    EOS
+    puts "Usage: #{script_name} #{usage}"
   end
 
+  def self.script_name
+    File.basename $0
+  end
+
+  def self.usage
+    Command::Registry.usage.join("\n            ")
+  end
 end
 
 Shaf.run
