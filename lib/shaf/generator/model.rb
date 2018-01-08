@@ -11,6 +11,9 @@ module Shaf
         if @model_name.nil? || @model_name.empty?
           raise Command::ArgumentError, "Please provide a model name when using the model generator!"
         end
+
+        create_migration
+        Generator::Factory.create('migration', "create #{@model_name} table").call
       end
     end
   end

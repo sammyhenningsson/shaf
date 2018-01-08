@@ -7,18 +7,18 @@ CONFIG = {
 
   production: {
     adapter: 'postgres',
-    host: ENV['SPOC_DB_HOST'],
-    database: ENV['SPOC_DB_USER'],
-    user: ENV['SPOC_DB_USER'],
-    password: ENV['SPOC_DB_PASS']
+    host: ENV['SHAF_DB_HOST'],
+    database: ENV['SHAF_DB_NAME'],
+    user: ENV['SHAF_DB_USER'],
+    password: ENV['SHAF_DB_PASS']
   }.freeze,
 
   development: {
     adapter: 'postgres',
-    host: ENV['SPOC_DB_HOST'],
-    database: ENV['SPOC_DB_USER'] || 'spoc_dev',
-    user: ENV['SPOC_DB_USER'] || 'spoc',
-    password: ENV['SPOC_DB_PASS']
+    host: ENV['SHAF_DB_HOST'],
+    database: ENV['SHAF_DB_NAME'] || 'shaf_dev',
+    user: ENV['SHAF_DB_USER'] || 'shaf',
+    password: ENV['SHAF_DB_PASS']
   }.freeze,
 
   test: {

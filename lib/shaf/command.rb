@@ -43,7 +43,7 @@ module Shaf
         @args = args.dup
       end
     end
-
-    Dir[File.join(__dir__, 'command', '*.rb')].each { |file| require file }
   end
 end
+
+Dir[File.join(__dir__, 'command', '*.rb')].each { |file| require file }
