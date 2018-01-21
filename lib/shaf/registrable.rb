@@ -12,20 +12,14 @@ module Shaf
       reg << clazz
     end
 
-    def unregister(str)
-      return if str.nil? || str.empty?
-      reg.delete_if do |clazz|
-        pattern = clazz.instance_eval { @id }
-        matching_identifier? str, pattern
-      end
+    def unregister(*str)
+      return if str.empty? || !str.all?
+      reg.delete_if { |clazz| matching_class? str, clazz }
     end
 
-    def lookup(str)
-      return if str.nil? || str.empty?
-      reg.detect do |clazz|
-        pattern = clazz.instance_eval { @id }
-        matching_identifier? str, pattern
-      end
+    def lookup(*str)
+      return if str.empty? || !str.all?
+      reg.detect { |clazz| matching_class? str, clazz }
     end
 
     def usage
@@ -36,6 +30,12 @@ module Shaf
 
     def reg
       @reg ||= []
+    end
+
+    def matching_class?(strings, clazz)
+      identifiers = clazz.instance_eval { @identifiers }
+      return false if strings.size < identifiers.size
+      identifiers.zip(strings).all? { |pattern, str| matching_identifier? str, pattern }
     end
 
     def matching_identifier?(str, pattern)

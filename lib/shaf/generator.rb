@@ -25,8 +25,8 @@ module Shaf
           Registry.register(child)
         end
 
-        def identifier(id)
-          @id = id.to_s
+        def identifier(*ids)
+          @identifiers = ids.map(&:to_s)
         end
 
         def usage(str)
