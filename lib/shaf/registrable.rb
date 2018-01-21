@@ -40,8 +40,8 @@ module Shaf
 
     def matching_identifier?(str, pattern)
       return false if pattern.nil? || pattern.empty?
-      pattern = %r(\A#{pattern}\Z) if pattern.is_a? String
-      str&.match(pattern)
+      return str == pattern if pattern.is_a? String
+      str&.match(pattern) || false
     end
   end
 end
