@@ -31,7 +31,19 @@ module Shaf
 
       class Base
         DB_COL_TYPES = {
-          string: 'String',
+          integer:    ['Integer :%s', ':%s, Integer'],
+          varchar:    ['String %s', ':%s, String'],
+          string:     ['String :%s', ':%s, String'],
+          text:       ['String :%s, text: true', ':%s, String, text: true'],
+          blob:       ['File :%s', ':%s, File'],
+          bigint:     ['Bignum :%s', ':%s, Bignum'],
+          double:     ['Float :%s', ':%s, Float'],
+          numeric:    ['BigDecimal :%s', ':%s, BigDecimal'],
+          date:       ['Date :%s', ':%s, Date'],
+          timestamp:  ['DateTime :%s', ':%s, DateTime'],
+          time:       ['Time :%s', ':%s, Time'],
+          bool:       ['TrueClass :%s', ':%s, TrueClass'],
+          boolean:    ['TrueClass :%s', ':%s, TrueClass'],
         }
 
         attr_reader :args
@@ -56,9 +68,9 @@ module Shaf
 
         def call
           validate_args
-          compile_migration_name
+          name = compile_migration_name
           compile_changes
-          [target, render]
+          [target(name), render]
         rescue StandardError => e
           raise Command::ArgumentError, e.message
         end
@@ -68,14 +80,18 @@ module Shaf
           @changes << change if change
         end
 
-        def column_def(str)
-          name, type = str.split(':')
-          "#{DB_COL_TYPES[type.to_sym]} :#{name.downcase}"
+        def db_type(type)
+          DB_COL_TYPES[type.to_sym] or raise "Column type '#{type}' not supported"
         end
 
-        def target
-          raise "Migration filename is nil" unless @name
-          "db/migrations/#{timestamp}_#{@name}.rb"
+        def column_def(str, create: true)
+          name, type = str.split(':')
+          format db_type(type)[create ? 0 : 1], name.downcase
+        end
+
+        def target(name)
+          raise "Migration filename is nil" unless name
+          "db/migrations/#{timestamp}_#{name}.rb"
         end
 
         private

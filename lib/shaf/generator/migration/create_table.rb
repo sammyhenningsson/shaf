@@ -12,13 +12,12 @@ module Shaf
         end
 
         def compile_migration_name
-          @name = "create_#{table_name}_table"
+          "create_#{table_name}_table"
         end
 
         def table_name
-          # FIXME: pluralize correctly!
           name = args[2] || ""
-          return "#{name}s" unless name.empty?
+          return name unless name.empty?
           raise Command::ArgumentError, "Table name must be given"
         end
 
