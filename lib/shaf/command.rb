@@ -2,6 +2,10 @@ require 'shaf/registrable'
 
 module Shaf
   module Command
+
+    class NotFoundError < StandardError; end
+    class ArgumentError < StandardError; end
+
     class Registry
       extend Registrable
     end
@@ -14,9 +18,6 @@ module Shaf
       end
     end
 
-    class NotFoundError < StandardError; end
-    class ArgumentError < StandardError; end
-
     class Base
 
       attr_reader :args
@@ -27,11 +28,11 @@ module Shaf
         end
 
         def identifier(*ids)
-          @identifiers = ids.map(&:to_s)
+          @identifiers = ids.flatten
         end
 
-        def usage(str)
-          @usage = str
+        def usage(str = nil, &block)
+          @usage = str || block
         end
 
         def description(str)

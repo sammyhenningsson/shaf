@@ -1,4 +1,3 @@
-require 'fileutils'
 require 'shaf/generator'
 
 module Shaf

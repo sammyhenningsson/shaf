@@ -23,7 +23,10 @@ module Shaf
     end
 
     def usage
-      reg.map {|cmd| cmd.instance_eval { @usage } }.compact
+      reg.compact.map do |entry|
+        usage = entry.instance_eval { @usage }
+        usage.respond_to?(:call) ? usage.call : usage
+      end
     end
 
     private
@@ -39,9 +42,10 @@ module Shaf
     end
 
     def matching_identifier?(str, pattern)
-      return false if pattern.nil? || pattern.empty?
+      return false if pattern.nil? || str.nil? || str.empty?
+      pattern = pattern.to_s if pattern.is_a? Symbol
       return str == pattern if pattern.is_a? String
-      str&.match(pattern) || false
+      str.match(pattern) || false
     end
   end
 end

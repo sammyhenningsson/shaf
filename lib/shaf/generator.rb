@@ -26,11 +26,11 @@ module Shaf
         end
 
         def identifier(*ids)
-          @identifiers = ids.map(&:to_s)
+          @identifiers = ids.flatten
         end
 
-        def usage(str)
-          @usage = str
+        def usage(str = nil, &block)
+          @usage = str || block
         end
       end
 
