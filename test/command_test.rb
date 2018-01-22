@@ -10,24 +10,24 @@ module Shaf
     end
 
     after do
-      Command::Registry.unregister "test_command"
+      Command::Factory.unregister "test_command"
     end
 
     it "registers subclass" do
-      count = Command::Registry.size
+      count = Command::Factory.size
       command # trigger let block
-      assert_equal count + 1, Command::Registry.size
+      assert_equal count + 1, Command::Factory.size
     end
 
     it "identify with string" do
       expected = command
-      assert_equal expected, Command::Registry.lookup("test_command")
-      assert_nil Command::Registry.lookup("some invalid identifier")
+      assert_equal expected, Command::Factory.lookup("test_command")
+      assert_nil Command::Factory.lookup("some invalid identifier")
     end
 
     it "::usage" do
       command # trigger let block
-      assert_includes Command::Registry.usage, "do stuff"
+      assert_includes Command::Factory.usage, "do stuff"
     end
   end
 end

@@ -4,28 +4,19 @@ module Shaf
   module Generator
     module Migration
 
-      class Registry
-        extend Registrable
+      class Factory
+        extend RegistrableFactory
       end
 
       class Generator < Generator::Base
         identifier :migration
-        usage { Registry.usage }
+        usage { Factory.usage }
 
         def call
           (target, content) = Factory.create(*args).call
           write_output(target, content)
         rescue StandardError => e
           raise Command::ArgumentError, e.message
-        end
-      end
-
-      class Factory
-        def self.create(*args)
-          clazz = Registry.lookup(*args)
-          return clazz.new(*args) if clazz
-          raise Command::NotFoundError,
-            %Q(Migration for '#{args.join(' ')}' is not supported)
         end
       end
 
@@ -50,7 +41,7 @@ module Shaf
 
         class << self
           def inherited(child)
-            Registry.register(child)
+            Factory.register(child)
           end
 
           def identifier(*ids)

@@ -5,7 +5,7 @@ module Shaf
     class Generate < Base
 
       identifier %r(gen(erate)?)
-      usage Generator::Registry.usage
+      usage Generator::Factory.usage
 
       def call
         Generator::Factory.create(*args).call

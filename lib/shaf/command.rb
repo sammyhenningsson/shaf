@@ -1,21 +1,12 @@
-require 'shaf/registrable'
+require 'shaf/registrable_factory'
 
 module Shaf
   module Command
 
-    class NotFoundError < StandardError; end
     class ArgumentError < StandardError; end
 
-    class Registry
-      extend Registrable
-    end
-
     class Factory
-      def self.create(str, *args)
-        clazz = Registry.lookup(str)
-        raise NotFoundError.new(%Q(Command '#{str}' is not supported)) unless clazz
-        clazz.new(*args)
-      end
+      extend RegistrableFactory
     end
 
     class Base
@@ -24,7 +15,7 @@ module Shaf
 
       class << self
         def inherited(child)
-          Registry.register(child)
+          Factory.register(child)
         end
 
         def identifier(*ids)

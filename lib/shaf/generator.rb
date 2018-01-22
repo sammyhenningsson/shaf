@@ -1,20 +1,12 @@
 require 'fileutils'
 require 'erb'
 require 'ostruct'
-require 'shaf/registrable'
+require 'shaf/registrable_factory'
 
 module Shaf
   module Generator
-    class Registry
-      extend Registrable
-    end
-
     class Factory
-      def self.create(str, *args)
-        clazz = Registry.lookup(str)
-        return clazz.new(*args) if clazz
-        raise Command::NotFoundError, %Q(Generator '#{str}' is not supported)
-      end
+      extend RegistrableFactory
     end
 
     class Base
@@ -22,7 +14,7 @@ module Shaf
 
       class << self
         def inherited(child)
-          Registry.register(child)
+          Factory.register(child)
         end
 
         def identifier(*ids)

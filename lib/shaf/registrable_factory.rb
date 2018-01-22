@@ -1,5 +1,8 @@
 module Shaf
-  module Registrable
+  module RegistrableFactory
+
+    class NotFoundError < StandardError; end
+
     def all
       reg.dup
     end
@@ -27,6 +30,12 @@ module Shaf
         usage = entry.instance_eval { @usage }
         usage.respond_to?(:call) ? usage.call : usage
       end
+    end
+
+    def create(*args)
+      clazz = lookup(*args)
+      return clazz.new(*args) if clazz
+      raise NotFoundError.new(%Q(Command '#{args}' is not supported))
     end
 
     private

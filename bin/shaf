@@ -7,7 +7,7 @@ module Shaf
     cmd = ARGV.shift
     return show_help if cmd =~ /-h/
     Command::Factory.create(cmd, *ARGV).call
-  rescue Command::NotFoundError, Command::ArgumentError => e
+  rescue RegistrableFactory::NotFoundError, Command::ArgumentError => e
     puts e.message, "\n"
     show_help
     exit 1
@@ -22,7 +22,7 @@ module Shaf
   end
 
   def self.usage
-    Command::Registry.usage.join("\n            ")
+    Command::Factory.usage.join("\n            ")
   end
 end
 

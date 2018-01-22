@@ -34,19 +34,19 @@ module Shaf
 
           it "adds timestamp to filename" do
             file = File.basename output_file
-            assert_match /\A\d{14}_/, file
+            assert_match %r(\A\d{14}_), file
           end
 
           it "names the migration file correctly" do
             file = File.basename output_file
-            assert_match /_create_#{table_name}_table\.rb\Z/, file
+            assert_match %r(_create_#{table_name}_table\.rb\Z), file
           end
 
           it "has the right content" do
-            assert_match /create_table\(:#{table_name}\) do$/, output
-            assert_match /primary_key :id$/, output
-            assert_match /String :message$/, output
-            assert_match /Integer :user_id$/, output
+            assert_match %r(create_table\(:#{table_name}\) do$), output
+            assert_match %r(primary_key :id$), output
+            assert_match %r(String :message$), output
+            assert_match %r(Integer :user_id$), output
           end
         end
 
@@ -58,12 +58,12 @@ module Shaf
 
           it "names the migration file correctly" do
             file = File.basename output_file
-            assert_match /_add_comment_to_#{table_name}\.rb\Z/, file
+            assert_match %r(_add_comment_to_#{table_name}\.rb\Z), file
           end
 
           it "has the right content" do
-            assert_match /alter_table\(:#{table_name}\) do$/, output
-            assert_match /add_column :comment, String/, output
+            assert_match %r(alter_table\(:#{table_name}\) do$), output
+            assert_match %r(add_column :comment, String), output
           end
         end
 
