@@ -7,7 +7,7 @@ module Shaf
         usage 'generate migration add column TABLE_NAME [field:type] [..]]'
 
         def validate_args
-          return if args.size >= 4
+          return if args.size >= 2
           raise "Please provide a table and at least one column " \
             "when generation add column migration"
         end
@@ -18,7 +18,7 @@ module Shaf
         end
 
         def table_name
-          name = args[2] || ""
+          name = args.first || ""
           return name unless name.empty?
           raise Command::ArgumentError, "Table name must be given"
         end
@@ -28,7 +28,7 @@ module Shaf
         end
 
         def columns
-          args[3..-1]
+          args[1..-1]
         end
 
         def add_columns_change

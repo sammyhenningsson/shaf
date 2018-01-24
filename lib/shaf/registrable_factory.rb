@@ -32,10 +32,12 @@ module Shaf
       end
     end
 
-    def create(*args)
-      clazz = lookup(*args)
-      return clazz.new(*args) if clazz
-      raise NotFoundError.new(%Q(Command '#{args}' is not supported))
+    def create(*params)
+      clazz = lookup(*params)
+      raise NotFoundError.new(%Q(Command '#{ARGV}' is not supported)) unless clazz
+
+      args = init_args(clazz, params)
+      clazz.new(*args)
     end
 
     private
@@ -55,6 +57,15 @@ module Shaf
       pattern = pattern.to_s if pattern.is_a? Symbol
       return str == pattern if pattern.is_a? String
       str.match(pattern) || false
+    end
+
+    def identifier_count(clazz)
+      clazz.instance_eval { @identifiers }&.size || 0
+    end
+
+    def init_args(clazz, params)
+      first_non_id = identifier_count(clazz)
+      params[first_non_id..-1]
     end
   end
 end

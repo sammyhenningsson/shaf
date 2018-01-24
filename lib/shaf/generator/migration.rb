@@ -72,6 +72,7 @@ module Shaf
         end
 
         def db_type(type)
+          type ||= :string
           DB_COL_TYPES[type.to_sym] or raise "Column type '#{type}' not supported"
         end
 

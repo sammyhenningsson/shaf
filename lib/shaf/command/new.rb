@@ -8,7 +8,7 @@ module Shaf
       usage 'new PROJECT_NAME'
 
       def call
-        @project_name = args.shift
+        @project_name = args.first
         if @project_name.nil? || @project_name.empty?
           raise ArgumentError,
             "Please provide a project name when using command 'new'!"
@@ -40,7 +40,7 @@ module Shaf
       end
 
       def template_files
-        Dir["#{template_dir}/**/*"].reject do |file|
+        Dir["#{template_dir}/**/{*,.*}"].reject do |file|
           File.directory?(file)
         end
       end

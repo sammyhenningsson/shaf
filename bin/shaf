@@ -1,29 +1,44 @@
 #!/usr/bin/env ruby
 
+require 'shaf/utils'
 require 'shaf/command'
 
 module Shaf
-  def self.run
-    cmd = ARGV.shift
-    return show_help if cmd =~ /-h/
-    Command::Factory.create(cmd, *ARGV).call
-  rescue RegistrableFactory::NotFoundError, Command::ArgumentError => e
-    puts e.message, "\n"
-    show_help
-    exit 1
-  end
+  class Script
 
-  def self.show_help
-    puts "Usage: #{script_name} #{usage}"
-  end
+    def self.run
+      new.run
+    end
 
-  def self.script_name
-    File.basename $0
-  end
+    def run
+      return show_help if show_help?
+      Command::Factory.create(*ARGV).call
+    rescue RegistrableFactory::NotFoundError, Command::ArgumentError => e
+      puts e.message, "\n"
+      show_help
+      exit 1
+    rescue Utils::ProjectRootNotFound
+      puts "This command can only be executed inside a Shaf project directory. " \
+        "Please change directory and try again!"
+      exit 2
+    end
 
-  def self.usage
-    Command::Factory.usage.join("\n            ")
+    def show_help
+      puts "Usage: #{script_name} #{usage}"
+    end
+
+    def script_name
+      File.basename $0
+    end
+
+    def usage
+      Command::Factory.usage.join("\n            ")
+    end
+
+    def show_help?
+      ARGV.first =~ /-h/ 
+    end
   end
 end
 
-Shaf.run
+Shaf::Script.run

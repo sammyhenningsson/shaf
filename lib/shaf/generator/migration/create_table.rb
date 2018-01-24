@@ -7,7 +7,7 @@ module Shaf
         usage 'generate migration create table TABLE_NAME [field:type] [..]'
 
         def validate_args
-          return if args.size >= 3
+          return unless args.empty?
           raise "Please provide a table name when generation a create table migration"
         end
 
@@ -16,7 +16,7 @@ module Shaf
         end
 
         def table_name
-          name = args[2] || ""
+          name = args.first || ""
           return name unless name.empty?
           raise Command::ArgumentError, "Table name must be given"
         end
@@ -27,7 +27,7 @@ module Shaf
 
         def create_table_change
           cols = ["primary_key :id"]
-          cols += args[3..-1].map { |s| column_def(s) }
+          cols += args[1..-1].map { |s| column_def(s) }
           [
             "create_table(:#{table_name}) do",
             *cols.map { |col| col.prepend("  ") }, # indent body with 2 spaces

@@ -1,3 +1,4 @@
+require 'shaf/utils'
 require 'shaf/registrable_factory'
 
 module Shaf
@@ -10,6 +11,7 @@ module Shaf
     end
 
     class Base
+      include Utils
 
       attr_reader :args
 

@@ -8,7 +8,9 @@ module Shaf
       usage Generator::Factory.usage
 
       def call
-        Generator::Factory.create(*args).call
+        in_project_root do
+          Generator::Factory.create(*args).call
+        end
       end
     end
   end
