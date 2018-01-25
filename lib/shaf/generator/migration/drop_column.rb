@@ -1,10 +1,10 @@
 module Shaf
   module Generator
     module Migration
-      class AddColumn < Base
+      class DropColumn < Base
 
-        identifier %w(add column)
-        usage 'generate migration add column TABLE_NAME [field:type] [..]]'
+        identifier %w(drop column)
+        usage 'generate migration drop column TABLE_NAME COLUMN_NAME'
 
         def validate_args
           if (table_name || "").empty?
@@ -17,29 +17,25 @@ module Shaf
         end
 
         def compile_migration_name
-          cols = columns.map { |c| c.split(':').first }
-          "add_#{cols.join('_')}_to_#{table_name}"
+          "drop_#{column}_from_#{table_name}"
+        end
+
+        def compile_changes
+          add_change drop_column_change
         end
 
         def table_name
           args.first
         end
 
-        def compile_changes
-          add_change add_columns_change
+        def column
+          args[1]
         end
 
-        def columns
-          args[1..-1]
-        end
-
-        def add_columns_change
-          cols = columns.map do |s|
-            "add_column #{column_def(s, create: false)}"
-          end
+        def drop_column_change
           [
             "alter_table(:#{table_name}) do",
-            *cols.map { |col| col.prepend("  ") }, # indent body with 2 spaces
+            "  drop_column :#{column}",
             "end\n"
           ]
         end

@@ -7,7 +7,7 @@ module Shaf
         usage 'generate migration create table TABLE_NAME [field:type] [..]'
 
         def validate_args
-          return unless args.empty?
+          return unless (table_name || "").empty?
           raise "Please provide a table name when generation a create table migration"
         end
 
@@ -16,9 +16,7 @@ module Shaf
         end
 
         def table_name
-          name = args.first || ""
-          return name unless name.empty?
-          raise Command::ArgumentError, "Table name must be given"
+          name = args.first
         end
 
         def compile_changes
