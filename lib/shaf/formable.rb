@@ -114,7 +114,7 @@ module Shaf
       end
 
       def call
-        instance_exec &block
+        instance_exec(&block)
         @form
       end
 
