@@ -83,6 +83,23 @@ module Shaf
             assert_match %r(drop_column :comment), output
           end
         end
+
+        describe "rename column" do
+          let(:table_name) { "blogs" }
+          let(:generator) do
+            Generator.new(*%w(rename column blogs comment tweet))
+          end
+
+          it "names the migration file correctly" do
+            file = File.basename output_file
+            assert_match %r(_rename_#{table_name}_comment_to_tweet\.rb\Z), file
+          end
+
+          it "has the right content" do
+            assert_match %r(alter_table\(:#{table_name}\) do$), output
+            assert_match %r(rename_column :comment, :tweet), output
+          end
+        end
       end
     end
   end

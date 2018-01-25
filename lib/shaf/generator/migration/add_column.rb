@@ -4,7 +4,7 @@ module Shaf
       class AddColumn < Base
 
         identifier %w(add column)
-        usage 'generate migration add column TABLE_NAME [field:type] [..]]'
+        usage 'generate migration add column TABLE_NAME field:type'
 
         def validate_args
           if (table_name || "").empty?
