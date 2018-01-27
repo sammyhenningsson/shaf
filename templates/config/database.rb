@@ -14,11 +14,8 @@ CONFIG = {
   }.freeze,
 
   development: {
-    adapter: 'postgres',
-    host: ENV['SHAF_DB_HOST'],
-    database: ENV['SHAF_DB_NAME'] || 'shaf_dev',
-    user: ENV['SHAF_DB_USER'] || 'shaf',
-    password: ENV['SHAF_DB_PASS']
+    adapter: 'sqlite',
+    database: File.join(APP_ROOT, 'db', 'development.sqlite3'),
   }.freeze,
 
   test: {
