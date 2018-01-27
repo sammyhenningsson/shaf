@@ -19,5 +19,4 @@ Gem::Specification.new do |gem|
 
   gem.add_development_dependency "rake", '~> 12.0', '>= 10.0'
   gem.add_development_dependency "minitest", '~> 5.10', '>= 5.0'
-  gem.add_development_dependency "byebug", '~> 9.0', '>= 9.0'
 end

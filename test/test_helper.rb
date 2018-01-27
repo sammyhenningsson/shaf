@@ -1,6 +1,5 @@
 require 'shaf'
 require 'minitest/autorun'
-require 'byebug'
 
 module Mutable
   def self.suppress_output
