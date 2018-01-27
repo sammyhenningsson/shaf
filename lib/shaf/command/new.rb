@@ -1,4 +1,6 @@
 require 'fileutils'
+require 'yaml'
+require 'shaf/version'
 
 module Shaf
   module Command
@@ -15,7 +17,10 @@ module Shaf
         end
 
         create_dir @project_name
-        Dir.chdir(@project_name) { copy_templates }
+        Dir.chdir(@project_name) do
+          copy_templates
+          create_shaf_root_file
+        end
       end
 
       def create_dir(name)
@@ -26,7 +31,14 @@ module Shaf
       end
 
       def copy_templates
-        template_files.each { |template| copy_template(template) }
+        template_files.each do |template|
+          copy_template(template)
+        end
+      end
+
+      def create_shaf_root_file
+        File.write '.shaf',
+          YAML.dump({'version' => Shaf::VERSION})
       end
 
       def copy_template(template)

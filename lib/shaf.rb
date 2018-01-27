@@ -1,3 +1,4 @@
+require 'shaf/version'
 require 'shaf/command'
 require 'shaf/errors'
 require 'shaf/formable'
