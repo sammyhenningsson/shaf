@@ -34,6 +34,20 @@ describe Shaf::Formable do
     assert_equal 'Foo', clazz.edit_form.name
   end
 
+  it "creates duplicate create and edit forms" do
+    clazz.form do
+      name 'Foo'
+      field :foo, type: "string", label: 'Foo'
+      field :bar, type: "string", label: 'Bar'
+    end
+    assert_instance_of(Shaf::Formable::Form, clazz.create_form)
+    assert_instance_of(Shaf::Formable::Form, clazz.edit_form)
+    refute_equal clazz.edit_form.object_id, clazz.create_form.object_id
+    assert_equal 'Foo', clazz.create_form.name
+    assert_equal 'Foo', clazz.edit_form.name
+    assert_equal [:foo, :bar], clazz.create_form.fields.map(&:name)
+  end
+
   it "creates a create form" do
     clazz.form do
       create do

@@ -2,6 +2,10 @@ module Shaf
   module Utils
     class ProjectRootNotFound < StandardError; end
 
+    def self.pluralize(noun)
+      noun + 's' #FIXME
+    end
+
     def project_root
       dir = Dir.pwd
       20.times do
@@ -36,6 +40,10 @@ module Shaf
         $:.unshift Dir.pwd
         require 'config/bootstrap'
       end
+    end
+
+    def pluralize(noun)
+      Utils::pluralize(noun)
     end
   end
 end

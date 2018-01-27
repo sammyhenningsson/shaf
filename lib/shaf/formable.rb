@@ -68,6 +68,10 @@ module Shaf
         @fields = fields.map { |name, args| Field.new(name, args) }
       end
 
+      def add_field(name, opts)
+        @fields << Field.new(name, opts)
+      end
+
       def to_html
         form_element do
           [
@@ -100,7 +104,10 @@ module Shaf
 
     class Builder
       def self.call(block)
-        [new(block, create: true).call, new(block, edit: true).call]
+        [
+          new(block, create: true).call,
+          new(block, edit: true).call
+        ]
       end
 
       attr_reader :block
@@ -143,6 +150,11 @@ module Shaf
         @form ||= Form.new(fields: fields, method: @default_method)
       end
 
+      def field(name, opts = {})
+        @form ||= Form.new(fields: fields, method: @default_method)
+        @form.add_field(name, opts)
+      end
+
       def create(&b)
         return unless @create
         call_nested_block(b)
@@ -167,21 +179,6 @@ module Shaf
       def form(&block)
         @create_form, @edit_form = Builder.(block)
       end
-
-  #     def form_fields(fields)
-  #       @create_form.fields = fields if defined? @create_form
-  #       @create_form ||= Form.new(fields: fields)
-  #       @edit_form.fields = fields if defined? @edit_form
-  #       @edit_form ||= Form.new(method: :put, fields: fields)
-  #     end
-  # 
-  #     def create_form_params(name: nil, title: nil, method: :post, fields: {})
-  #       @create_form = Form.new(name: name, title: title, method: method, fields: fields)
-  #     end
-  # 
-  #     def edit_form_params(name: nil, title: nil, method: :put, fields: {})
-  #       @edit_form = Form.new(name: name, title: title, method: method, fields: fields)
-  #     end
     end
 
     def self.included(base)

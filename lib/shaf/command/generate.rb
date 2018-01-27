@@ -11,6 +11,8 @@ module Shaf
         in_project_root do
           Generator::Factory.create(*args).call
         end
+      rescue StandardError => e
+        raise Command::ArgumentError, e.message
       end
     end
   end
