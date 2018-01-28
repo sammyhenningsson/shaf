@@ -64,7 +64,7 @@ module Payload
   end
 
   def serialize(resource, serializer, collection)
-    serializer ||= HALDecorator
+    serializer ||= HALPresenter
     if collection
       serializer.to_collection(resource, current_user: current_user)
     else

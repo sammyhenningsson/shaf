@@ -1,6 +1,6 @@
 module Serializers
   class Root
-    extend HALDecorator
+    extend HALPresenter
     extend UriHelper
 
     link :self, root_uri

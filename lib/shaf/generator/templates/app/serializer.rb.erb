@@ -3,7 +3,7 @@ require 'policies/user'
 
 module Serializers
   class User
-    extend HALDecorator
+    extend HALPresenter
     extend UriHelper
 
     model ::User

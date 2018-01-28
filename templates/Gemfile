@@ -10,7 +10,7 @@ gem 'thin'
 gem 'sequel'
 gem 'sinatra-sequel'
 gem 'bcrypt'
-gem 'hal_decorator'
+gem 'hal_presenter'
 gem 'redcarpet'
 
 group :production, :development do

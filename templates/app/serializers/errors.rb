@@ -1,6 +1,6 @@
 module Serializers
   class Error
-    extend HALDecorator
+    extend HALPresenter
 
     model Error
 

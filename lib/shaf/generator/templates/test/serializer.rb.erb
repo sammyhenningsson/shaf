@@ -17,7 +17,7 @@ module Serializer
     end
 
     def test_unauthenticated
-      payload HALDecorator.to_hal(@user, current_user: nil)
+      payload HALPresenter.to_hal(@user, current_user: nil)
 
       assert_attribute :username, 'test_user'
       assert_attribute :email, 'test@user.com'
@@ -26,7 +26,7 @@ module Serializer
     end
 
     def test_current_user
-      payload HALDecorator.to_hal(@user, current_user: @user)
+      payload HALPresenter.to_hal(@user, current_user: @user)
 
       assert_attribute :username, 'test_user'
       assert_attribute :email, 'test@user.com'
@@ -35,7 +35,7 @@ module Serializer
     end
 
     def test_other_user
-      payload HALDecorator.to_hal(@user, current_user: @another_user)
+      payload HALPresenter.to_hal(@user, current_user: @another_user)
 
       assert_attribute :username, 'test_user'
       assert_attribute :email, 'test@user.com'

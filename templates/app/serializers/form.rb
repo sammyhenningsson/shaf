@@ -2,7 +2,7 @@ require 'shaf/formable'
 
 module Serializers
   class Form
-    extend HALDecorator
+    extend HALPresenter
 
     model Shaf::Formable::Form
 
