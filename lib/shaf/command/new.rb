@@ -19,7 +19,7 @@ module Shaf
         create_dir @project_name
         Dir.chdir(@project_name) do
           copy_templates
-          create_shaf_root_file
+          create_shaf_version_file
         end
       end
 
@@ -36,7 +36,7 @@ module Shaf
         end
       end
 
-      def create_shaf_root_file
+      def create_shaf_version_file
         File.write '.shaf',
           YAML.dump({'version' => Shaf::VERSION})
       end
