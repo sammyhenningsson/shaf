@@ -1,7 +1,7 @@
 module Serializers
   class Root
     extend HALPresenter
-    extend UriHelper
+    extend Shaf::UriHelper
 
     link :self, root_uri
   end

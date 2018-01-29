@@ -44,12 +44,12 @@ module TestUtils
       def login(email, pass)
         params = {email: email, password: pass}
         header 'Content-Type', 'application/json'
-        post UriHelper.session_uri, JSON.generate(params)
+        post Shaf::UriHelper.session_uri, JSON.generate(params)
         @_integration_test_auth_token = attribute[:auth_token]
       end
 
       def logout
-        delete UriHelper.session_uri
+        delete Shaf::UriHelper.session_uri
         @_integration_test_auth_token = nil
       end
     end
