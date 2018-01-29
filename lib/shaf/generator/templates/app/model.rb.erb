@@ -1,7 +1,5 @@
-require 'lib/formable'
-
 class <%= class_name %> < Sequel::Model
-  include Formable
+  include Shaf::Formable
 
 <% if form_fields.any? %>
   form do

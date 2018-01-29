@@ -32,12 +32,8 @@ module Shaf
           refute_empty output.keys.grep(/migrations\/.*create_blogs_table\.rb/)
         end
 
-        it "requires formable" do
-          assert_match %r(\Arequire 'lib/formable'$), output["app/models/blog.rb"]
-        end
-
         it "includes Formable" do
-          assert_match %r(^\s*include Formable$), output["app/models/blog.rb"]
+          assert_match %r(^\s*include Shaf::Formable$), output["app/models/blog.rb"]
         end
 
         it "inherits Sequel::Model" do

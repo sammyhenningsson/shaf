@@ -125,34 +125,32 @@ module Shaf
         @form
       end
 
+      def form
+        @form ||= Form.new(method: @default_method)
+      end
+
       def name(name)
-        @form.name = name if @form
-        @form ||= Form.new(name: name, method: @default_method)
+        form.name = name
       end
 
       def title(title)
-        @form.title = title if @form
-        @form ||= Form.new(title: title, method: @default_method)
+        form.title = title
       end
 
       def method(method)
-        @form.method = method if @form
-        @form ||= Form.new(method: method)
+        form.method = method
       end
 
       def type(type)
-        @form.type = type if @form
-        @form ||= Form.new(type: type, method: @default_method)
+        form.type = type
       end
 
       def fields(fields)
-        @form.fields = fields if @form
-        @form ||= Form.new(fields: fields, method: @default_method)
+        form.fields = fields
       end
 
       def field(name, opts = {})
-        @form ||= Form.new(fields: fields, method: @default_method)
-        @form.add_field(name, opts)
+        form.add_field(name, opts)
       end
 
       def create(&b)
