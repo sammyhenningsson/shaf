@@ -3,14 +3,13 @@ module Shaf
     class Model < Base
 
       identifier :model
-      usage 'generate model MODEL_NAME'
+      usage 'generate model MODEL_NAME [attribute:type] [..]'
 
       def call
         if model_name.empty?
           raise "Please provide a model name when using the model generator!"
         end
 
-        puts "generating model #{model_name}.."
         create_model
         create_migration
       end

@@ -153,6 +153,21 @@ module Shaf
         ex + ["#      #{uri}", "# ```"]
       end
 
+      def embeds
+        [
+          [
+            "# Auto generated doc:  ",
+            "# A form to edit this #{name}",
+            "embed :'edit-form' do",
+            "  resource.edit_form.tap do |form|",
+            "    form.self_link = edit_#{name}_uri(resource)",
+            "    form.href = #{name}_uri(resource)",
+            "  end",
+            "end",
+          ]
+        ]
+      end
+
       def collection
         [
           "collection of: '#{plural_name}' do",
@@ -169,70 +184,10 @@ module Shaf
           policy_class_name: policy_class_name,
           attributes: attributes,
           links: links,
+          embeds: embeds,
           collection: collection
         }
       end
     end
   end
 end
-#
-#     # The users username.
-#     attribute :username
-# 
-#     # The users email address.
-#     attribute :email
-#     
-#     # Link to this resource.  
-#     # Method: GET  
-#     # Example:  
-#     #```
-#     # curl -H "Accept: "application/vnd.api+json" \
-#     #      -H "Authorization: "abcdef \
-#     #      /api/users/5
-#     #```
-#     link :self do
-#       user_uri(resource)
-#     end
-# 
-#     # Link to update this resource.  
-#     # Method: PUT  
-#     # Example:  
-#     #```
-#     # curl -H "Accept: "application/vnd.api+json" \
-#     #      -H "Authorization: "abcdef \
-#     #      -X PUT -d '{"user": {"name": "Bengt Bengtsson"}}'
-#     #      /api/users/5
-#     #```
-#     link :edit do
-#       user_uri(resource)
-#     end
-# 
-#     # Link to get a form for updating this resource.  
-#     # Method: GET  
-#     # Example:  
-#     #```
-#     # curl -H "Accept: "application/vnd.api+json" \
-#     #      -H "Authorization: "abcdef \
-#     #      /api/users/5/edit-form
-#     #```
-#     link :'edit-form' do
-#       edit_user_uri(resource)
-#     end
-# 
-#     # Link to remove this resource.  
-#     # Method: DELETE  
-#     # Example:  
-#     #```
-#     # curl -H "Accept: "application/vnd.api+json" \
-#     #      -H "Authorization: "abcdef \
-#     #      /api/users/5/edit-form
-#     #```
-#     link :delete do
-#       user_uri(resource)
-#     end
-# 
-#     collection of: 'users' do
-#       link :self, UriHelper.users_uri
-#     end
-#   end
-# end

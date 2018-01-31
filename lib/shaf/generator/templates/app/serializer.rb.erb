@@ -13,6 +13,9 @@ module Serializers
     <% links.each do |link| %>
     <%= link.join("\n    ") %>
     <% end %>
+    <% embeds.each do |embed| %>
+    <%= embed.join("\n    ") %>
+    <% end %>
     <% if collection %>
     <%= collection.join("\n    ") %>
     <% end %>
