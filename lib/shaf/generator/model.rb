@@ -12,6 +12,7 @@ module Shaf
 
         create_model
         create_migration
+        create_serializer
       end
 
       def model_name
@@ -55,6 +56,12 @@ module Shaf
       def create_migration
         migration_args = %W(create table #{table_name}) + args[1..-1]
         Migration::Generator.new(*migration_args).call
+      end
+
+      def create_serializer
+        serializer_args = %W(serializer #{model_name})
+        serializer_args += args[1..-1].map { |arg| arg.split(':').first }
+        Generator::Factory.create(*serializer_args).call
       end
     end
   end

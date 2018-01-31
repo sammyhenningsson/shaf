@@ -9,8 +9,8 @@ module Shaf
           raise "Please provide a serializer name when using the serializer generator!"
         end
 
-        puts "generating serializer #{name}.."
         create_serializer
+        create_policy
       end
 
       def name
@@ -187,6 +187,11 @@ module Shaf
           embeds: embeds,
           collection: collection
         }
+      end
+
+      def create_policy
+        policy_args = ["policy", name, *args[1..-1]]
+        Generator::Factory.create(*policy_args).call
       end
     end
   end
