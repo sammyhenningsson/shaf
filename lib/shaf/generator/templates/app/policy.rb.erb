@@ -1,12 +1,12 @@
-class UserPolicy
+class <%= policy_class_name %>
   include HALPresenter::Policy::DSL
 
-  attribute :username, :email
+  <%= attributes.join("\n  ") %>
 
-  link :self
+  link :self, :up, :'create-form'
 
-  link :edit, :delete, :'edit-form' do
-    !resource.id.nil? && current_user&.id == resource.id
+  link :edit, :'edit-form', :delete do
+    resource&.id && current_user&.id == resource.id
   end
 
 end
