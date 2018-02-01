@@ -1,52 +1,54 @@
-class UsersController < BaseController
+class <%= controller_class_name %> < BaseController
 
-  resource_uris_for :user
+  resource_uris_for :<%= name %>
 
-  get '/users/form' do
-    form = User.create_form
-    form.self_link = new_user_uri
-    form.href = users_uri
+  get '/<%= name %>/form' do
+    form = <%= model_class_name %>.create_form
+    form.self_link = new_<%= name %>_uri
+    form.href = <%= plural_name %>_uri
     respond_with form
   end
 
-  get '/users/:id/edit' do
-    form = user.edit_form
-    form.self_link = edit_user_uri(user)
-    form.href = user_uri(user)
+  get '/<%= plural_name %>/:id/edit' do
+    form = <%= name %>.edit_form
+    form.self_link = edit_<%= name %>_uri(<%= name %>)
+    form.href = <%= name %>_uri(<%= name %>)
     respond_with form
   end
 
-  get '/users/:id' do
-    respond_with user
+  get '/<%= plural_name %>/:id' do
+    respond_with <%= name %>
   end
 
-  put '/users/:id' do
-    user.update(user_params)
-    respond_with user
+  put '/<%= plural_name %>/:id' do
+    <%= name %>.update(<%= name %>_params)
+    respond_with <%= name %>
   end
 
-  delete '/users/:id' do
-    user.destroy
+  delete '/<%= plural_name %>/:id' do
+    <%= name %>.destroy
     status 204
   end
 
-  get '/users' do
-    respond_with_collection paginate(User.order(:created_at).reverse)
+  get '/<%= plural_name %>' do
+    respond_with_collection paginate(<%= model_class_name %>.order(:created_at).reverse)
   end
 
-  post '/users' do
-    user = User.create(user_params)
-    headers({ "Location" => user_uri(user) })
-    respond_with user, status: 201
+  post '/<%= plural_name %>' do
+    <%= name %> = <%= model_class_name %>.create(<%= name %>_params)
+    headers({ "Location" => <%= name %>_uri(<%= name %>) })
+    respond_with <%= name %>, status: 201
   end
 
-  def user_params
-    safe_params(:username, :password, :email)
+  def <%= name %>_params
+    # FIXME! Specify which params are allowed by passing them to safe_params. E.g:
+    # safe_params(:param1, :param2, :param3)
+    {}
   end
 
-  def user
-    User[params['id']].tap do |user|
-      raise ::NotFoundError.new(clazz: User, id: params['id']) unless user
+  def <%= name %>
+    <%= model_class_name %>[params['id']].tap do |<%= name %>|
+      raise ::NotFoundError.new(clazz: <%= model_class_name %>, id: params['id']) unless <%= name %>
     end
   end
 
