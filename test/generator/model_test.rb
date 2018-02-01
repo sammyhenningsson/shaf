@@ -32,6 +32,14 @@ module Shaf
           refute_empty output.keys.grep(/migrations\/.*create_blogs_table\.rb/)
         end
 
+        it "generates a serializer" do
+          assert_includes output.keys, "app/serializers/blog.rb"
+        end
+
+        it "generates a policy" do
+          assert_includes output.keys, "app/policies/blog.rb"
+        end
+
         it "includes Formable" do
           assert_match %r(^\s*include Shaf::Formable$), output["app/models/blog.rb"]
         end

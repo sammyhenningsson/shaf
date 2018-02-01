@@ -3,16 +3,19 @@ module Shaf
     class Scaffold < Base
 
       identifier :scaffold
-      usage 'generate scaffold RESOURCE_NAME'
+      usage 'generate scaffold RESOURCE_NAME [attribute:type] [..]'
 
       def call
-        name = args.shift
-        puts "generating scaffold #{name}.."
-        if name.nil? || name.empty?
-          raise Command::ArgumentError, "Please provide a resource name when using scaffold generator!"
+        if name.empty?
+          raise "Please provide a resource name when using the scaffold generator!"
         end
-        Generator::Factory.create('model', name, *args).call
-        Generator::Factory.create('controller', name, *args).call
+
+        Generator::Factory.create('model', *args).call
+        Generator::Factory.create('controller', name).call
+      end
+
+      def name
+        args.first || ""
       end
     end
   end
