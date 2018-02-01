@@ -171,7 +171,7 @@ module Shaf
       def collection
         [
           "collection of: '#{plural_name}' do",
-          "  link :self, UriHelper.#{plural_name}_uri",
+          "  link :self, Shaf::UriHelper.#{plural_name}_uri",
           "end",
         ]
       end
