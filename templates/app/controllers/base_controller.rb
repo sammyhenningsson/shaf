@@ -16,6 +16,7 @@ class BaseController < Sinatra::Base
 
   use Rack::Deflater
   register Shaf::ResourceUris
+  helpers Shaf::Payload, Shaf::JsonHtml, Shaf::Paginate, Shaf::Session
 
   def self.inherited(controller)
     super
