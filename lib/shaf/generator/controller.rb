@@ -12,6 +12,7 @@ module Shaf
         end
 
         create_controller
+        add_link_to_root
       end
 
       def name
@@ -42,6 +43,24 @@ module Shaf
           model_class_name: name.capitalize,
           controller_class_name: "#{plural_name.capitalize}Controller"
         }
+      end
+
+      def add_link_to_root
+        file = "app/serializers/root.rb"
+        unless File.exist? file
+          puts "Warning: file '#{file}' does not exist. "\
+            "Not adding any link to the #{plural_name} collection"
+        end
+        added = false
+        content = []
+        File.readlines(file).reverse.each do |line|
+          if match = !added && line.match(/^(\s*)link /)
+            content.unshift("#{match[1]}link :#{plural_name}, #{plural_name}_uri")
+            added = true
+          end
+          content.unshift(line)
+        end
+        File.open(file, 'w') { |f| f.puts content }
       end
     end
   end
