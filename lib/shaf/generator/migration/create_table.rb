@@ -25,6 +25,7 @@ module Shaf
 
         def create_table_change
           cols = ["primary_key :id"]
+          cols += ["DateTime :created_at", "DateTime :updated_at"] if add_timestamp_columns?
           cols += args[1..-1].map { |s| column_def(s) }
           [
             "create_table(:#{table_name}) do",

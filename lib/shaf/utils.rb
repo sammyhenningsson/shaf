@@ -30,6 +30,7 @@ module Shaf
     def in_project_root
       return unless block_given?
       Dir.chdir(project_root) do
+        $:.unshift Dir.pwd
         yield
       end
     end
@@ -37,7 +38,6 @@ module Shaf
     def bootstrap
       in_project_root do
         ENV['RACK_ENV'] ||= 'development'
-        $:.unshift Dir.pwd
         require 'config/bootstrap'
       end
     end

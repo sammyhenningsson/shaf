@@ -92,6 +92,13 @@ module Shaf
           DateTime.now.strftime("%Y%m%d%H%M%S")
         end
 
+        def add_timestamp_columns?
+          if File.exist? 'config/initializers/sequel.rb'
+            require 'config/initializers/sequel'
+            Sequel::Model.plugins.include? Sequel::Plugins::Timestamps
+          end
+        end
+
         def render
           <<~EOS
             Sequel.migration do
