@@ -40,6 +40,7 @@ module Shaf
         {
           name: name,
           plural_name: plural_name,
+          serializer_class_name: "Serializers::#{name.capitalize}",
           model_class_name: name.capitalize,
           controller_class_name: "#{plural_name.capitalize}Controller"
         }
@@ -61,6 +62,7 @@ module Shaf
           content.unshift(line)
         end
         File.open(file, 'w') { |f| f.puts content }
+        puts "Modified:   #{file}"
       end
     end
   end

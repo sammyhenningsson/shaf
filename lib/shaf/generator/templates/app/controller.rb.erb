@@ -2,7 +2,7 @@ class <%= controller_class_name %> < BaseController
 
   resource_uris_for :<%= name %>
 
-  get '/<%= name %>/form' do
+  get '/<%= plural_name %>/form' do
     form = <%= model_class_name %>.create_form
     form.self_link = new_<%= name %>_uri
     form.href = <%= plural_name %>_uri
@@ -31,7 +31,8 @@ class <%= controller_class_name %> < BaseController
   end
 
   get '/<%= plural_name %>' do
-    respond_with_collection paginate(<%= model_class_name %>.order(:created_at).reverse)
+    collection = paginate(<%= model_class_name %>.order(:created_at).reverse)
+    respond_with_collection collection, serializer: <%= serializer_class_name %>
   end
 
   post '/<%= plural_name %>' do

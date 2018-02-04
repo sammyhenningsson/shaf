@@ -55,7 +55,7 @@ module Shaf
         dir = File.dirname(file)
         FileUtils.mkdir_p(dir) unless Dir.exist?(dir)
         File.write(file, content)
-        puts "Adding file: #{file}"
+        puts "Added:      #{file}"
       end
     end
   end
