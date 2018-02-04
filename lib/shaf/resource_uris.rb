@@ -62,17 +62,17 @@ module Shaf
     attr_reader :name, :base, :plural_name
 
     def register_resources_uri
-      uri = "#{base}/#{plural_name}".freeze
+      uri = "#{base}/#{plural_name}"
       UriHelperMethods.register "#{plural_name}_uri" do
-        uri.dup
+        uri.dup.freeze
       end
     end
 
     def register_resource_uri
-      uri = "#{base}/#{plural_name}".freeze
+      uri = "#{base}/#{plural_name}"
       UriHelperMethods.register "#{name}_uri" do |resrc|
         id = resrc.is_a?(Integer) ? resrc : resrc&.id
-        "#{uri}/#{id}" unless id.nil?
+        "#{uri}/#{id}".freeze unless id.nil?
       end
     end
 
@@ -80,29 +80,29 @@ module Shaf
     # should be used. It will return the resource uri when a resource is given
     # as argument and the resources uri when no arguments are provided.
     def register_resource_uri_by_arg
-      uri = "#{base}/#{plural_name}".freeze
+      uri = "#{base}/#{plural_name}"
       UriHelperMethods.register "#{plural_name}_uri" do |resrc = nil|
         if resrc.nil?
-          uri.dup
+          uri.dup.freeze
         else
           id = resrc.is_a?(Integer) ? resrc : resrc&.id
-          "#{uri}/#{id}" unless id.nil?
+          "#{uri}/#{id}".freeze unless id.nil?
         end
       end
     end
 
     def register_new_resource_uri
-      uri = "#{base}/#{plural_name}/form".freeze
+      uri = "#{base}/#{plural_name}/form"
       UriHelperMethods.register "new_#{name}_uri" do
-        uri.dup
+        uri.dup.freeze
       end
     end
 
     def register_edit_resource_uri
-      uri = "#{base}/#{plural_name}".freeze
+      uri = "#{base}/#{plural_name}"
       UriHelperMethods.register "edit_#{name}_uri" do |resrc|
         id = resrc.is_a?(Integer) ? resrc : resrc&.id
-        "#{uri}/#{id}/edit" unless id.nil?
+        "#{uri}/#{id}/edit".freeze unless id.nil?
       end
     end
   end
