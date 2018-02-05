@@ -84,13 +84,13 @@ module Shaf
     end
 
     def respond_with_hal(resource, serialized)
-      log.debug "Response (#{resource.class}): #{serialized}"
+      log.debug "Response payload (#{resource.class}): #{serialized}"
       content_type :hal
       body serialized
     end
 
     def respond_with_html(resource, serialized)
-      log.debug "Responding with html: #{resource.class})"
+      log.debug "Responding with html. Output payload (#{resource.class}): #{serialized}"
       content_type :html
       case resource
       when Shaf::Formable::Form
