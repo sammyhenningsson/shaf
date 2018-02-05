@@ -18,6 +18,10 @@ module Shaf
       def name
         args.first || ""
       end
+
+      def params
+        args[1..-1]
+      end
       
       def plural_name
         Utils::pluralize(name)
@@ -42,7 +46,8 @@ module Shaf
           plural_name: plural_name,
           serializer_class_name: "Serializers::#{name.capitalize}",
           model_class_name: name.capitalize,
-          controller_class_name: "#{plural_name.capitalize}Controller"
+          controller_class_name: "#{plural_name.capitalize}Controller",
+          params: params
         }
       end
 

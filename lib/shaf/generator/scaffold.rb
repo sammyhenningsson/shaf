@@ -11,11 +11,17 @@ module Shaf
         end
 
         Generator::Factory.create('model', *args).call
-        Generator::Factory.create('controller', name).call
+        Generator::Factory.create('controller', *controller_args).call
       end
 
       def name
         args.first || ""
+      end
+
+      def controller_args
+        [name] + args[1..-1].map do |arg|
+          arg.split(':').first
+        end
       end
     end
   end

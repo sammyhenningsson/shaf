@@ -42,9 +42,8 @@ class <%= controller_class_name %> < BaseController
   end
 
   def <%= name %>_params
-    # FIXME! Specify which params are allowed by passing them to safe_params. E.g:
-    # safe_params(:param1, :param2, :param3)
-    {}
+    # Generated method - TODO: Remove any params that should not be allowed!
+    safe_params(<%= params.map { |p| ":#{p}" }.join(', ') %>)
   end
 
   def <%= name %>
