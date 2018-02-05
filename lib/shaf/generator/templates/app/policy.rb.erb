@@ -9,4 +9,6 @@ class <%= policy_class_name %>
     resource&.id && current_user&.id == resource.id
   end
 
+  embed :'create-form'
+
 end

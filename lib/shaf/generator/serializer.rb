@@ -120,60 +120,66 @@ module Shaf
       end
 
       def link(rel:, method: "GET", desc:, uri:, uri_helper:)
-        [
-          "# Auto generated doc:  ",
-          "# #{desc}.  ",
-          "# Method: #{method}  ",
-        ] +
-        example(method, uri) +
-        [
-          "link :#{rel} do",
-          "  #{uri_helper}",
-          "end",
-        ]
+        <<~EOS.split("\n")
+          # Auto generated doc:  
+          # #{desc}.  
+          # Method: #{method}  
+          #{example(method, uri)}
+          link :#{rel} do
+            #{uri_helper}
+          end
+        EOS
       end
 
       def example(method, uri)
-        ex = [
-          "# Example:",
-          "# ```",
-          "# curl -H \"Accept: application/json\" \\",
-          "#      -H \"Authorization: abcdef\" \\",
-        ]
-
+        method_args = ""
         case method
         when "POST"
-          ex << "#      -d@payload \\"
+          method_args = "\n#      -d@payload \\"
         when "PUT"
-          ex << "#      -X PUT -d@payload \\"
+          method_args = "\n#      -X PUT -d@payload \\"
         when "DELETE"
-          ex << "#      -X DELETE \\"
+          method_args = "\n#      -X DELETE \\"
         end
 
-        ex + ["#      #{uri}", "# ```"]
+        <<~EOS
+          # Example:
+          # ```
+          # curl -H "Accept: application/json" \\
+          #      -H "Authorization: abcdef" \\#{method_args}
+          #      #{uri}
+          #```
+        EOS
       end
 
       def embeds
         [
-          [
-            "# Auto generated doc:  ",
-            "# A form to edit this #{name}",
-            "embed :'edit-form' do",
-            "  resource.edit_form.tap do |form|",
-            "    form.self_link = edit_#{name}_uri(resource)",
-            "    form.href = #{name}_uri(resource)",
-            "  end",
-            "end",
-          ]
+          <<~EOS.split("\n")
+            # Auto generated doc:  
+            # A form to edit this #{name}
+            embed :'edit-form' do
+              resource.edit_form.tap do |form|
+                form.self_link = edit_#{name}_uri(resource)
+                form.href = #{name}_uri(resource)
+              end
+            end
+          EOS
         ]
       end
 
       def collection
-        [
-          "collection of: '#{plural_name}' do",
-          "  link :self, Shaf::UriHelper.#{plural_name}_uri",
-          "end",
-        ]
+        <<~EOS.split("\n")
+          collection of: '#{plural_name}' do
+            link :self, #{plural_name}_uri
+          
+            embed :'create-form' do
+              #{model_class_name}.create_form.tap do |form|
+                form.self_link = new_#{name}_uri
+                form.href = #{plural_name}_uri
+              end
+            end
+          end
+        EOS
       end
 
       def opts
