@@ -36,6 +36,17 @@ module Shaf
       end
     end
 
+    class ForbiddenError < ServerError
+      def http_status
+        403
+      end
+
+      def initialize(msg = nil)
+        msg ||= "User is not allowed to perform this action"
+        super(msg, code: "FORBIDDEN", title: "User not allowed")
+      end
+    end
+
     class NotFoundError < ServerError
       attr_reader :clazz, :id
 

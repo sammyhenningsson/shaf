@@ -47,6 +47,8 @@ module Shaf
           serializer_class_name: "Serializers::#{name.capitalize}",
           model_class_name: name.capitalize,
           controller_class_name: "#{plural_name.capitalize}Controller",
+          policy_class_name: "#{name.capitalize}Policy",
+          policy_file: "policies/#{name}",
           params: params
         }
       end

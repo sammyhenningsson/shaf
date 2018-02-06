@@ -10,19 +10,18 @@ class BaseController < Sinatra::Base
     set :views, VIEWS_DIR
     set :static, !production?
     set :public_folder, ASSETS_DIR
-    enable :dump_errors
+    disable :dump_errors
     set :show_exceptions, :after_handler
   end
 
   use Rack::Deflater
-  register Shaf::ResourceUris
-  helpers Shaf::Payload, Shaf::JsonHtml, Shaf::Paginate, Shaf::Session
+  register *Shaf.extensions
+  helpers *Shaf.helpers
 
   def self.inherited(controller)
     super
     App.use controller
   end
-
 
   def log
     $logger
@@ -31,6 +30,11 @@ class BaseController < Sinatra::Base
   before do
     log.info "Processing: #{request.request_method} #{request.path_info}"
     log.debug "Payload: #{payload || 'empty'}"
+  end
+
+  error Shaf::Authorize::PolicyViolationError do
+    err = ForbiddenError.new
+    respond_with err, status: err.http_status, serializer: Serializers::Error
   end
 
   error StandardError do

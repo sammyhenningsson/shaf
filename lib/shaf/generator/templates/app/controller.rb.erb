@@ -1,6 +1,10 @@
+require '<%= policy_file %>'
+
 class <%= controller_class_name %> < BaseController
 
   resource_uris_for :<%= name %>
+
+  authorize_with <%= policy_class_name %>
 
   get '/<%= plural_name %>/form' do
     form = <%= model_class_name %>.create_form
@@ -21,11 +25,13 @@ class <%= controller_class_name %> < BaseController
   end
 
   put '/<%= plural_name %>/:id' do
+    authorize! :write
     <%= name %>.update(<%= name %>_params)
     respond_with <%= name %>
   end
 
   delete '/<%= plural_name %>/:id' do
+    authorize! :write
     <%= name %>.destroy
     status 204
   end
@@ -36,6 +42,7 @@ class <%= controller_class_name %> < BaseController
   end
 
   post '/<%= plural_name %>' do
+    authorize! :write
     <%= name %> = <%= model_class_name %>.create(<%= name %>_params)
     headers({ "Location" => <%= name %>_uri(<%= name %>) })
     respond_with <%= name %>, status: 201
