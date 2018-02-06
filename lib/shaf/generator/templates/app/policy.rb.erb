@@ -1,14 +1,25 @@
 class <%= policy_class_name %>
   include HALPresenter::Policy::DSL
 
+  # Auto generated policy: Update this file to suite your API!
+ 
   <%= attributes.join("\n  ") %>
 
-  link :self, :up, :'create-form'
+  link :self, :up
 
-  link :edit, :'edit-form', :delete do
-    resource&.id && current_user&.id == resource.id
+  link :edit, :'create-form', :'edit-form', :delete do
+    write?
   end
 
-  embed :'create-form'
+  embed :'create-form', :'edit-form' do
+    write?
+  end
 
+  def read?
+    true
+  end
+
+  def write?
+    !!current_user
+  end
 end
