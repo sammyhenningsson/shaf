@@ -14,7 +14,9 @@ module Shaf
       before do
         File.stub :write, write_stub do
           Dir.stub :exist?, true do
-            Mutable.suppress_output { generator.call }
+            generator.stub :add_link_to_root, nil do
+              Mutable.suppress_output { generator.call }
+            end
           end
         end
       end
