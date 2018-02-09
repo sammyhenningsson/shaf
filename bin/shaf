@@ -5,12 +5,14 @@ require 'shaf/command'
 
 module Shaf
   class Script
+    include Utils
 
     def self.run
       new.run
     end
 
     def run
+      check_customizations
       return show_help if show_help?
       Command::Factory.create(*ARGV).call
     rescue RegistrableFactory::NotFoundError, Command::ArgumentError => e
@@ -37,6 +39,16 @@ module Shaf
 
     def show_help?
       ARGV.first =~ /-h/ 
+    end
+
+    def check_customizations
+      return unless project_root
+
+      in_project_root do
+        ENV['RACK_ENV'] ||= 'development'
+        next unless File.exist? 'config/customize.rb'
+        require 'config/customize'
+      end
     end
   end
 end

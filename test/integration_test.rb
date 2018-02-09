@@ -81,5 +81,30 @@ module Shaf
         end
       end
     end
+
+    it "can use custom commands" do
+      Dir.chdir(project_path) do
+        File.open("config/customize.rb", "w") do |f|
+          f.puts <<~EOS
+            require 'shaf'
+
+            class CustomCommand < Shaf::Command::Base
+              identifier :my_command
+              usage      "my_command"
+
+              def call
+                puts "hej"
+              end
+            end
+          EOS
+        end
+        r, w = IO.pipe
+        assert system("shaf my_command", out: w, err: [:child, :out])
+        w.close
+        output = r.read.chomp
+        r.close
+        assert_equal "hej", output
+      end
+    end
   end
 end

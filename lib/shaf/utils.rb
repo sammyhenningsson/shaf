@@ -16,7 +16,10 @@ module Shaf
         end
         dir = File.expand_path("..", dir)
       end
-      raise ProjectRootNotFound
+    end
+
+    def project_root!
+      project_root or raise ProjectRootNotFound
     end
 
     def is_project_root?(dir)
@@ -29,7 +32,7 @@ module Shaf
 
     def in_project_root
       return unless block_given?
-      Dir.chdir(project_root) do
+      Dir.chdir(project_root!) do
         $:.unshift Dir.pwd
         yield
       end
@@ -39,6 +42,7 @@ module Shaf
       in_project_root do
         ENV['RACK_ENV'] ||= 'development'
         require 'config/bootstrap'
+        yield if block_given?
       end
     end
 
