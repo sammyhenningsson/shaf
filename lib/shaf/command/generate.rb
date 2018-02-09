@@ -5,7 +5,7 @@ module Shaf
     class Generate < Base
 
       identifier %r(gen(erate)?)
-      usage Generator::Factory.usage
+      usage Generator::Factory.usage.flatten.sort
 
       def call
         in_project_root do

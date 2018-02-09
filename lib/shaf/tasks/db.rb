@@ -58,23 +58,4 @@ namespace :db do
   Rake::Task["db:rollback"].enhance do
     Rake::Task["db:version"].invoke
   end
-
-  desc "Create an empty migration"
-  namespace :create do
-    task :migration, [:name] do |t, args|
-      require 'date'
-      require 'sinatra/base'
-      require 'sequel'
-      require 'config/database'
-      timestamp = DateTime.now.strftime("%Y%m%d%H%M%S")
-      filename = "#{MIGRATIONS_DIR}/#{timestamp}_#{args[:name]}.rb"
-      File.write filename, <<~EOS
-      Sequel.migration do
-        change do
-        end
-      end
-      EOS
-      puts "Created file: #{filename}"
-    end
-  end
 end

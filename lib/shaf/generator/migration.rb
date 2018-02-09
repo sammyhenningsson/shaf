@@ -13,7 +13,8 @@ module Shaf
         usage { Factory.usage }
 
         def call
-          (target, content) = Factory.create(*args).call
+          generator = args.empty? ? Empty.new : Factory.create(*args)
+          (target, content) = generator.call
           write_output(target, content)
         rescue StandardError => e
           raise Command::ArgumentError, e.message
