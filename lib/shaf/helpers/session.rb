@@ -5,8 +5,6 @@ module Shaf
 
     SESSION_TTL = 60 * 60 * 24 * 2 # 2 days
 
-    attr_reader :current_user
-
     def login(email, password)
       return unless email && password
       user = User.first(email: email) or return

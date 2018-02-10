@@ -3,7 +3,7 @@ module Shaf
     module Migration
       class Empty < Base
 
-        identifier /\A\Z/
+        identifier %r(\A\Z)
         usage 'generate migration'
 
         def validate_args; end
