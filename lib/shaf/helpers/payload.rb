@@ -26,20 +26,13 @@ module Shaf
     end
 
     def parse(payload)
-      return if payload.empty?
+      return {} if payload.empty?
       if request.env['CONTENT_TYPE'] == 'application/x-www-form-urlencoded'
-        parse_urlencoded(payload)
+        params.reject { |key,_| ['captures', 'splat'].include? key }
       elsif request.env['CONTENT_TYPE'] =~ %r(\Aapplication/json)
         JSON.parse(payload)
       else
         raise ::UnsupportedMediaTypeError.new(request: request)
-      end
-    end
-
-    def parse_urlencoded(payload)
-      payload.split('&').each_with_object({}) do |field, h|
-        k,v = field.split('=')
-        h[k] = v unless ignore_form_input?(k)
       end
     end
 
