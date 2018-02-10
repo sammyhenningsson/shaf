@@ -106,5 +106,32 @@ module Shaf
         assert_equal "hej", output
       end
     end
+
+    it "can use custom generators" do
+      Dir.chdir(project_path) do
+
+        filename = 'lib/generators/my_generator.rb'
+        content = 'Some content'
+
+        File.open("config/customize.rb", "w") do |f|
+          f.puts <<~EOS
+            require 'shaf'
+
+            class CustomGenerator < Shaf::Generator::Base
+
+              identifier :my_generator
+              usage 'generate my_generator'
+
+              def call
+                write_output('#{filename}', '#{content}')
+              end
+            end
+          EOS
+        end
+        assert system("shaf generate my_generator", out: File::NULL, err: [:child, :out])
+        assert File.exist?(filename)
+        assert_equal File.read(filename), content
+      end
+    end
   end
 end
