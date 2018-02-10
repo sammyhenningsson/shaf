@@ -2,36 +2,36 @@ require 'rake/testtask'
 
 namespace :test do |ns|
   Rake::TestTask.new(:integration) do |t|
-    t.libs = %w(. app test)
-    t.pattern = "test/integration/**/*_test.rb"
+    t.libs = %w(. app spec)
+    t.pattern = "spec/integration/**/*_spec.rb"
     t.verbose = true
   end
 
   Rake::TestTask.new(:models) do |t|
-    t.libs = %w(. app test)
-    t.pattern = "test/model/**/*_test.rb"
+    t.libs = %w(. app spec)
+    t.pattern = "spec/models/**/*_spec.rb"
     t.verbose = true
   end
 
   Rake::TestTask.new(:serializers) do |t|
-    t.libs = %w(. app test)
-    t.pattern = "test/serializer/**/*_test.rb"
+    t.libs = %w(. app spec)
+    t.pattern = "spec/serializers/**/*_spec.rb"
     t.verbose = true
   end
 
   Rake::TestTask.new(:lib) do |t|
-    t.libs = %w(. app test)
-    t.pattern = "test/lib/**/*_test.rb"
+    t.libs = %w(. app spec)
+    t.pattern = "spec/lib/**/*_spec.rb"
     t.verbose = true
   end
 
   Rake::TestTask.new(:all) do |t|
-    t.libs = %w(. app test)
+    t.libs = %w(. app spec)
     t.pattern = [
-      "test/lib/**/*_test.rb",
-      "test/model/**/*_test.rb",
-      "test/serializer/**/*_test.rb",
-      "test/integration/**/*_test.rb"
+      "spec/lib/**/*_spec.rb",
+      "spec/models/**/*_spec.rb",
+      "spec/serializers/**/*_spec.rb",
+      "spec/integration/**/*_spec.rb"
     ]
     t.verbose = true
   end

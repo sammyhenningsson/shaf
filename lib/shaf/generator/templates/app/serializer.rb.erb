@@ -7,17 +7,17 @@ module Serializers
 
     model <%= model_class_name %>
     policy <%= policy_class_name %>
-    <% attributes.each do |attr| %>
+    <% attributes_with_doc.each do |attr| %>
     <%= attr.join("\n    ") %>
     <% end %>
-    <% links.each do |link| %>
+    <% links_with_doc.each do |link| %>
     <%= link.join("\n    ") %>
     <% end %>
-    <% embeds.each do |embed| %>
+    <% embeds_with_doc.each do |embed| %>
     <%= embed.join("\n    ") %>
     <% end %>
-    <% if collection %>
-    <%= collection.join("\n    ") %>
+    <% if collection_with_doc %>
+    <%= collection_with_doc.join("\n    ") %>
     <% end %>
   end
 end

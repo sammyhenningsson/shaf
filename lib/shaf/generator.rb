@@ -45,7 +45,7 @@ module Shaf
         str = read_template(template)
         locals[:changes] ||= []
         b = OpenStruct.new(locals).instance_eval { binding }
-        ERB.new(str, 0, '<>').result(b)
+        ERB.new(str, 0, '%-<>').result(b)
       rescue SystemCallError => e
         puts "Failed to render template #{template}: #{e.message}"
         raise

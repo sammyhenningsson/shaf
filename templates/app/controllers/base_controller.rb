@@ -15,8 +15,8 @@ class BaseController < Sinatra::Base
   end
 
   use Rack::Deflater
-  register *Shaf.extensions
-  helpers *Shaf.helpers
+  register(*Shaf.extensions)
+  helpers(*Shaf.helpers)
 
   def self.inherited(controller)
     super

@@ -8,6 +8,7 @@ gem 'sinatra', require: 'sinatra/base'
 gem 'rake'
 gem 'thin'
 gem 'sequel'
+gem 'sequel'
 gem 'sinatra-sequel'
 gem 'bcrypt'
 gem 'hal_presenter'
@@ -23,6 +24,7 @@ end
 
 group :test do
   gem 'minitest'
+  gem 'minitest-hooks'
   gem 'rack-test'
 end
 

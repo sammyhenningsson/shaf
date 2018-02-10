@@ -56,7 +56,7 @@ module Shaf
         config/initializers/sequel.rb app/controllers/base_controller.rb
         app/controllers/root.rb app/serializers/errors.rb app/serializers/form.rb
         app/serializers/root.rb frontend/assets/css/main.css frontend/views/form.erb
-        frontend/views/layout.erb frontend/views/payload.erb test/test_helper.rb
+        frontend/views/layout.erb frontend/views/payload.erb spec/spec_helper.rb
         ).each do |file|
           assert File.exist?(file),
             "The file '#{file}' does not exist in a newly created project"
@@ -79,6 +79,14 @@ module Shaf
           get_root
           get_link('posts')
         end
+      end
+    end
+
+    it "passes specs" do
+      Dir.chdir(project_path) do
+        assert system("shaf generate scaffold post message:string:Meddelande author:integer:Författare", out: File::NULL)
+        assert system("rake db:migrate", out: File::NULL)
+        assert system("rake test", out: File::NULL)
       end
     end
 

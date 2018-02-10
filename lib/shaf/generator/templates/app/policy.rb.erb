@@ -20,6 +20,7 @@ class <%= policy_class_name %>
   end
 
   def write?
-    !!current_user
+    # !!current_user
+    true
   end
 end

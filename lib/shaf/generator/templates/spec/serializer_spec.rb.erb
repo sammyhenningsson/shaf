@@ -1,0 +1,46 @@
+require 'spec_helper'
+
+describe <%= class_name %>, type: :serializer do
+
+  let(:resource) do
+    <%= model_class_name %>.new.
+      tap { |<%= name %>| <%= name %>.id = 5 }
+  end
+
+  describe "when current_user is nil" do
+    before do
+      payload HALPresenter.to_hal(resource)
+    end
+
+    it "serializes attributes" do
+<% attributes.each do |attr| -%>
+      attributes.keys.must_include(<%= attr %>)
+<% end -%>
+    end
+
+    it "serializes links" do
+<% [:self, :up].each do |rel| -%>
+      links.keys.must_include(:<%= rel %>)
+<% end -%>
+    end
+  end
+
+  describe "when current_user is present" do
+    before do
+      payload HALPresenter.to_hal(resource, current_user: "Bengt")
+    end
+
+    it "serializes attributes" do
+<% attributes.each do |attr| -%>
+      attributes.keys.must_include(<%= attr %>)
+<% end -%>
+    end
+
+    it "serializes links" do
+<% links.each do |rel| -%>
+      links.keys.must_include(:<%= rel %>)
+<% end -%>
+    end
+  end
+end
+

@@ -1,0 +1,5 @@
+require 'minitest/autorun'
+require 'minitest/hooks'
+require 'shaf/spec/payload_utils'
+require 'shaf/spec/integration_spec'
+require 'shaf/spec/serializer_spec'

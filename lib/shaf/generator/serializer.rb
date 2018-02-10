@@ -2,14 +2,15 @@ module Shaf
   module Generator
     class Serializer < Base
       identifier :serializer
-      usage 'generate serializer SERIALIZER_NAME'
+      usage 'generate serializer MODEL_NAME'
 
       def call
         if name.empty?
-          raise "Please provide a serializer name when using the serializer generator!"
+          raise "Please provide a model name when using the serializer generator!"
         end
 
         create_serializer
+        create_serializer_spec
         create_policy
       end
 
@@ -33,8 +34,16 @@ module Shaf
         'app/serializer.rb'
       end
 
+      def spec_template
+        'spec/serializer_spec.rb'
+      end
+
       def target
         "app/serializers/#{name}.rb"
+      end
+
+      def spec_target
+        "spec/serializers/#{name}_spec.rb"
       end
 
       def create_serializer
@@ -42,16 +51,29 @@ module Shaf
         write_output(target, content)
       end
 
+      def create_serializer_spec
+        content = render(spec_template, opts)
+        write_output(spec_target, content)
+      end
+
       def attributes
-        args[1..-1].map do |attr|
+        args[1..-1].map { |attr| ":#{attr}" }
+      end
+
+      def attributes_with_doc
+        attributes.map do |attr|
           [
             "# FIXME: Write documentation for attribute #{attr}",
-            "attribute :#{attr}"
+            "attribute #{attr}"
           ]
         end
       end
 
       def links
+        %w(up self 'create-form' 'edit-form' edit delete)
+      end
+
+      def links_with_doc
         [
           collection_link,
           self_link,
@@ -153,6 +175,10 @@ module Shaf
       end
 
       def embeds
+        [:'edit-form']
+      end
+
+      def embeds_with_doc
         [
           <<~EOS.split("\n")
             # Auto generated doc:  
@@ -167,7 +193,7 @@ module Shaf
         ]
       end
 
-      def collection
+      def collection_with_doc
         <<~EOS.split("\n")
           collection of: '#{plural_name}' do
             link :self, #{plural_name}_uri
@@ -191,7 +217,10 @@ module Shaf
           attributes: attributes,
           links: links,
           embeds: embeds,
-          collection: collection
+          attributes_with_doc: attributes_with_doc,
+          links_with_doc: links_with_doc,
+          embeds_with_doc: embeds_with_doc,
+          collection_with_doc: collection_with_doc,
         }
       end
 
