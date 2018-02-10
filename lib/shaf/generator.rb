@@ -61,4 +61,9 @@ module Shaf
   end
 end
 
-Dir[File.join(__dir__, 'generator', '*.rb')].each { |file| require file }
+require 'shaf/generator/controller'
+require 'shaf/generator/migration'
+require 'shaf/generator/model'
+require 'shaf/generator/policy'
+require 'shaf/generator/scaffold'
+require 'shaf/generator/serializer'

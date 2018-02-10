@@ -115,4 +115,8 @@ module Shaf
   end
 end
 
-Dir[File.join(__dir__, 'migration', '*.rb')].each { |file| require file }
+require 'shaf/generator/migration/add_column'
+require 'shaf/generator/migration/create_table'
+require 'shaf/generator/migration/drop_column'
+require 'shaf/generator/migration/empty'
+require 'shaf/generator/migration/rename_column'

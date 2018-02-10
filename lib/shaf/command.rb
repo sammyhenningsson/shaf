@@ -40,4 +40,6 @@ module Shaf
   end
 end
 
-Dir[File.join(__dir__, 'command', '*.rb')].each { |file| require file }
+require 'shaf/command/new'
+require 'shaf/command/console'
+require 'shaf/command/generate'
