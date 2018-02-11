@@ -136,6 +136,8 @@ module Shaf
       end
 
       def interpolated_uri_string(uri)
+        return uri if uri.split('/').empty?
+
         segments = uri.split('/').map do |segment|
           if segment.start_with? ':'
             str = segment[1..-1]

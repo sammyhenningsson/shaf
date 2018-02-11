@@ -43,7 +43,7 @@ module Shaf
       end
 
       def embedded_resources
-        payload[:_embedded].keys
+        payload[:_embedded]&.keys || []
       end
 
       def embedded(name = nil)

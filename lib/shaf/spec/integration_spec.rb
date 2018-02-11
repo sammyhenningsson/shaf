@@ -4,9 +4,10 @@ module Shaf
       include Minitest::Hooks
       include ::Rack::Test::Methods
       include PayloadUtils
+      include UriHelper
 
       register_spec_type self do |desc, args|
-        return unless args && args.is_a?(Hash)
+        next unless args && args.is_a?(Hash)
         args[:type]&.to_s == 'integration'
       end
 

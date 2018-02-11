@@ -11,8 +11,8 @@ module Shaf
       }.freeze
 
       register_spec_type self do |desc, args|
-        return true if desc =~ /Serializer$/
-        return unless args && args.is_a?(Hash)
+        next true if desc =~ /Serializer$/
+        next unless args && args.is_a?(Hash)
         args[:type]&.to_s == 'serializer'
       end
 
