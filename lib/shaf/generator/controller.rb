@@ -63,13 +63,29 @@ module Shaf
         content = []
         File.readlines(file).reverse.each do |line|
           if match = !added && line.match(/^(\s*)link /)
-            content.unshift("#{match[1]}link :#{plural_name}, #{plural_name}_uri")
+            content.unshift link_content("#{match[1]}")
             added = true
           end
           content.unshift(line)
         end
         File.open(file, 'w') { |f| f.puts content }
         puts "Modified:   #{file}"
+      end
+
+      def link_content(indentation = "")
+        <<~EOS.split("\n").map { |line| "#{indentation}#{line}" }
+
+          # Auto generated doc:  
+          # Link to the collection of #{plural_name}.  
+          # Method: GET  
+          # Example:
+          # ```
+          # curl -H "Accept: application/json" \\
+          #      -H "Authorization: abcdef" \\
+          #      /#{plural_name}/5
+          #```
+          link :#{plural_name}, #{plural_name}_uri
+        EOS
       end
     end
   end

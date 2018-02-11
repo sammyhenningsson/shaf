@@ -164,7 +164,7 @@ module Shaf
           method_args = "\n#      -X DELETE \\"
         end
 
-        <<~EOS
+        <<~EOS.chomp
           # Example:
           # ```
           # curl -H "Accept: application/json" \\
