@@ -3,7 +3,7 @@ namespace :db do
   task :version do
     require 'config/database'
     if DB.tables.include?(:schema_migrations)
-      migration = DB[:schema_migrations].first
+      migration = DB[:schema_migrations].order(:filename).last
       filename = migration && migration[:filename]
       if match = /(\d*)_(.*).rb/.match(filename)
         puts "Schema version: #{match[1]} (#{match[2]})"
