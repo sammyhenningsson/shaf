@@ -32,7 +32,7 @@ module Shaf
     end
 
     def current_user
-      unless @current_user
+      unless defined?(@current_user) && @current_user
         return unless request.env.key? 'HTTP_X_AUTH_TOKEN'
         digest = Digest::SHA256.hexdigest(request.env['HTTP_X_AUTH_TOKEN'])
         session = Session.where(auth_token_digest: digest).first

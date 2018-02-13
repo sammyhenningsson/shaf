@@ -22,7 +22,7 @@ module Shaf
       end
 
       def set_headers
-        if @__integration_test_auth_token
+        if defined?(@__integration_test_auth_token) && @__integration_test_auth_token
           header 'X-AUTH-TOKEN', @__integration_test_auth_token
         end
       end
