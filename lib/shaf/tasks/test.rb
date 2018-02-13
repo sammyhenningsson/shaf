@@ -2,31 +2,31 @@ require 'rake/testtask'
 
 namespace :test do |ns|
   Rake::TestTask.new(:integration) do |t|
-    t.libs = %w(. app spec)
+    t.libs = %w(. api spec)
     t.pattern = "spec/integration/**/*_spec.rb"
     t.verbose = true
   end
 
   Rake::TestTask.new(:models) do |t|
-    t.libs = %w(. app spec)
+    t.libs = %w(. api spec)
     t.pattern = "spec/models/**/*_spec.rb"
     t.verbose = true
   end
 
   Rake::TestTask.new(:serializers) do |t|
-    t.libs = %w(. app spec)
+    t.libs = %w(. api spec)
     t.pattern = "spec/serializers/**/*_spec.rb"
     t.verbose = true
   end
 
   Rake::TestTask.new(:lib) do |t|
-    t.libs = %w(. app spec)
+    t.libs = %w(. api spec)
     t.pattern = "spec/lib/**/*_spec.rb"
     t.verbose = true
   end
 
   Rake::TestTask.new(:all) do |t|
-    t.libs = %w(. app spec)
+    t.libs = %w(. api spec)
     t.pattern = [
       "spec/lib/**/*_spec.rb",
       "spec/models/**/*_spec.rb",

@@ -24,11 +24,11 @@ module Shaf
       end
 
       def template
-        'app/model.rb'
+        'api/model.rb'
       end
 
       def target
-        "app/models/#{model_name}.rb"
+        "api/models/#{model_name}.rb"
       end
 
       def create_model

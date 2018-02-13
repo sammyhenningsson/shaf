@@ -22,12 +22,12 @@ module Shaf
       end
 
       describe "empty controller" do
-        let(:file) { "app/controllers/blog.rb" }
+        let(:file) { "api/controllers/blog.rb" }
         let(:generator) do
           Factory.create(*%w(controller blog))
         end
 
-        it "creates file in app/controllers" do
+        it "creates file in api/controllers" do
           assert_includes output.keys, file
         end
 

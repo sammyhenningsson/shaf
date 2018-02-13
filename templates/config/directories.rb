@@ -24,7 +24,7 @@ end
 Dir.chdir(APP_DIR) do
   files = Dir[File.join('**', '*.rb')]
   sort_files(files).each do |file|
-    # load all files with .rb extension in subfolders of app
+    # load all files with .rb extension in subfolders of api
     $logger&.debug "Require file: #{file}"
     require file
   end

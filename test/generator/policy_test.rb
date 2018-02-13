@@ -20,12 +20,12 @@ module Shaf
       end
 
       describe "empty policy" do
-        let(:file) { "app/policies/blog.rb" }
+        let(:file) { "api/policies/blog.rb" }
         let(:generator) do
           Factory.create(*%w(policy blog))
         end
 
-        it "creates file in app/policies" do
+        it "creates file in api/policies" do
           assert_includes output.keys, file
         end
 
@@ -39,7 +39,7 @@ module Shaf
       end
 
       describe "model with properties" do
-        let(:file) { "app/policies/blog.rb" }
+        let(:file) { "api/policies/blog.rb" }
         let(:generator) do
           Factory.create(*%w(policy blog user_id message))
         end

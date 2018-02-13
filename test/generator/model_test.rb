@@ -24,8 +24,8 @@ module Shaf
           Factory.create(*%w(model blog))
         end
 
-        it "creates file in app/models" do
-          assert_includes output.keys, "app/models/blog.rb"
+        it "creates file in api/models" do
+          assert_includes output.keys, "api/models/blog.rb"
         end
 
         it "creates a migration" do
@@ -33,19 +33,19 @@ module Shaf
         end
 
         it "generates a serializer" do
-          assert_includes output.keys, "app/serializers/blog.rb"
+          assert_includes output.keys, "api/serializers/blog.rb"
         end
 
         it "generates a policy" do
-          assert_includes output.keys, "app/policies/blog.rb"
+          assert_includes output.keys, "api/policies/blog.rb"
         end
 
         it "includes Formable" do
-          assert_match %r(^\s*include Shaf::Formable$), output["app/models/blog.rb"]
+          assert_match %r(^\s*include Shaf::Formable$), output["api/models/blog.rb"]
         end
 
         it "inherits Sequel::Model" do
-          assert_match %r(class Blog < Sequel::Model), output["app/models/blog.rb"]
+          assert_match %r(class Blog < Sequel::Model), output["api/models/blog.rb"]
         end
       end
 
@@ -55,32 +55,32 @@ module Shaf
         end
 
         it "declares a form" do
-          assert_match %r(^\s*form do$), output["app/models/blog.rb"]
+          assert_match %r(^\s*form do$), output["api/models/blog.rb"]
         end
 
         it "adds form fields" do
           assert_match(
             %r(^\s*field :user_id, type: "integer"$),
-            output["app/models/blog.rb"],
+            output["api/models/blog.rb"],
             "Model file does not include: 'field :user_id, type \"integer\"'\n"
           )
           assert_match(
             %r(^\s*field :message, type: "string", label: "Inlägg"$),
-            output["app/models/blog.rb"],
+            output["api/models/blog.rb"],
             "Model file does not include: 'field :message, type \"string\", label: \"Inlägg\"'\n"
           )
         end
 
         it "sets title and name for create form" do
-          assert_match %r(^\s*create do$), output["app/models/blog.rb"]
-          assert_match %r(^\s*title 'Create Blog'$), output["app/models/blog.rb"]
-          assert_match %r(^\s*name  'create-blog'$), output["app/models/blog.rb"]
+          assert_match %r(^\s*create do$), output["api/models/blog.rb"]
+          assert_match %r(^\s*title 'Create Blog'$), output["api/models/blog.rb"]
+          assert_match %r(^\s*name  'create-blog'$), output["api/models/blog.rb"]
         end
 
         it "sets title and name for edit form" do
-          assert_match %r(^\s*edit do$), output["app/models/blog.rb"]
-          assert_match %r(^\s*title 'Update Blog'$), output["app/models/blog.rb"]
-          assert_match %r(^\s*name  'update-blog'$), output["app/models/blog.rb"]
+          assert_match %r(^\s*edit do$), output["api/models/blog.rb"]
+          assert_match %r(^\s*title 'Update Blog'$), output["api/models/blog.rb"]
+          assert_match %r(^\s*name  'update-blog'$), output["api/models/blog.rb"]
         end
       end
     end

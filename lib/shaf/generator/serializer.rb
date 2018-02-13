@@ -31,7 +31,7 @@ module Shaf
       end
 
       def template
-        'app/serializer.rb'
+        'api/serializer.rb'
       end
 
       def spec_template
@@ -39,7 +39,7 @@ module Shaf
       end
 
       def target
-        "app/serializers/#{name}.rb"
+        "api/serializers/#{name}.rb"
       end
 
       def spec_target

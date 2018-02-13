@@ -29,7 +29,7 @@ module Shaf
       end
 
       def template
-        'app/controller.rb'
+        'api/controller.rb'
       end
 
       def spec_template
@@ -37,7 +37,7 @@ module Shaf
       end
 
       def target
-        "app/controllers/#{name}.rb"
+        "api/controllers/#{name}.rb"
       end
 
       def spec_target
@@ -68,7 +68,7 @@ module Shaf
       end
 
       def add_link_to_root
-        file = "app/serializers/root.rb"
+        file = "api/serializers/root.rb"
         unless File.exist? file
           puts "Warning: file '#{file}' does not exist. "\
             "Not adding any link to the #{plural_name} collection"

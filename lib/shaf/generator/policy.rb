@@ -16,11 +16,11 @@ module Shaf
       end
 
       def template
-        'app/policy.rb'
+        'api/policy.rb'
       end
 
       def target
-        "app/policies/#{policy_name}.rb"
+        "api/policies/#{policy_name}.rb"
       end
 
       def create_policy

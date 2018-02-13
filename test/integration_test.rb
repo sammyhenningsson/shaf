@@ -53,10 +53,11 @@ module Shaf
         config/constants.rb config/database.rb config/directories.rb config/helpers.rb
         config/initializers.rb config/initializers/db_migrations.rb
         config/initializers/hal_presenter.rb config/initializers/logging.rb
-        config/initializers/sequel.rb app/controllers/base_controller.rb
-        app/controllers/root.rb app/serializers/errors.rb app/serializers/form.rb
-        app/serializers/root.rb frontend/assets/css/main.css frontend/views/form.erb
+        config/initializers/sequel.rb api/controllers/base_controller.rb
+        api/controllers/root.rb api/serializers/errors.rb api/serializers/form.rb
+        api/serializers/root.rb frontend/assets/css/main.css frontend/views/form.erb
         frontend/views/layout.erb frontend/views/payload.erb spec/spec_helper.rb
+        spec/serializers/root_spec.rb spec/integration/root_spec.rb
         ).each do |file|
           assert File.exist?(file),
             "The file '#{file}' does not exist in a newly created project"
