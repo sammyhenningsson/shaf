@@ -33,11 +33,11 @@ module Shaf
         end
 
         it "generates a serializer" do
-          assert_includes output.keys, "api/serializers/blog.rb"
+          assert_includes output.keys, "api/serializers/blog_serializer.rb"
         end
 
         it "generates a policy" do
-          assert_includes output.keys, "api/policies/blog.rb"
+          assert_includes output.keys, "api/policies/blog_policy.rb"
         end
 
         it "includes Formable" do

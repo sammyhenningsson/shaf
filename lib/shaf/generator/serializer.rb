@@ -39,11 +39,11 @@ module Shaf
       end
 
       def target
-        "api/serializers/#{name}.rb"
+        "api/serializers/#{name}_serializer.rb"
       end
 
       def spec_target
-        "spec/serializers/#{name}_spec.rb"
+        "spec/serializers/#{name}_serializer_spec.rb"
       end
 
       def create_serializer
@@ -211,9 +211,10 @@ module Shaf
       def opts
         {
           name: name,
-          class_name: name.capitalize,
+          class_name: "#{name.capitalize}Serializer",
           model_class_name: model_class_name,
           policy_class_name: policy_class_name,
+          policy_name: "#{name}_policy",
           attributes: attributes,
           links: links,
           embeds: embeds,

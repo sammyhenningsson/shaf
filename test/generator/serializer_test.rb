@@ -25,19 +25,19 @@ module Shaf
         end
 
         it "creates file in api/serializers" do
-          assert_includes output.keys, "api/serializers/blog.rb"
+          assert_includes output.keys, "api/serializers/blog_serializer.rb"
         end
 
         it "requires policy" do
-          assert_match %r(^\s*require 'policies/), output["api/serializers/blog.rb"]
+          assert_match %r(^\s*require 'policies/blog_policy'), output["api/serializers/blog_serializer.rb"]
         end
 
         it "extends HALPresenter" do
-          assert_match %r(^\s*extend HALPresenter$), output["api/serializers/blog.rb"]
+          assert_match %r(^\s*extend HALPresenter$), output["api/serializers/blog_serializer.rb"]
         end
 
         it "extends UriHelper" do
-          assert_match %r(^\s*extend Shaf::UriHelper$), output["api/serializers/blog.rb"]
+          assert_match %r(^\s*extend Shaf::UriHelper$), output["api/serializers/blog_serializer.rb"]
         end
       end
 
@@ -47,8 +47,8 @@ module Shaf
         end
 
         it "specifies attributes" do
-          assert_match %r(^\s*attribute :user), output["api/serializers/blog.rb"]
-          assert_match %r(^\s*attribute :message), output["api/serializers/blog.rb"]
+          assert_match %r(^\s*attribute :user), output["api/serializers/blog_serializer.rb"]
+          assert_match %r(^\s*attribute :message), output["api/serializers/blog_serializer.rb"]
         end
       end
     end

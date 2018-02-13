@@ -1,23 +1,21 @@
-require 'policies/<%= name %>'
+require 'policies/<%= policy_name %>'
 
-module Serializers
-  class <%= class_name %>
-    extend HALPresenter
-    extend Shaf::UriHelper
+class <%= class_name %>
+  extend HALPresenter
+  extend Shaf::UriHelper
 
-    model <%= model_class_name %>
-    policy <%= policy_class_name %>
-    <% attributes_with_doc.each do |attr| %>
-    <%= attr.join("\n    ") %>
-    <% end %>
-    <% links_with_doc.each do |link| %>
-    <%= link.join("\n    ") %>
-    <% end %>
-    <% embeds_with_doc.each do |embed| %>
-    <%= embed.join("\n    ") %>
-    <% end %>
-    <% if collection_with_doc %>
-    <%= collection_with_doc.join("\n    ") %>
-    <% end %>
-  end
+  model <%= model_class_name %>
+  policy <%= policy_class_name %>
+  <% attributes_with_doc.each do |attr| %>
+  <%= attr.join("\n    ") %>
+  <% end %>
+  <% links_with_doc.each do |link| %>
+  <%= link.join("\n    ") %>
+  <% end %>
+  <% embeds_with_doc.each do |embed| %>
+  <%= embed.join("\n    ") %>
+  <% end %>
+  <% if collection_with_doc %>
+  <%= collection_with_doc.join("\n    ") %>
+  <% end %>
 end

@@ -58,17 +58,17 @@ module Shaf
         {
           name: name,
           plural_name: plural_name,
-          serializer_class_name: "Serializers::#{name.capitalize}",
+          serializer_class_name: "#{name.capitalize}Serializer",
           model_class_name: name.capitalize,
           controller_class_name: "#{plural_name.capitalize}Controller",
           policy_class_name: "#{name.capitalize}Policy",
-          policy_file: "policies/#{name}",
+          policy_file: "policies/#{name}_policy",
           params: params
         }
       end
 
       def add_link_to_root
-        file = "api/serializers/root.rb"
+        file = "api/serializers/root_serializer.rb"
         unless File.exist? file
           puts "Warning: file '#{file}' does not exist. "\
             "Not adding any link to the #{plural_name} collection"

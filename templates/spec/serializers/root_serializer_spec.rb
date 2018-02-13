@@ -1,9 +1,9 @@
 require 'spec_helper'
 
-describe "RootSerializer" do
+describe RootSerializer do
 
   before do
-    set_payload Serializers::Root.to_hal
+    set_payload RootSerializer.to_hal
   end
 
   it "serializes links" do

@@ -20,7 +20,7 @@ module Shaf
       end
 
       def target
-        "api/policies/#{policy_name}.rb"
+        "api/policies/#{policy_name}_policy.rb"
       end
 
       def create_policy

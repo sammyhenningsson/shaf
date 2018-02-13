@@ -34,13 +34,13 @@ class BaseController < Sinatra::Base
 
   error Shaf::Authorize::PolicyViolationError do
     err = ForbiddenError.new
-    respond_with err, status: err.http_status, serializer: Serializers::Error
+    respond_with err, status: err.http_status, serializer: ErrorSerializer
   end
 
   error StandardError do
     err = env['sinatra.error']
     err = ServerError.new(err.message) unless err.is_a? ServerError
-    respond_with err, status: err.http_status, serializer: Serializers::Error
+    respond_with err, status: err.http_status, serializer: ErrorSerializer
   end
 
 end

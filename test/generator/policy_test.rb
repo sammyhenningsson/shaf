@@ -20,7 +20,7 @@ module Shaf
       end
 
       describe "empty policy" do
-        let(:file) { "api/policies/blog.rb" }
+        let(:file) { "api/policies/blog_policy.rb" }
         let(:generator) do
           Factory.create(*%w(policy blog))
         end
@@ -39,7 +39,7 @@ module Shaf
       end
 
       describe "model with properties" do
-        let(:file) { "api/policies/blog.rb" }
+        let(:file) { "api/policies/blog_policy.rb" }
         let(:generator) do
           Factory.create(*%w(policy blog user_id message))
         end
