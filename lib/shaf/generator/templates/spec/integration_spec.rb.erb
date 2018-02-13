@@ -41,6 +41,12 @@ describe <%= model_class_name %>, type: :integration do
       link_rels.must_include(:self)
       headers["Location"].must_equal links[:self][:href]
     end
+
+    get <%= plural_name %>_uri
+    status.must_equal 200
+    links[:self][:href].must_include <%= plural_name %>_uri
+    embedded(:'<%= plural_name %>').size.must_equal 1
+
   end
 
   it "<%= plural_name %> can be updated" do
