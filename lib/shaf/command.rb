@@ -41,5 +41,6 @@ module Shaf
 end
 
 require 'shaf/command/new'
+require 'shaf/command/server'
 require 'shaf/command/console'
 require 'shaf/command/generate'
