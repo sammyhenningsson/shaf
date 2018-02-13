@@ -22,7 +22,7 @@ module Shaf
 
     def with_server
       Dir.chdir(project_path) do
-        pid = spawn("rackup", out: File::NULL, err: [:child, :out])
+        pid = spawn("shaf server", out: File::NULL, err: [:child, :out])
         sleep 1
         yield
       ensure
@@ -38,7 +38,7 @@ module Shaf
     end
 
     def get_root
-      get("http://localhost:9292/")
+      get("http://localhost:3000/")
     end
 
     def get_link(rel)
