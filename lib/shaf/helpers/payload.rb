@@ -20,9 +20,9 @@ module Shaf
     private
 
     def payload
-      return @payload if defined? @payload
+      return @@payload if defined? @@payload
       request.body.rewind
-      @payload = parse(request.body.read)
+      @@payload = parse(request.body.read)
     end
 
     def parse(payload)
