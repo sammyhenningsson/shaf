@@ -9,7 +9,7 @@ describe <%= class_name %>, type: :serializer do
 
   describe "when current_user is nil" do
     before do
-      payload HALPresenter.to_hal(resource)
+      set_payload HALPresenter.to_hal(resource)
     end
 
     it "serializes attributes" do
@@ -20,14 +20,14 @@ describe <%= class_name %>, type: :serializer do
 
     it "serializes links" do
 <% [:self, :up].each do |rel| -%>
-      links.keys.must_include(:<%= rel %>)
+      link_rels.must_include(:<%= rel %>)
 <% end -%>
     end
   end
 
   describe "when current_user is present" do
     before do
-      payload HALPresenter.to_hal(resource, current_user: "Bengt")
+      set_payload HALPresenter.to_hal(resource, current_user: "Bengt")
     end
 
     it "serializes attributes" do
@@ -38,7 +38,7 @@ describe <%= class_name %>, type: :serializer do
 
     it "serializes links" do
 <% links.each do |rel| -%>
-      links.keys.must_include(:<%= rel %>)
+      link_rels.must_include(:<%= rel %>)
 <% end -%>
     end
   end

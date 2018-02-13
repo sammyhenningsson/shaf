@@ -3,7 +3,7 @@ require 'spec_helper'
 describe "RootSerializer" do
 
   before do
-    payload Serializers::Root.to_hal
+    set_payload Serializers::Root.to_hal
   end
 
   it "serializes links" do

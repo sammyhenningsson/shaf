@@ -12,6 +12,7 @@ module Shaf
         end
 
         create_controller
+        create_integration_spec
         add_link_to_root
       end
 
@@ -31,13 +32,26 @@ module Shaf
         'app/controller.rb'
       end
 
+      def spec_template
+        'spec/integration_spec.rb'
+      end
+
       def target
         "app/controllers/#{name}.rb"
+      end
+
+      def spec_target
+        "spec/integration/#{name}_spec.rb"
       end
 
       def create_controller
         content = render(template, opts)
         write_output(target, content)
+      end
+
+      def create_integration_spec
+        content = render(spec_template, opts)
+        write_output(spec_target, content)
       end
 
       def opts

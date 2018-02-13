@@ -2,21 +2,23 @@ module Shaf
   module Spec
     class IntegrationSpec < Minitest::Spec
       include Minitest::Hooks
-      include ::Rack::Test::Methods
+      include HttpMethodUtils
       include PayloadUtils
       include UriHelper
+
+      TRANSACTION_OPTIONS = {
+        rollback: :always,
+        savepoint: true,
+        auto_savepoint: true
+      }.freeze
 
       register_spec_type self do |desc, args|
         next unless args && args.is_a?(Hash)
         args[:type]&.to_s == 'integration'
       end
 
-      [:get, :put, :post, :delete].each do |m|
-        define_method m do |*args|
-          set_headers
-          super(*args)
-          @payload = parse_response(last_response.body)
-        end
+      around do |&block|
+        DB.transaction(TRANSACTION_OPTIONS) { super(&block) }
       end
 
       def set_headers
@@ -32,14 +34,6 @@ module Shaf
 
       def app
         App.instance
-      end
-
-      def headers
-        last_response&.headers
-      end
-
-      def status
-        last_response&.status
       end
 
 #       def login(email, pass)

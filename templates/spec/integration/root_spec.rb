@@ -1,6 +1,6 @@
 require 'spec_helper'
 
-describe Car, type: :integration do
+describe "Root", type: :integration do
 
   before do
     get root_uri
