@@ -197,6 +197,7 @@ module Shaf
         <<~EOS.split("\n")
           collection of: '#{plural_name}' do
             link :self, #{plural_name}_uri
+            link :up, root_uri
           
             embed :'create-form' do
               #{model_class_name}.create_form.tap do |form|
