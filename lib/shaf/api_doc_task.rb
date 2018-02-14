@@ -61,6 +61,8 @@ module Shaf
           doc.link(rel, comment)
         elsif rel = curie(line)
           doc.curie(rel, comment)
+        elsif name = embed(line)
+          doc.embedded(name, comment)
         end
 
         comment = Comment.new
@@ -75,11 +77,11 @@ module Shaf
     end
 
     def model(line)
-      line[/\A\s*model\s*(?:::)?(\w*)/, 1]
+      line[/\A\s*model\s*(?:::)?(\w+)/, 1]
     end
 
     def policy(line)
-      line[/\A\s*policy\s*(?:::)?(\w*)/, 1]
+      line[/\A\s*policy\s*(?:::)?(\w+)/, 1]
     end
 
     def comment(line)
@@ -87,15 +89,19 @@ module Shaf
     end
 
     def attribute(line)
-      line[/\A\s*attribute[^s]\s*\(?\s*:(\w*)/, 1]
+      line[/\A\s*attribute[^s]\s*\(?\s*:(\w+)/, 1]
     end
 
     def link(line)
-      line[/\A\s*link\s*\(?\s*:'?([-\w]*)'?/, 1]
+      line[/\A\s*link\s*\(?\s*:'?([-:\w]+)'?/, 1]
     end
 
     def curie(line)
-      line[/\A\s*curie\s*\(?\s*:'?([-\w]*)'?/, 1]
+      line[/\A\s*curie\s*\(?\s*:'?([-\w]+)'?/, 1]
+    end
+
+    def embed(line)
+      line[/\A\s*embed\s*\(?\s*:'?([-:\w]+)'?/, 1]
     end
 
     def write_html(doc)
@@ -126,14 +132,15 @@ module Shaf
   end
 
   class Document
-    attr_accessor :model, :policy, :attributes, :links, :curies
+    attr_accessor :model, :policy, :attributes, :links, :curies, :embeds
 
     def initialize
-      @model = ""
-      @policy = ""
+      @model = nil
+      @policy = nil
       @attributes = {}
       @links = {}
       @curies = {}
+      @embeds = {}
     end
 
     def attribute(attr, comment)
@@ -148,8 +155,12 @@ module Shaf
       @curies[rel] = comment unless comment.empty?
     end
 
+    def embedded(name, comment)
+      @embeds[name] = comment unless comment.empty?
+    end
+
     def has_enough_info?
-      return false if model.empty?
+      return false if model.nil?
       attributes.merge(links).merge(curies).any?
     end
 
@@ -159,6 +170,7 @@ module Shaf
       gen_title!
       gen_policy!
       gen_attributes!
+      gen_curies!
       gen_links!
       gen_embedded!
       @md
@@ -171,7 +183,7 @@ module Shaf
     end
 
     def gen_policy!
-      return if policy.empty?
+      return if policy.nil?
       @md << "###Policy\n"
       @md << policy + "\n"
     end
@@ -183,6 +195,18 @@ module Shaf
       else
         attributes.each do |attr, comment|
           @md << "######{attr.gsub('_', '-')}\n"
+          @md << comment.to_s + "\n"
+        end
+      end
+    end
+
+    def gen_curies!
+      @md << "###Curies\n"
+      if curies.empty?
+        @md << "This resource does not have any documented curies\n"
+      else
+        curies.each do |rel, comment|
+          @md << "#####rel: #{rel.gsub('_', '-')}\n"
           @md << comment.to_s + "\n"
         end
       end
@@ -201,7 +225,15 @@ module Shaf
     end
 
     def gen_embedded!
-      # TODO
+      @md << "###Embedded resources\n"
+      if embeds.empty?
+        @md << "This resource does not have any documented embedded resources\n"
+      else
+        embeds.each do |name, comment|
+          @md << "#####rel: #{name.gsub('_', '-')}\n"
+          @md << comment.to_s + "\n"
+        end
+      end
     end
 
   end
