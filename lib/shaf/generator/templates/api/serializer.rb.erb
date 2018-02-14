@@ -9,6 +9,9 @@ class <%= class_name %>
   <% attributes_with_doc.each do |attr| %>
   <%= attr.join("\n  ") %>
   <% end %>
+  <% curies_with_doc.each do |curie| %>
+  <%= curie.join("\n  ") %>
+  <% end %>
   <% links_with_doc.each do |link| %>
   <%= link.join("\n  ") %>
   <% end %>

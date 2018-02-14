@@ -70,7 +70,27 @@ module Shaf
       end
 
       def links
-        %w(up self 'create-form' 'edit-form' edit delete)
+        %w(doc:up doc:self doc:create-form doc:edit-form doc:edit doc:delete)
+      end
+
+      def curies_with_doc
+        [
+          <<~EOS.split("\n")
+            # Auto generated doc:  
+            # Link to the documentation for a given relation of the #{name} resource.
+            # This links templated, which means that `{rel}` must be replaced by the
+            # appropriate relation name.  
+            # Method: GET  
+            # Example:
+            # ```
+            # curl -H "Accept: application/json" \
+            #      /doc/#{name}/rels/edit
+            #```
+            curie :doc do
+              api_doc_uri(#{plural_name})
+            end
+          EOS
+        ]
       end
 
       def links_with_doc
@@ -86,7 +106,7 @@ module Shaf
 
       def collection_link
         link(
-          rel: "up",
+          rel: "doc:up",
           desc: "Link to the collection of all #{plural_name}. " \
           "Send a POST request to this uri to create a new #{name}",
           method: "GET or POST",
@@ -97,7 +117,7 @@ module Shaf
 
       def self_link
         link(
-          rel: "self",
+          rel: "doc:self",
           desc: "Link to this #{name}",
           uri: "/#{plural_name}/5",
           uri_helper: "#{name}_uri(resource)"
@@ -106,7 +126,7 @@ module Shaf
 
       def new_link
         link(
-          rel: "'create-form'",
+          rel: "doc:create-form",
           desc: "Link to a form to create a new #{name}",
           uri: "/#{plural_name}/form",
           uri_helper: "new_#{name}_uri"
@@ -115,7 +135,7 @@ module Shaf
 
       def edit_link
         link(
-          rel: "'edit-form'",
+          rel: "doc:edit-form",
           desc: "Link to a form to edit this resource",
           uri: "/#{plural_name}/5/edit",
           uri_helper: "edit_#{name}_uri(resource)"
@@ -124,7 +144,7 @@ module Shaf
 
       def update_link
         link(
-          rel: "edit",
+          rel: "doc:edit",
           desc: "Link to update this #{name}",
           method: "PUT",
           uri: "/#{plural_name}/5",
@@ -134,7 +154,7 @@ module Shaf
 
       def delete_link
         link(
-          rel: "delete",
+          rel: "doc:delete",
           desc: "Link to delete this #{name}",
           method: "DELETE",
           uri: "/#{plural_name}/5",
@@ -148,7 +168,7 @@ module Shaf
           # #{desc}.  
           # Method: #{method}  
           #{example(method, uri)}
-          link :#{rel} do
+          link :'#{rel}' do
             #{uri_helper}
           end
         EOS
@@ -176,7 +196,7 @@ module Shaf
       end
 
       def embeds
-        [:'edit-form']
+        [:'doc:edit-form']
       end
 
       def embeds_with_doc
@@ -184,7 +204,7 @@ module Shaf
           <<~EOS.split("\n")
             # Auto generated doc:  
             # A form to edit this #{name}
-            embed :'edit-form' do
+            embed :'doc:edit-form' do
               resource.edit_form.tap do |form|
                 form.self_link = edit_#{name}_uri(resource)
                 form.href = #{name}_uri(resource)
@@ -200,7 +220,7 @@ module Shaf
             link :self, #{plural_name}_uri
             link :up, root_uri
           
-            embed :'create-form' do
+            embed :'doc:create-form' do
               #{model_class_name}.create_form.tap do |form|
                 form.self_link = new_#{name}_uri
                 form.href = #{plural_name}_uri
@@ -221,6 +241,7 @@ module Shaf
           links: links,
           embeds: embeds,
           attributes_with_doc: attributes_with_doc,
+          curies_with_doc: curies_with_doc,
           links_with_doc: links_with_doc,
           embeds_with_doc: embeds_with_doc,
           collection_with_doc: collection_with_doc,

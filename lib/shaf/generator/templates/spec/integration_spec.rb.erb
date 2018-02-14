@@ -6,8 +6,8 @@ describe <%= model_class_name %>, type: :integration do
     <%= name %> = <%= model_class_name %>.create
     get <%= name %>_uri(<%= name %>)
     status.must_equal 200
-    link_rels.must_include(:self)
-    links[:self][:href].must_equal <%= name %>_uri(<%= name %>)
+    link_rels.must_include(:'doc:self')
+    links[:'doc:self'][:href].must_equal <%= name %>_uri(<%= name %>)
   end
 
   it "lists all <%= plural_name %>" do
@@ -16,6 +16,7 @@ describe <%= model_class_name %>, type: :integration do
 
     get <%= plural_name %>_uri
     status.must_equal 200
+    link_rels.must_include(:self)
     links[:self][:href].must_include <%= plural_name %>_uri
     embedded :'<%= plural_name %>' do
       <%= plural_name %> = last_payload
@@ -26,7 +27,7 @@ describe <%= model_class_name %>, type: :integration do
   it "can create <%= plural_name %>" do
     get <%= plural_name %>_uri
 
-    embedded :'create-form' do
+    embedded :'doc:create-form' do
       links[:self][:href].must_equal new_<%= name %>_uri
       attributes[:href].must_equal <%= plural_name %>_uri
       attributes[:method].must_equal "POST"
@@ -38,8 +39,8 @@ describe <%= model_class_name %>, type: :integration do
       payload = fill_form attributes[:fields]
       post attributes[:href], payload
       status.must_equal 201
-      link_rels.must_include(:self)
-      headers["Location"].must_equal links[:self][:href]
+      link_rels.must_include(:'doc:self')
+      headers["Location"].must_equal links[:'doc:self'][:href]
     end
 
     get <%= plural_name %>_uri
@@ -53,9 +54,9 @@ describe <%= model_class_name %>, type: :integration do
     <%= name %> = <%= model_class_name %>.create
     get <%= name %>_uri(<%= name %>)
     status.must_equal 200
-    link_rels.must_include(:'edit-form')
+    link_rels.must_include(:'doc:edit-form')
 
-    embedded :'edit-form' do
+    embedded :'doc:edit-form' do
       links[:self][:href].must_equal edit_<%= name %>_uri(<%= name %>)
       attributes[:href].must_equal <%= name %>_uri(<%= name %>)
       attributes[:method].must_equal "PUT"
@@ -67,7 +68,7 @@ describe <%= model_class_name %>, type: :integration do
       payload = fill_form attributes[:fields]
       put attributes[:href], payload
       status.must_equal 200
-      link_rels.must_include(:self)
+      link_rels.must_include(:'doc:self')
     end
   end
 
@@ -75,9 +76,9 @@ describe <%= model_class_name %>, type: :integration do
     <%= name %> = <%= model_class_name %>.create
     get <%= name %>_uri(<%= name %>)
     status.must_equal 200
-    link_rels.must_include(:delete)
+    link_rels.must_include(:'doc:delete')
 
-    follow_rel(:delete, method: :delete)
+    follow_rel(:'doc:delete', method: :delete)
     status.must_equal 204
 
     get <%= name %>_uri(<%= name %>)
