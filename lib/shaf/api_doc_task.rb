@@ -18,15 +18,15 @@ module Shaf
         task :generate do
           files = Dir.glob(File.join(@directory, "*.rb"))
           files.each do |file|
-            read_file file do
-              generate_doc
-              write_html
-              write_text
+            read_file file do |doc|
+              next unless doc.has_enough_info?
+              write_html doc
+              write_text doc
             end
           end
         end
 
-        desc "Remove genrated documentation"
+        desc "Remove generated documentation"
         task :clean do
           [
             Dir.glob(File.join(@text_output, "*.txt")),
@@ -40,9 +40,7 @@ module Shaf
 
 
     def read_file(file)
-      return unless block_given?
-
-      @doc = Document.new
+      doc = Document.new
       comment = Comment.new
 
       File.readlines(file).each do |line|
@@ -54,21 +52,22 @@ module Shaf
         end
 
         if model = model(line)
-          @doc.model = model
+          doc.model = model
         elsif policy = policy(line)
-          @doc.policy = policy
+          doc.policy = policy
         elsif attr = attribute(line)
-          @doc.attribute(attr, comment)
+          doc.attribute(attr, comment)
         elsif rel = link(line)
-          @doc.link(rel, comment)
+          doc.link(rel, comment)
         elsif rel = curie(line)
-          @doc.curie(rel, comment)
+          doc.curie(rel, comment)
         end
 
         comment = Comment.new
       end
 
-      yield if @doc.has_enough_info?
+      return doc unless block_given?
+      yield doc
     end
 
     def empty_line?(line)
@@ -99,59 +98,30 @@ module Shaf
       line[/\A\s*curie\s*\(?\s*:'?([-\w]*)'?/, 1]
     end
 
-    def generate_doc
-      @md_doc = "##%s\n" % @doc.model.capitalize
-
-      unless @doc.policy.empty?
-        @md_doc << "####Policy\n"
-        @md_doc << @doc.policy + "\n"
-      end
-
-      @md_doc << "####Attributes\n"
-      if @doc.attributes.empty?
-        @md_doc << "This resource does not have any documented attributes\n"
-      else
-        @doc.attributes.each do |attr, comment|
-          @md_doc << "######{attr.gsub('_', '-')}\n"
-          @md_doc << comment.to_s + "\n"
-        end
-      end
-
-      @md_doc << "####Links\n"
-      if @doc.links.empty?
-        @md_doc << "This resource does not have any documented links\n"
-      else
-        @doc.links.each do |rel, comment|
-          @md_doc << "#####rel: #{rel.gsub('_', '-')}\n"
-          @md_doc << comment.to_s + "\n"
-        end
-      end
-    end
-
-    def write_html
+    def write_html(doc)
       Dir.mkdir(@html_output) unless Dir.exist? @html_output
-      File.open(File.join(@html_output, "#{@doc.model}.html"), "w") do |file|
-        file.write markdown2html
+      File.open(File.join(@html_output, "#{doc.model}.html"), "w") do |file|
+        file.write markdown2html(doc)
       end
     end
 
-    def write_text
+    def write_text(doc)
       Dir.mkdir(@text_output) unless Dir.exist? @text_output
       markdown = Redcarpet::Markdown.new(Redcarpet::Render::StripDown)
-      File.open(File.join(@text_output, "#{@doc.model}.txt"), "w") do |file|
-        file.write markdown.render(@md_doc)
+      File.open(File.join(@text_output, "#{doc.model}.txt"), "w") do |file|
+        file.write markdown.render(doc.generate_markdown)
       end
     end
 
     # For some reason redcarpet don't like to surround my markdown code blocks
     # with <pre> tags, so let's fix that here.
-    def markdown2html
+    def markdown2html(doc)
       options = {autolink: true, fenced_code_blocks: true}
       markdown = Redcarpet::Markdown.new(Redcarpet::Render::HTML, options)
-      md = markdown.render(@md_doc)
-      md.gsub!("<code>", "<pre><code>")
-      md.gsub!("</code>", "</code></pre>")
-      md
+      html = markdown.render(doc.generate_markdown)
+      html.gsub!("<code>", "<pre><code>")
+      html.gsub!("</code>", "</code></pre>")
+      html
     end
   end
 
@@ -180,8 +150,60 @@ module Shaf
 
     def has_enough_info?
       return false if model.empty?
-      !(attributes.empty? && links.empty? && curies.empty? && policy.empty?)
+      attributes.merge(links).merge(curies).any?
     end
+
+    def generate_markdown
+      return @md if defined? @md
+
+      gen_title!
+      gen_policy!
+      gen_attributes!
+      gen_links!
+      gen_embedded!
+      @md
+    end
+
+    private
+    
+    def gen_title!
+      @md = "##%s\n" % model.capitalize
+    end
+
+    def gen_policy!
+      return if policy.empty?
+      @md << "###Policy\n"
+      @md << policy + "\n"
+    end
+
+    def gen_attributes!
+      @md << "###Attributes\n"
+      if attributes.empty?
+        @md << "This resource does not have any documented attributes\n"
+      else
+        attributes.each do |attr, comment|
+          @md << "######{attr.gsub('_', '-')}\n"
+          @md << comment.to_s + "\n"
+        end
+      end
+    end
+
+    def gen_links!
+      @md << "###Links\n"
+      if links.empty?
+        @md << "This resource does not have any documented links\n"
+      else
+        links.each do |rel, comment|
+          @md << "#####rel: #{rel.gsub('_', '-')}\n"
+          @md << comment.to_s + "\n"
+        end
+      end
+    end
+
+    def gen_embedded!
+      # TODO
+    end
+
   end
 
   class Comment
