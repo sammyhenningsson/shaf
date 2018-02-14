@@ -1,3 +1,5 @@
+require 'fileutils'
+require 'yaml'
 require 'redcarpet'
 require 'redcarpet/render_strip'
 
@@ -5,7 +7,7 @@ module Shaf
   class ApiDocTask
     include Rake::DSL
 
-    attr_accessor :directory, :html_output, :text_output
+    attr_accessor :directory, :html_output, :yaml_output
 
     def initialize
       yield self if block_given?
@@ -21,7 +23,7 @@ module Shaf
             read_file file do |doc|
               next unless doc.has_enough_info?
               write_html doc
-              write_text doc
+              write_yaml doc
             end
           end
         end
@@ -29,7 +31,7 @@ module Shaf
         desc "Remove generated documentation"
         task :clean do
           [
-            Dir.glob(File.join(@text_output, "*.txt")),
+            Dir.glob(File.join(@yaml_output, "*.yml")),
             Dir.glob(File.join(@html_output, "*.html"))
           ].flatten.each do |file|
             File.unlink file
@@ -53,6 +55,8 @@ module Shaf
 
         if model = model(line)
           doc.model = model
+        elsif serializer_class = serializer_class(line)
+          doc.serializer_class = serializer_class
         elsif policy = policy(line)
           doc.policy = policy
         elsif attr = attribute(line)
@@ -74,6 +78,10 @@ module Shaf
 
     def empty_line?(line)
       true if line[/\A[#\s*]*\Z/]
+    end
+
+    def serializer_class(line)
+      line[/\A\s*class\s*(\w+)\Z/, 1]
     end
 
     def model(line)
@@ -105,42 +113,38 @@ module Shaf
     end
 
     def write_html(doc)
-      Dir.mkdir(@html_output) unless Dir.exist? @html_output
-      File.open(File.join(@html_output, "#{doc.model}.html"), "w") do |file|
-        file.write markdown2html(doc)
+      FileUtils.mkdir_p(@html_output) unless Dir.exist? @html_output
+      File.open(File.join(@html_output, "#{doc.model.downcase}.html"), "w") do |file|
+        file.write(doc.to_markdown)
       end
     end
 
-    def write_text(doc)
-      Dir.mkdir(@text_output) unless Dir.exist? @text_output
-      markdown = Redcarpet::Markdown.new(Redcarpet::Render::StripDown)
-      File.open(File.join(@text_output, "#{doc.model}.txt"), "w") do |file|
-        file.write markdown.render(doc.generate_markdown)
+    def write_yaml(doc)
+      FileUtils.mkdir_p(@yaml_output) unless Dir.exist? @yaml_output
+      File.open(File.join(@yaml_output, "#{doc.model.downcase}.yml"), "w") do |file|
+        file.write(doc.generate_yaml!)
       end
     end
 
-    # For some reason redcarpet don't like to surround my markdown code blocks
-    # with <pre> tags, so let's fix that here.
-    def markdown2html(doc)
-      options = {autolink: true, fenced_code_blocks: true}
-      markdown = Redcarpet::Markdown.new(Redcarpet::Render::HTML, options)
-      html = markdown.render(doc.generate_markdown)
-      html.gsub!("<code>", "<pre><code>")
-      html.gsub!("</code>", "</code></pre>")
-      html
-    end
   end
 
   class Document
-    attr_accessor :model, :policy, :attributes, :links, :curies, :embeds
+    attr_writer :model
+    attr_accessor :serializer_class, :policy, :attributes, :links, :curies, :embeds
 
     def initialize
       @model = nil
+      @serializer_class = nil
       @policy = nil
       @attributes = {}
       @links = {}
       @curies = {}
       @embeds = {}
+      @md = {}
+    end
+
+    def model
+      @model || @serializer_class && @serializer_class.sub("Serializer", "")
     end
 
     def attribute(attr, comment)
@@ -160,105 +164,96 @@ module Shaf
     end
 
     def has_enough_info?
-      return false if model.nil?
+      return false unless model
       attributes.merge(links).merge(curies).any?
     end
 
-    def generate_markdown
-      return @md if defined? @md
+    def generate_markdown!
+      return @md unless @md.empty?
 
-      gen_title!
-      gen_policy!
-      gen_attributes!
-      gen_curies!
-      gen_links!
-      gen_embedded!
-      @md
+      generate_title!
+      generate_policy!
+      generate_section!(key: :attributes, heading: "Attributes")
+      generate_section!(key: :curies, heading: "Curies", sub_title: "rel")
+      generate_section!(key: :links, heading: "Links", sub_title: "rel")
+      generate_section!(key: :embeds, heading: "Embedded resources", sub_title: "rel")
+      @md[:doc]
+    end
+
+    def generate_yaml!
+      generate_markdown!
+      renderer = Redcarpet::Markdown.new(Redcarpet::Render::StripDown)
+
+      hash = {}
+      hash[:policy] = renderer.render(@md[:policy]).chomp if @md[:policy]
+
+      [:attributes, :curies, :links, :embeds].each do |key|
+        hash[key] = @md[key].map { |k, v| [k.to_sym, renderer.render(v).chomp] }.to_h
+      end
+      hash.to_yaml
+    end
+
+    def to_markdown
+      # For some reason redcarpet don't like to surround my markdown code blocks
+      # with <pre> tags, so let's fix that here.
+      options = {autolink: true, fenced_code_blocks: true}
+      markdown = Redcarpet::Markdown.new(Redcarpet::Render::HTML, options)
+      html = markdown.render(generate_markdown!)
+      html.gsub!("<code>", "<pre><code>")
+      html.gsub!("</code>", "</code></pre>")
+      html
     end
 
     private
     
-    def gen_title!
-      @md = "##%s\n" % model.capitalize
+    def generate_title!
+      @md[:doc] = "##%s\n" % model.capitalize
+      @md[:title] = model.capitalize
     end
 
-    def gen_policy!
+    def generate_policy!
       return if policy.nil?
-      @md << "###Policy\n"
-      @md << policy + "\n"
+      @md[:doc] << "###Policy\n#{policy}\n"
+      @md[:policy] = policy
     end
 
-    def gen_attributes!
-      @md << "###Attributes\n"
-      if attributes.empty?
-        @md << "This resource does not have any documented attributes\n"
+    def generate_section!(key:, heading:, sub_title: "")
+      list = send(key)
+      @md[:doc] << "####{heading}\n"
+      @md[key] = {}
+      if list.empty?
+        @md[:doc] << "This resource does not have any documented #{heading.downcase}\n"
       else
-        attributes.each do |attr, comment|
-          @md << "######{attr.gsub('_', '-')}\n"
-          @md << comment.to_s + "\n"
+        sub_title << ": " unless sub_title.empty?
+        list.each do |name, comment|
+          @md[:doc] << "#######{sub_title}#{name.gsub('_', '-')}\n#{comment.to_s}\n"
+          @md[key][name] = comment.to_s.chomp
         end
       end
     end
-
-    def gen_curies!
-      @md << "###Curies\n"
-      if curies.empty?
-        @md << "This resource does not have any documented curies\n"
-      else
-        curies.each do |rel, comment|
-          @md << "#####rel: #{rel.gsub('_', '-')}\n"
-          @md << comment.to_s + "\n"
-        end
-      end
-    end
-
-    def gen_links!
-      @md << "###Links\n"
-      if links.empty?
-        @md << "This resource does not have any documented links\n"
-      else
-        links.each do |rel, comment|
-          @md << "#####rel: #{rel.gsub('_', '-')}\n"
-          @md << comment.to_s + "\n"
-        end
-      end
-    end
-
-    def gen_embedded!
-      @md << "###Embedded resources\n"
-      if embeds.empty?
-        @md << "This resource does not have any documented embedded resources\n"
-      else
-        embeds.each do |name, comment|
-          @md << "#####rel: #{name.gsub('_', '-')}\n"
-          @md << comment.to_s + "\n"
-        end
-      end
-    end
-
   end
 
   class Comment
     def initialize
       @indent = 0
-      @md = ""
+      @comment = ""
     end
 
     def to_s
-      @md
+      @comment
     end
 
     def empty?
-      @md.empty?
+      @comment.empty?
     end
 
     def <<(line)
       @indent = line[/\A\s*/].size if empty?
-      @md << extract(line)
+      @comment << "\n#{extract(line)}"
     end
 
     def extract(line)
-      line.sub(%r(/\A\s{#{@indent}}/), "")
+      line.sub(%r(\A\s{#{@indent}}), "")
     end
   end
 end

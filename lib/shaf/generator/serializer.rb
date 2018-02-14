@@ -78,12 +78,12 @@ module Shaf
           <<~EOS.split("\n")
             # Auto generated doc:  
             # Link to the documentation for a given relation of the #{name} resource.
-            # This links templated, which means that `{rel}` must be replaced by the
+            # This link is templated, which means that {rel} must be replaced by the
             # appropriate relation name.  
             # Method: GET  
             # Example:
             # ```
-            # curl -H "Accept: application/json" \
+            # curl -H "Accept: application/json" \\
             #      /doc/#{name}/rels/edit
             #```
             curie :doc do
