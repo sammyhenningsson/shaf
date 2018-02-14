@@ -89,6 +89,7 @@ module Shaf
           rel: "up",
           desc: "Link to the collection of all #{plural_name}. " \
           "Send a POST request to this uri to create a new #{name}",
+          method: "GET or POST",
           uri: "/#{plural_name}",
           uri_helper: "#{plural_name}_uri"
         )

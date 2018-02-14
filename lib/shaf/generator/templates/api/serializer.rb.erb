@@ -7,15 +7,15 @@ class <%= class_name %>
   model <%= model_class_name %>
   policy <%= policy_class_name %>
   <% attributes_with_doc.each do |attr| %>
-  <%= attr.join("\n    ") %>
+  <%= attr.join("\n  ") %>
   <% end %>
   <% links_with_doc.each do |link| %>
-  <%= link.join("\n    ") %>
+  <%= link.join("\n  ") %>
   <% end %>
   <% embeds_with_doc.each do |embed| %>
-  <%= embed.join("\n    ") %>
+  <%= embed.join("\n  ") %>
   <% end %>
   <% if collection_with_doc %>
-  <%= collection_with_doc.join("\n    ") %>
+  <%= collection_with_doc.join("\n  ") %>
   <% end %>
 end
