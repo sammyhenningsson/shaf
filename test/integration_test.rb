@@ -54,10 +54,11 @@ module Shaf
         config/initializers.rb config/initializers/db_migrations.rb
         config/initializers/hal_presenter.rb config/initializers/logging.rb
         config/initializers/sequel.rb api/controllers/base_controller.rb
-        api/controllers/root.rb api/serializers/error_serializer.rb
-        api/serializers/form_serializer.rb api/serializers/root_serializer.rb
-        frontend/assets/css/main.css frontend/views/form.erb
-        frontend/views/layout.erb frontend/views/payload.erb spec/spec_helper.rb
+        api/controllers/root_controller.rb api/controllers/docs_controller.rb
+        api/serializers/error_serializer.rb api/serializers/form_serializer.rb
+        api/serializers/root_serializer.rb frontend/assets/css/main.css
+        frontend/views/form.erb frontend/views/layout.erb
+        frontend/views/payload.erb spec/spec_helper.rb
         spec/serializers/root_serializer_spec.rb spec/integration/root_spec.rb
         ).each do |file|
           assert File.exist?(file),

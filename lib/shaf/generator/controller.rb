@@ -37,11 +37,11 @@ module Shaf
       end
 
       def target
-        "api/controllers/#{name}.rb"
+        "api/controllers/#{plural_name}_controller.rb"
       end
 
       def spec_target
-        "spec/integration/#{name}_spec.rb"
+        "spec/integration/#{plural_name}_controller_spec.rb"
       end
 
       def create_controller

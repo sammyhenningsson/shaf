@@ -22,7 +22,7 @@ module Shaf
       end
 
       describe "empty controller" do
-        let(:file) { "api/controllers/blog.rb" }
+        let(:file) { "api/controllers/blogs_controller.rb" }
         let(:generator) do
           Factory.create(*%w(controller blog))
         end
