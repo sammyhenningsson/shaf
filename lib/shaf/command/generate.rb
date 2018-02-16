@@ -4,7 +4,7 @@ module Shaf
   module Command
     class Generate < Base
 
-      identifier %r(gen(erate)?)
+      identifier %r(\Ag(en(erate)?)?\Z)
       usage Generator::Factory.usage.flatten.sort
 
       def call

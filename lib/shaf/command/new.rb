@@ -6,7 +6,7 @@ module Shaf
   module Command
     class New < Base
 
-      identifier :new
+      identifier %r(\An(ew)?\Z)
       usage 'new PROJECT_NAME'
 
       def call
