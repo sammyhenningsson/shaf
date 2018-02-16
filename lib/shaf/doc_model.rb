@@ -2,9 +2,6 @@ require 'yaml'
 
 module Shaf
   class DocModel
-
-    DOC_DIR = 'doc/api'.freeze
-
     class << self
       def find(name)
         @@docs ||= {}
@@ -19,7 +16,7 @@ module Shaf
       private
 
       def load(name)
-        file = File.join(DOC_DIR, "#{name}.yml")
+        file = File.join(Settings.documents_dir, "#{name}.yml")
         return YAML.load(File.read(file)) if File.exist? file
       end
     end

@@ -1,0 +1,19 @@
+---
+default: &default
+  port: 3000
+  public_folder: frontend/assets
+  views_folder: frontend/views
+  documents_dir: doc/api
+  migrations_dir: db/migrations
+  paginate_per_page: 25
+
+production:
+  <<: *default
+  port: 80
+
+development:
+  <<: *default
+
+test:
+  <<: *default
+  port: 3000

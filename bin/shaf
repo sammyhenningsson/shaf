@@ -2,6 +2,7 @@
 
 require 'shaf/utils'
 require 'shaf/command'
+require 'shaf/settings'
 
 module Shaf
   class Script

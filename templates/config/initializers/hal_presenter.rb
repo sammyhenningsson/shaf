@@ -1,5 +1,6 @@
 if Sinatra::Application.settings.environment == :development
-  HALPresenter.base_href = "http://localhost:#{LISTEN_PORT || 3000}"
+  port = Shaf::Settings.port ? ":#{Shaf::Settings.port}" : ""
+  HALPresenter.base_href = "http://localhost#{port}"
 end
 
 HALPresenter.paginate = true

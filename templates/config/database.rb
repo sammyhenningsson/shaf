@@ -33,7 +33,7 @@ unless CONFIG[env]
   exit 1
 end
 
-MIGRATIONS_DIR = File.join(APP_ROOT, 'db', 'migrations')
+MIGRATIONS_DIR = File.join(APP_ROOT, Shaf::Settings.migrations_dir)
 FileUtils.mkdir_p(MIGRATIONS_DIR) unless Dir.exist?(MIGRATIONS_DIR)
 
 DB = Sequel.connect(CONFIG[env])

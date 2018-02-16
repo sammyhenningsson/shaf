@@ -1,11 +1,9 @@
-require 'config/constants'
-
 class App
   class << self
     def instance
       unless defined?(@instance)
         @instance = Sinatra.new
-        @instance.set :port, LISTEN_PORT
+        @instance.set :port, Shaf::Settings.port || 3000
       end
       @instance
     end
