@@ -3,7 +3,7 @@ class DocsController < BaseController
   register_uri :doc_curie,    '/doc/:resource/rels/{rel}'
 
   get '/doc/:resource/rels/:rel' do
-    doc.links(params[:rel])
+    doc.link(params[:rel])
   end
 
   get '/doc/:resource' do

@@ -22,8 +22,8 @@ module Shaf
           files.each do |file|
             read_file file do |doc|
               next unless doc.has_enough_info?
-              write_html doc
-              write_yaml doc
+              doc.write_html @html_output
+              doc.write_yaml @yaml_output
             end
           end
         end
@@ -112,20 +112,6 @@ module Shaf
       line[/\A\s*embed\s*\(?\s*:'?([-:\w]+)'?/, 1]
     end
 
-    def write_html(doc)
-      FileUtils.mkdir_p(@html_output) unless Dir.exist? @html_output
-      File.open(File.join(@html_output, "#{doc.model.downcase}.html"), "w") do |file|
-        file.write(doc.to_markdown)
-      end
-    end
-
-    def write_yaml(doc)
-      FileUtils.mkdir_p(@yaml_output) unless Dir.exist? @yaml_output
-      File.open(File.join(@yaml_output, "#{doc.model.downcase}.yml"), "w") do |file|
-        file.write(doc.generate_yaml!)
-      end
-    end
-
   end
 
   class Document
@@ -152,7 +138,7 @@ module Shaf
     end
 
     def link(rel, comment)
-      @links[rel] = comment unless comment.empty?
+      @links[strip_curie(rel)] = comment unless comment.empty?
     end
 
     def curie(rel, comment)
@@ -160,7 +146,7 @@ module Shaf
     end
 
     def embedded(name, comment)
-      @embeds[name] = comment unless comment.empty?
+      @embeds[strip_curie(name)] = comment unless comment.empty?
     end
 
     def has_enough_info?
@@ -185,10 +171,10 @@ module Shaf
       renderer = Redcarpet::Markdown.new(Redcarpet::Render::StripDown)
 
       hash = {}
-      hash[:policy] = renderer.render(@md[:policy]).chomp if @md[:policy]
+      hash['policy'] = renderer.render(@md[:policy]).chomp if @md[:policy]
 
       [:attributes, :curies, :links, :embeds].each do |key|
-        hash[key] = @md[key].map { |k, v| [k.to_sym, renderer.render(v).chomp] }.to_h
+        hash[key.to_s] = @md[key].map { |k, v| [k.to_s, renderer.render(v).chomp] }.to_h
       end
       hash.to_yaml
     end
@@ -204,8 +190,27 @@ module Shaf
       html
     end
 
+    def write_html(output)
+      FileUtils.mkdir_p(output) unless Dir.exist? output
+      File.open(File.join(output, "#{model.downcase}.html"), "w") do |file|
+        file.write(to_markdown)
+      end
+    end
+
+    def write_yaml(output)
+      FileUtils.mkdir_p(output) unless Dir.exist? output
+      File.open(File.join(output, "#{model.downcase}.yml"), "w") do |file|
+        file.write(generate_yaml!)
+      end
+    end
+
+
     private
     
+    def strip_curie(rel)
+      rel.split(':', 2)[1] || rel
+    end
+
     def generate_title!
       @md[:doc] = "##%s\n" % model.capitalize
       @md[:title] = model.capitalize

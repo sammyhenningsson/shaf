@@ -9,12 +9,11 @@ module Shaf
       def find(name)
         @@docs ||= {}
         @@docs[name] ||= load(name)
-        new(name)
+        new(name) if @@docs[name]
       end
 
       def find!(name)
-        find(name) or
-          raise(Errors::NotFoundError, "No documentation for #{name}")
+        find(name) or raise(Errors::NotFoundError, "No documentation for #{name}")
       end
 
       private
@@ -35,24 +34,24 @@ module Shaf
     end
 
     def attribute(attr)
-      attr_doc = @@docs.dig(@name, :attributes, attr.to_sym)
+      attr_doc = @@docs.dig(@name, 'attributes', attr.to_s)
       return attr_doc if attr_doc
       raise Errors::NotFoundError,
-        "No documentation for #{@name} - attribute '#{attr}'"
+        "No documentation for #{@name} attribute '#{attr}'"
     end
 
     def link(rel)
-      link_doc = @@docs.dig(@name, :links, rel.to_sym)
+      link_doc = @@docs.dig(@name, 'links', rel.to_s)
       return link_doc if link_doc
       raise Errors::NotFoundError,
-        "No documentation for #{@name} - link relation '#{rel}'"
+        "No documentation for #{@name} link relation '#{rel}'"
     end
 
     def embedded(name)
-      embed_doc = @@docs.dig(@name, :embeds, name.to_sym)
+      embed_doc = @@docs.dig(@name, 'embeds', name.to_s)
       return embed_doc if embed_doc
       raise Errors::NotFoundError,
-        "No documentation for #{@name} - embedded '#{name}'"
+        "No documentation for #{@name} embedded '#{name}'"
     end
   end
 end

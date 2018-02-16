@@ -87,7 +87,7 @@ module Shaf
             #      /doc/#{name}/rels/edit
             #```
             curie :doc do
-              doc_curie_uri('#{plural_name}')
+              doc_curie_uri('#{name}')
             end
           EOS
         ]
