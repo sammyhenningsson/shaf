@@ -49,7 +49,7 @@ module Shaf
 
     it "copies templates" do
       Dir.chdir(project_path) do
-        %w(Gemfile Rakefile config.ru .shaf config/app.rb config/bootstrap.rb
+        %w(Gemfile Rakefile config.ru .shaf config/bootstrap.rb config/settings.yml
         config/constants.rb config/database.rb config/directories.rb config/helpers.rb
         config/initializers.rb config/initializers/db_migrations.rb
         config/initializers/hal_presenter.rb config/initializers/logging.rb
@@ -89,7 +89,7 @@ module Shaf
       Dir.chdir(project_path) do
         assert system("shaf generate scaffold post message:string:Meddelande author:integer:Författare", out: File::NULL)
         assert system("rake db:migrate", out: File::NULL)
-        assert system("rake test", out: File::NULL)
+        assert system("rake test", out: File::NULL, err: File::NULL)
       end
     end
 

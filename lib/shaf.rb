@@ -1,6 +1,7 @@
 require 'shaf/version'
 require 'shaf/settings'
 require 'shaf/command'
+require 'shaf/app'
 require 'shaf/errors'
 require 'shaf/formable'
 require 'shaf/extensions'

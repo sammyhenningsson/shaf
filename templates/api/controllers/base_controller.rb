@@ -20,7 +20,7 @@ class BaseController < Sinatra::Base
 
   def self.inherited(controller)
     super
-    App.use controller
+    Shaf::App.use controller
   end
 
   def log
