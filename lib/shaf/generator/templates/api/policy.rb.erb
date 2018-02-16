@@ -5,13 +5,13 @@ class <%= policy_class_name %>
  
   <%= attributes.join("\n  ") %>
 
-  link :'doc:self', :'doc:up'
+  link :up
 
-  link :'doc:edit', :'doc:create-form', :'doc:edit-form', :'doc:delete' do
+  link :edit, :'create-form', :'edit-form', :delete do
     write?
   end
 
-  embed :'doc:create-form', :'doc:edit-form' do
+  embed :'create-form', :'edit-form' do
     write?
   end
 
