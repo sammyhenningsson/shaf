@@ -10,9 +10,9 @@ module Shaf
       def call
         in_project_root do
           Generator::Factory.create(*args).call
-        rescue StandardError => e
-          raise Command::ArgumentError, e.message
         end
+      rescue StandardError => e
+        raise Command::ArgumentError, e.message
       end
     end
   end
