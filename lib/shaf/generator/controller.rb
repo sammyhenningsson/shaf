@@ -3,7 +3,7 @@ module Shaf
     class Controller < Base
 
       identifier :controller
-      usage 'generate controller RESOURCE_NAME'
+      usage 'generate controller RESOURCE_NAME [attribute:type] [..]'
 
       def call
         if name.empty?

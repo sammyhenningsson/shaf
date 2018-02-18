@@ -2,7 +2,7 @@ module Shaf
   module Generator
     class Serializer < Base
       identifier :serializer
-      usage 'generate serializer MODEL_NAME'
+      usage 'generate serializer MODEL_NAME [attribute] [..]'
 
       def call
         if name.empty?
