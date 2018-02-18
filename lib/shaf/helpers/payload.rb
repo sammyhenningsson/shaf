@@ -20,20 +20,38 @@ module Shaf
     private
 
     def payload
-      return @@payload if defined? @@payload
-      request.body.rewind
-      @@payload = parse(request.body.read)
+      @@request_id ||= nil
+      @@payload ||= nil
+
+      if @@request_id != request.env["REQUEST_ID"]
+        @@request_id = request.env["REQUEST_ID"]
+        @@payload = parse_payload
+      end
+      @@payload
     end
 
-    def parse(payload)
-      return {} if payload.empty?
+    def read_input
+      request.body.rewind unless request.body.pos == 0
+      input = request.body.read
+    ensure
+      request.body.rewind
+    end
+
+    def parse_payload
       if request.env['CONTENT_TYPE'] == 'application/x-www-form-urlencoded'
-        params.reject { |key,_| ['captures', 'splat'].include? key }
-      elsif request.env['CONTENT_TYPE'] =~ %r(\Aapplication/json)
-        JSON.parse(payload)
+        return params.reject { |key,_| ['captures', 'splat'].include? key }
+      end
+
+      input = read_input
+      return {} if input.empty?
+
+      if request.env['CONTENT_TYPE'] =~ %r(\Aapplication/json)
+        JSON.parse(input)
       else
         raise ::UnsupportedMediaTypeError.new(request: request)
       end
+    rescue StandardError => e
+      raise ::BadRequestError.new
     end
 
     def safe_params(*fields)
