@@ -14,7 +14,7 @@ Gem::Specification.new do |gem|
   #gem.signing_key = File.expand_path("~/.ssh/gem-private_key.pem") if $0 =~ /gem\z/
 
   gem.executables   = ['shaf']
-  gem.files         = Dir['lib/**/*.rb'] + Dir['templates/**/*.rb']
+  gem.files         = Dir['lib/**/*rb'] + Dir['templates/**/*']
   gem.require_paths = ["lib"]
 
   gem.add_development_dependency "rake", '~> 12.0', '>= 10.0'
