@@ -50,7 +50,7 @@ class <%= controller_class_name %> < BaseController
 
   def <%= name %>_params
     # Generated method - TODO: Remove any params that should not be allowed!
-    safe_params(<%= params.map { |p| ":#{p}" }.join(', ') %>)
+    safe_params(<%= params.map { |p| ":#{p[0]}" }.join(', ') %>)
   end
 
   def <%= name %>

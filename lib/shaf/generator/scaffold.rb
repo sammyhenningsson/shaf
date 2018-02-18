@@ -19,9 +19,7 @@ module Shaf
       end
 
       def controller_args
-        [name] + args[1..-1].map do |arg|
-          arg.split(':').first
-        end
+        [name] + args[1..-1]
       end
     end
   end

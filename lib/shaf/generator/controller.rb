@@ -21,9 +21,9 @@ module Shaf
       end
 
       def params
-        args[1..-1]
+        args[1..-1].map { |param| param.split(':')}
       end
-      
+
       def plural_name
         Utils::pluralize(name)
       end

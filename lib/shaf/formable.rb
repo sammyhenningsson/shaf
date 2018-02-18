@@ -7,12 +7,8 @@ module Shaf
         @name = name
         @type = params[:type]
         @label = params[:label]
-        if params.key? :value
-          @value = params[:value]
-          @has_value = true
-        else
-          @has_value = false
-        end
+        @has_value = params.key? :value
+        @value = params[:value]
       end
 
       def has_value?
