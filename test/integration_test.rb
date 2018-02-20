@@ -25,10 +25,10 @@ module Shaf
         pid = spawn("shaf server", out: File::NULL, err: [:child, :out])
         sleep 1
         yield
-      ensure
-        Process.kill("TERM", pid)
-        Process.waitpid2(pid)
       end
+    ensure
+      Process.kill("TERM", pid)
+      Process.waitpid2(pid)
     end
 
     def get(uri)
