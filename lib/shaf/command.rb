@@ -27,10 +27,6 @@ module Shaf
         def usage(str = nil, &block)
           @usage = str || block
         end
-
-        def description(str)
-          @description = str
-        end
       end
 
       def initialize(*args)
