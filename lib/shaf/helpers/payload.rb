@@ -32,7 +32,7 @@ module Shaf
 
     def read_input
       request.body.rewind unless request.body.pos == 0
-      input = request.body.read
+      request.body.read
     ensure
       request.body.rewind
     end
@@ -50,7 +50,7 @@ module Shaf
       else
         raise ::UnsupportedMediaTypeError.new(request: request)
       end
-    rescue StandardError => e
+    rescue StandardError
       raise ::BadRequestError.new
     end
 
