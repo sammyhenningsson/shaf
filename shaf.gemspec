@@ -19,4 +19,13 @@ Gem::Specification.new do |gem|
 
   gem.add_development_dependency "rake", '~> 12.0', '>= 10.0'
   gem.add_development_dependency "minitest", '~> 5.10', '>= 5.0'
+  gem.add_development_dependency "hal_presenter", '~> 0.4.3', '>= 0.4.0'
+  gem.add_development_dependency "sinatra", '~> 2.0.1', '>= 2.0.0'
+  gem.add_development_dependency "sequel"
+  gem.add_development_dependency "sinatra-sequel"
+  gem.add_development_dependency "thin"
+  gem.add_development_dependency "bcrypt"
+  gem.add_development_dependency "redcarpet"
+  gem.add_development_dependency "minitest-hooks"
+  gem.add_development_dependency "rack-test"
 end
