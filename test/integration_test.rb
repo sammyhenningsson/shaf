@@ -21,6 +21,7 @@ module Shaf
     end
 
     def with_server
+      pid = nil
       Dir.chdir(project_path) do
         pid = spawn("shaf server", out: File::NULL, err: [:child, :out])
         sleep 1
