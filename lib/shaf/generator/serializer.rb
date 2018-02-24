@@ -219,6 +219,7 @@ module Shaf
           collection of: '#{plural_name}' do
             link :self, #{plural_name}_uri
             link :up, root_uri
+            curie :doc { doc_curie_uri('#{name}') }
           
             embed :'doc:create-form' do
               #{model_class_name}.create_form.tap do |form|
