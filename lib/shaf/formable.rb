@@ -27,8 +27,8 @@ module Shaf
       private
 
       def label_element
-        return unless label
-        %Q(<label for="#{name}" class="form--label">#{label.to_s}</label>)
+        str = (label || name || "").to_s
+        %Q(<label for="#{name}" class="form--label">#{str}</label>)
       end
 
       def input_element
