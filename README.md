@@ -178,7 +178,7 @@ The response looks like this
   }
 }
 ```
-This is the collection of posts (which currently is empty, see _'_embedded'_ => _'posts'_). Besides from the emtpy list of posts we also get an embedded form (with rel _doc:create-form_). This form should be used to create a new post.
+This is the collection of posts (which currently is empty, see _'\_embedded'_ => _'posts'_). Besides from the emtpy list of posts we also get an embedded form (with rel _doc:create-form_). This form should be used to create a new post.
 
 
 ## HAL
@@ -189,24 +189,24 @@ curl http://localhost:3000/doc/post/rels/create-form
 This documentation is written as code comments in the corresponding serializer. See [Serializers](#Serializers) for more info.  
 
 ## Generators
-Shaf supports a few different generator to make it easy to create new files. Each generator has an _identifier_ and they are called with `shaf generate IDENTIFIER` plus zero or more arguments.
+Shaf supports a few different generators to make it easy to create new files. Each generator has an _identifier_ and they are called with `shaf generate IDENTIFIER` plus zero or more arguments.
 
 #### Scaffold
-Shaf makes it easy to create new files with generators. When adding a new resource its recommended to use the scaffold generator. It accepts a resource name and an arbitrary number of attribute:type:label arguments.
+When adding a new resource its recommended to use the scaffold generator. It accepts a resource name and an arbitrary number of attribute:type arguments.
 ```sh
 shaf generate scaffold some_resource attr1:string attr2:integer
 ```
-The scaffold generator will call the model generator and the controller generator.
+The scaffold generator will call the model generator and the controller generator, see below.
 
 #### Controller
-A new controller is generated with the _controller_ identifier and a resource name and an arbitrary number of attribute:type:label arguments.
+A new controller is generated with the _controller_ identifier and a resource name and an arbitrary number of attribute:type arguments.
 ```sh
 shaf generate controller some_resource attr1:string attr2:integer
 ```
 This will add a new controller and an integration spec. It will also modify the root resource to include a link the the collection endpoint for _some_resource_.
 
 #### Model
-A new model is generated with the _model_ identifier and a resource name and an arbitrary number of attribute:type:label arguments.
+A new model is generated with the _model_ identifier and a resource name and an arbitrary number of attribute:type arguments.
 ```sh
 shaf generate model some_resource attr1:string attr2:integer
 ```
@@ -228,35 +228,349 @@ This will add a new policy.
 
 #### Migration
 Shaf currently supports 4 db migrations to be generated plus the possibility to generate an empty migration. These are:
-    generate migration
-    generate migration add column TABLE_NAME field:type
-    generate migration create table TABLE_NAME [field:type] [..]
-    generate migration drop column TABLE_NAME COLUMN_NAME
-    generate migration rename column TABLE_NAME OLD_NAME NEW_NAME
+```sh
+  generate migration
+  generate migration add column TABLE_NAME field:type
+  generate migration create table TABLE_NAME [field:type] [..]
+  generate migration drop column TABLE_NAME COLUMN_NAME
+  generate migration rename column TABLE_NAME OLD_NAME NEW_NAME
+```
 See [the Sequel migrations documentation](http://sequel.jeremyevans.net/rdoc/files/doc/migration_rdoc.html) for more info.
 Note: You can also add custom migrations, see [Customizations](#Customizations)
 
 ## Routing/Controllers
-As usual with Sinatra applications routes are declared together with the controller code rather than in a separate file (like Rails). All controllers SHOULD be subclasses of `BaseController` found in `api/controllers/base_controller.rb` (which was created along with the project).  
-TODO
+As usual with Sinatra applications routes are declared together with the controller code rather than in a separate file (as with Rails). All controllers SHOULD be subclasses of `BaseController` found in `api/controllers/base_controller.rb` (which was created along with the project).  
+Controllers generated with `shaf generate` uses two Shaf extensions, `Shaf::ResourceUris` and `Shaf::Authorize`.
+#### Shaf::ResourceUris
+This extension adds two class methods, `resource_uris_for` and `register_uri`. Both methods are used to create uri helpers.  
+`resource_uris_for(name, base: nil, plural_name: nil)` - creates four uri helpers and adds them as class methods and instance methods to the caller.
+```sh
+class PostController < BaseController
+  resource_uris_for :post
+end
+```
+Would add the following methods to the `PostController` class as well as instances of `PostController`  
+
+| Methods                | Returned string (id may vary) | 
+| ---------------------- | ----------------------------- |
+| `posts_uri`            | /posts                        |
+| `post_uri(post)`       | /posts/5                      |
+| `new_post_uri`         | /posts/form                   |
+| `edit_post_uri(post)`  | /posts/5/edit                 |
+
+Methods taking an argument (`post_uri` and `edit_post_uri`) may be called with either an integer or an object responding to `:id`. The keyword arguments `:base` and `:plural_name` is used to specify a path namespace (such as '/api') that will be prepended to the uri resp. the pluralization of the name (when excluded the plural name will be `name` + 's').  
+`register_uri` is used to create a single uri helper that does not follow the "normal" conventions of `resource_uris_for`.
+```sh
+class PostController < BaseController
+  register_uri :archive_post '/posts/:id/archive'
+end
+```
+Would add an `archive_post_uri(post)` method to the `PostController` class as well as instances of `PostController`.
+
+
+#### Shaf::Authorize
+This module adds an `authorize_with(policy)` class method and an `authorize!(action, resource = nil)` instance method. The class method is used to register a Policy class. The instance method is used to ensure that a certain action is authorized. Given the following policy class (see [Policies](#policies) for more info)
+```sh
+class PostPolicy
+  include HALPresenter::Policy::DSL
+
+  alias :post :resource
+
+  def show?
+    !!current_user
+  end
+
+  def edit?
+    current_user && current_user.id == post.author.id
+  end
+end
+```
+The following controller will make sure that a user must be authenticated to be able to view a post and must be the author of a certain post to be able to edit it.
+```sh
+class PostController < BaseController
+  authorize_with PostPolicy
+
+  get '/posts/:id' do
+    authorize! :show
+
+    respond_with post 
+  end
+
+  put '/posts/:id/edit' do
+    authorize! :edit, post
+
+    post.update(params)
+    respond_with post
+  end
+
+  private
+
+  def post
+    @post ||= Post[params['id']]
+  end
+end
+```
+Note: that Policy method MUST end with a question mark '?' while the symbol given to `authorize!` may or may not end with a symbol.  
+
+Shaf controllers includes two helper methods that simplifies rendering responses `respond_with(resource, status: 200, serializer: nil)` and `respond_with_collection(resource, status: 200, serializer: nil)`. Given that you have a Serializer that is registered to process instances of `Post` (see [Serializers](#serializers) for more info), then a controller route may simply end with `respond_with post` (as shown above) and the response payload will be serialized as expected. Use the keyword arguments, `status` and `serializer`, if you would like to override the default http response code resp. the serializer to be used.
+
 
 ## Models
-Models generated with `shaf generate` inherits from `Sequel::Model` (see [Sequel](http://sequel.jeremyevans.net/documentation.html) for more info) and they include `Shaf::Formable`. The Formable module associates two forms with the model. One for creating a new resource and one for editing an extension resource. These forms contain an array of _fields_ that specifies all attributes that are accepted for create/update. When submitting the form it MUST be sent to the url in _href_ with the HTTP method specified in _method_ with the Content-Type header set to the value of _type_. TODO
+Models generated with `shaf generate` inherits from `Sequel::Model` (see [Sequel docs](http://sequel.jeremyevans.net/documentation.html) for more info) and they include `Shaf::Formable`. The Formable module associates two forms with the model. One for creating a new resource and one for editing an extension resource. These forms contain an array of _fields_ that specifies all attributes that are accepted for create/update. Each field has a `name` property that MUST be used as key when construction a payload to be submitted. Each field also has a type which declares the kind of value that are accepted (currently only string and integer are supported) and a label that may be used when rendering the form to a user. When submitting the form it MUST be sent to the url in _href_ with the HTTP method specified in _method_ with the Content-Type header set to the value of _type_. Here's the create form from above.
+```sh
+    "create-form": {
+      "method": "POST",
+      "name": "create-post",
+      "title": "Create Post",
+      "href": "/posts",
+      "type": "application/json",
+      "_links": {
+        "self": {
+          "href": "http://localhost:3000/posts/form"
+        }
+      },
+      "fields": [
+        {
+          "name": "title",
+          "type": "string",
+          "label": null
+        },
+        {
+          "name": "message",
+          "type": "string",
+          "label": null
+        }
+      ]
+    },
+```
+A request to submit this form may then look like:
+```sh
+curl -H "Content-Type: application/json" \
+     -d '{"title": "hello", "message": "lorem ipsum"}' \
+     localhost:3000/posts
+```
 
 ## Serializers
-TODO
+Serializers generated with `shaf generate` extends `HALPresenter` and `Shaf::UriHelper`. This means that they have a clean DSL that makes it easy to specify what should be serialized. `Shaf::UriHelper` makes all uri helpers accessible. Serializing a message attribute and a self link is as simple as:
+```sh
+class PostSerializer
+  extend HALPresenter
+  extend Shaf::UriHelper
+
+  attribute :message
+
+  link :self do
+    post_uri(resource)
+  end
+end
+```
+This serializer will send `:message` to the object being serializer and use the returned value in the 'message' property. It will also add a link with rel _self_ with the href is set to the returned value from the corresponding block. `post_uri` comes from `Shaf::UriHelper` and `resource` is a `HALPresenter` method that returns the resource being serialized. See [HALPresenter](https://github.com/sammyhenningsson/hal_presenter) for more information.  
+This is also where the api should be documented. Each `attribute`/`link`/`curie`/`embed` directive should be preceeded with comments that document the corresponding usage. See [API Documentation](#api-documentation) for more info.
 
 ## Policies
-TODO
+Policies generated with `shaf generate` includes `HALPresenter::Policy::DSL`. This means that they have a DSL that makes it easy to specify which attributes/links/embedded resources specfied in the serialized should be serialized or not, depending on the context. For instance, it should probably only be possible to edit/delete a post if _current_user_ is the author of that post:
+```sh
+class PostPolicy
+  include HALPresenter::Policy::DSL
+
+  link :edit, :'edit-form', :delete do
+    current_user&.id == resource.author.id
+  end
+end
+```
+Here `resource` is the object being serialized (in our case the `post` object). Given a serializer that uses tThe links to edit, edit-form and delete will only be serialized when the block returns `true`.  
+Policies should also be used in Controllers (through the `authorize_with` class method). Since the links that should be serialized should coincide with which action should be allowed in the controller it makes sense to refactor this logic into a method.
+```sh
+  link :edit, :'edit-form', :delete do
+    write?
+  end
+
+  def write?
+    current_user&.id == resource.author.id
+  end
+```
+Then the controller can call `authorize! :write` in the actions for editing/deleting and fetching of edit-form.
 
 ## Testing
-TODO
+Shaf helps you create `MiniTest::Spec`s for serializers and integration.
+
+#### Serializer specs
+The description for a Serializer spec MUST end with 'Serializer', such as `describe PostSerializer do; end`. This will make the spec include `Shaf::Spec::PayloadUtils`, which adds some utility methods. The method `set_payload(payload)` may be used for specifying a payload that should be tested. After setting a payload, it is possible to use the following methods that will extract values from the payload passed to `set_payload`:
+- `attributes`
+- `links`
+- `link_rels`
+- `embedded_resources`
+- `embedded(name, &block)`  
+
+Given a serializer `FooSerializer` that renders attributes `:foo` and `:bar`, but not `:baz` as well as a _self_ link and a _some_action_ link. Then a simple spec might look like this:
+```sh
+require 'ostruct'
+
+describe FooSerializer do
+  let(:resource) do
+    Ostruct.new(foo: 1, bar: 2, baz: 4)
+  end
+
+  before do
+    set_payload FooSerializer.to_hal(resource)
+  end
+
+  it "serializes attributes" do
+    attributes.keys.must_include(:foo)
+    attributes.keys.must_include(:bar)
+    attributes.keys.wont_include(:baz)
+  end
+
+  it "serializes links" do
+    link_rels.must_include(:self)
+    link_rels.must_include(:some_action)
+  end
+end
+```
+
+The method `embedded(name, &block)` is used to verify attributes and links inside embedded resources. Given a serializer `BarSerializer` that embeds `Foo` resources then a spec might look like this:
+```sh
+require 'ostruct'
+
+describe BarSerializer do
+  let(:resource) do
+    foo = Ostruct.new(bar: 2, baz: 4)
+    Ostruct.new(name: 'test', foo: foo)
+  end
+
+  before do
+    set_payload BarSerializer.to_hal(resource)
+  end
+
+  it "embeds a foo resource" do
+    embedded :foo do
+      attributes.keys.must_include(:foo)
+      attributes.keys.must_include(:bar)
+      attributes.keys.wont_include(:baz)
+
+      link_rels.must_include(:self)
+      link_rels.must_include(:some_action)
+    end
+  end
+end
+```
+
+#### Integration specs
+Integration specs must pass in `{type: :integration}` as extra arguments to `describe`, such as `describe "Posts", type: :integration do; end`. This will include `Rack::Test::Methods`, `Shaf::UriHelper` and `Shaf::Spec::PayloadUtils`. The combination of the methods added by these modules gives integration specs a kind of [Capybara](https://github.com/teamcapybara/capybara) touch. Example:
+```sh
+require 'spec_helper'
+
+describe "Post", type: :integration do
+  it "can create posts" do
+    get posts_uri
+
+    embedded :'doc:create-form' do
+      links[:self][:href].must_equal new_post_uri
+      attributes[:href].must_equal posts_uri
+      attributes[:method].must_equal "POST"
+      attributes[:name].must_equal "create-post"
+      attributes[:title].must_equal "Create Post"
+      attributes[:type].must_equal "application/json"
+      attributes[:fields].size.must_equal 1
+
+      payload = fill_form attributes[:fields]
+      post attributes[:href], payload
+      status.must_equal 201
+      link_rels.must_include(:self)
+      headers["Location"].must_equal links[:self][:href]
+    end
+
+    get posts_uri
+    status.must_equal 200
+    links[:self][:href].must_include posts_uri
+    embedded(:'posts').size.must_equal 1
+
+    embedded :'posts' do
+      post = last_payload.first
+      post[:message].must_equal "value for message"
+    end
+  end
+end
+```
+This spec will:
+- start by fetching the posts_uri (e.g. `GET /posts`). This will call `set_payload(response)` behind the scenes.
+- Verify that the response embeds a resource with rel `doc:create-form` with some speced attributes.
+- Build a new payload with the cryptic call to `fill_form` which just adds some jibrish values for each attribute.
+- Post this payload to the form `href`.
+- Verify HTTP Status code and HTTP Location header.
+- Fetch the posts_uri again.
+- Verify that the new resource created in step 4 is included in the response.
 
 ## API Documentation
-TODO
+Since API clients should basically only have to care about the payloads that are returned from the API, it makes sense to keep the API documentation in the serializer files. Each `attribute`, `link`, `curie` and `embed` should be preceeded with code comments that documents how client should interpret/use it. The comments should be in markdown format. This makes it possible to generate API documentation with `rake doc:generate`. This documentation can then be retrieved from a running server at `/doc/RESOURCE_NAME`, where `RESOURCE_NAME` is the name of the resource to fetch doc for, e.g `curl localhost:3000/doc/post`.
+
+## Frontend
+To make it easy to explore the API in a brower, Shaf includes a some very basic html views. They are only meant to be a quick and easy way to view the api and to add/edit resources that does not require authentication. They are really ugly and you should not look at them if you are a frontend developer ;) (PRs are welcome!).
 
 ## Customizations
-TODO
+Currently Shaf only support four commands (`new`, `server`, `console` and `generate`). Luckily it's possible to extend Shaf with custom commands and generators. Whenever the `shaf` command is executed the file `config/customize.rb` is loaded and checked for additional commands. To add a custom command, create a class that inherits from `Shaf::Command::Base`. Either put it directly in `config/customize.rb` or put it in a separate file and require that file inside `config/customize.rb`. Your customized class must call the inherited class method `identifier` with a `String`/`Symbol`/`Regexp` (or an array of `String`/`Symbol`/`Regexp` values) that _identifies_ the command. The identifier is used to match arguments passed to `shaf`. The command/generator must respond to `call` without any arguments. The arguments after the identifer will be availble from the instance method `args`. Writing a couple of simple command that echos back the arguments would be written as:
+```sh
+class EchoCommand < Shaf::Command::Base
+  identifier :echo
+
+  def call
+    puts args
+  end
+end
+
+class EchoUpCommand < Shaf::Command::Base
+  identifier :echo, :up
+
+  def call
+    puts args.map(&:upcase)
+  end
+end
+
+class EchoDownCommand < Shaf::Command::Base
+  identifier :echo, :down
+
+  def call
+    puts args.map(&:downcase)
+  end
+end
+```
+Then running `shaf echo Hello World` would print:
+```sh
+Hello
+World
+```
+Running `shaf echo up Hello World` would print:
+```sh
+HELLO
+WORLD
+```
+Running `shaf echo down Hello World` would print:
+```sh
+hello
+world
+```
+These commands are of course useless, but hopefully they give you an idea of what is happening.  
+Generators work pretty much the same but they MUST inherit from `Shaf::Generator::Base`. Generators also inherits the following instance methods that may help generating files processed through erb:
+- `template_dir`
+- `read_template(file, directory = nil)`
+- `render(template, locals = {})`
+- `write_output(file, content)`
+Example:
+```sh
+class FooServiceGenerator < Shaf::Generator::Base
+  identifier :foo
+
+  def template_dir
+    "generator_templates"
+  end
+
+  def call
+    content = render("foo_service", {some_variables: "used_in_template"})
+    write_output("api/services/foo_service.rb", content)
+  end
+end
+```
+This would require the file `generator_templates/foo_service.erb` to exist in the project root. Executing `shaf generate foo` would then read that template, process it through erb (utilizing any local variables given to `render`) and then create the output file `api/services/foo_service.rb`.
 
 ## Contributing
 If you find a bug or have suggestions for improvements, please create a new issue on Github. Pull request are welcome!
