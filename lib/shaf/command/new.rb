@@ -22,6 +22,7 @@ module Shaf
           copy_templates
           create_gemfile
           create_shaf_version_file
+          create_ruby_version_file
         end
       end
 
@@ -48,6 +49,10 @@ module Shaf
       def create_shaf_version_file
         File.write '.shaf',
           YAML.dump({'version' => Shaf::VERSION})
+      end
+
+      def create_ruby_version_file
+        File.write '.ruby-version', RUBY_VERSION
       end
 
       def copy_template(template)
