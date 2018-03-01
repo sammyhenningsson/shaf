@@ -1,8 +1,9 @@
 # -*- encoding: utf-8 -*-
+require './lib/shaf/version'
+
 Gem::Specification.new do |gem|
   gem.name        = 'shaf'
-  gem.version     = '0.1.0'
-  gem.date        = '2018-01-25'
+  gem.version     = Shaf::VERSION
   gem.summary     = "Sinatra Hypermedia Api Framework"
   gem.description = "A framework for building hypermedia driven APIs with sinatra and sequel."
   gem.authors     = ["Sammy Henningsson"]
