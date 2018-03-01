@@ -11,8 +11,8 @@ Gem::Specification.new do |gem|
   gem.homepage    = "https://github.com/sammyhenningsson/shaf"
   gem.license     = "MIT"
 
-  #gem.cert_chain  = ['certs/sammyhenningsson.pem']
-  #gem.signing_key = File.expand_path("~/.ssh/gem-private_key.pem") if $0 =~ /gem\z/
+  gem.cert_chain  = ['certs/sammyhenningsson.pem']
+  gem.signing_key = File.expand_path("~/.ssh/gem-private_key.pem") if $0 =~ /gem\z/
 
   gem.executables   = ['shaf']
   gem.files         = Dir['lib/**/*rb'] + Dir['templates/**/*']
