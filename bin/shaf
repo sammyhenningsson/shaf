@@ -17,11 +17,11 @@ module Shaf
       return show_help if show_help?
       Command::Factory.create(*ARGV).call
     rescue RegistrableFactory::NotFoundError, Command::ArgumentError => e
-      puts e.message, "\n"
+      STDERR.puts e.message, "\n"
       show_help
       exit 1
     rescue Utils::ProjectRootNotFound
-      puts "This command can only be executed inside a Shaf project directory. " \
+      STDERR.puts "This command can only be executed inside a Shaf project directory. " \
         "Please change directory and try again!"
       exit 2
     end

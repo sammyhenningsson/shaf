@@ -27,6 +27,11 @@ module Shaf
         def usage(str = nil, &block)
           @usage = str || block
         end
+
+        def exit_with_error(msg, status)
+          STDERR.puts msg
+          exit status
+        end
       end
 
       def initialize(*args)
