@@ -36,7 +36,7 @@ module Shaf
   # This class register uri helper methods like:
   # books_uri             => /books
   # book_uri(book)        => /books/5
-  # new_book_uri          => /books
+  # new_book_uri          => /books/form
   # edit_book_uri(book)   => /books/5/edit
   #
   class CreateUriMethods
