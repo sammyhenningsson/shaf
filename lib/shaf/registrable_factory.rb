@@ -22,7 +22,9 @@ module Shaf
 
     def lookup(*str)
       return if str.empty? || !str.all?
-      reg.detect { |clazz| matching_class? str, clazz }
+      reg.select { |clazz| matching_class? str, clazz }
+        .sort_by(&method(:identifier_count))
+        .last
     end
 
     def usage
