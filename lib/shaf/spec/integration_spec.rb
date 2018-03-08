@@ -36,6 +36,17 @@ module Shaf
         App.instance
       end
 
+      def follow_rel(rel, method: nil)
+        assert_has_link(rel)
+        link = links[rel.to_sym]
+        if method && respond_to?(method)
+          public_send(method, link[:href])
+        else
+          get link[:href]
+        end
+      end
+
+
 #       def login(email, pass)
 #         params = {email: email, password: pass}
 #         header 'Content-Type', 'application/json'

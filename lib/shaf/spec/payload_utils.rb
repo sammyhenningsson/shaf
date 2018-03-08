@@ -73,13 +73,6 @@ module Shaf
         Embedded.new(last_payload.dig(*keys), self, Proc.new).call
       end
 
-      def follow_rel(rel, method: nil)
-        assert_has_link(rel)
-        link = links[rel.to_sym]
-        if method && respond_to?(method)
-          public_send(method, link[:href])
-        else
-          get link[:href]
         end
       end
 
