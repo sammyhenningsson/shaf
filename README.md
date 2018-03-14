@@ -187,7 +187,7 @@ The [HAL](http://stateless.co/hal_specification.html) mediatype is very simple a
 ```sh
 curl http://localhost:3000/doc/post/rels/create-form
 ```
-This documentation is written as code comments in the corresponding serializer. See [Serializers](#Serializers) for more info.  
+This documentation is written as code comments in the corresponding serializer. See [Serializers](#Serializers) for more info. Before this documentation can be fetched, a rake task to extract the comments needs to be executed, see [API Documentation](#api-documentation) for more info.   
 
 ## Generators
 Shaf supports a few different generators to make it easy to create new files. Each generator has an _identifier_ and they are called with `shaf generate IDENTIFIER` plus zero or more arguments.
@@ -266,7 +266,8 @@ class PostController < BaseController
   register_uri :archive_post '/posts/:id/archive'
 end
 ```
-Would add an `archive_post_uri(post)` method to the `PostController` class as well as instances of `PostController`.
+Would add an `archive_post_uri(post)` method to the `PostController` class as well as instances of `PostController`.  
+Uri helpers added by `resource_uris_for` and `register_uri` gets added to the module `Shaf::UriHelper` as both module methods and instance methods. So to use them outside of Controllers, either call them directly on the module (e.g. `Shaf::UriHelper.my_foo_uri`) or include `Shaf::UriHelper` and get all helpers as instance methods.
 
 
 #### Shaf::Authorize
@@ -311,13 +312,16 @@ class PostController < BaseController
   end
 end
 ```
-Note: that Policy method MUST end with a question mark '?' while the symbol given to `authorize!` may or may not end with a symbol.  
+Note: that the Policy instance method MUST end with a question mark '?' while the symbol given to `authorize!` may or may not end with a symbol.  
 
-Shaf controllers includes two helper methods that simplifies rendering responses `respond_with(resource, status: 200, serializer: nil)` and `respond_with_collection(resource, status: 200, serializer: nil)`. Given that you have a Serializer that is registered to process instances of `Post` (see [Serializers](#serializers) for more info), then a controller route may simply end with `respond_with post` (as shown above) and the response payload will be serialized as expected. Use the keyword arguments, `status` and `serializer`, if you would like to override the default http response code resp. the serializer to be used.
+Shaf controllers includes two helper methods that simplifies rendering responses:
+- `respond_with(resource, status: 200, serializer: nil)`
+- `respond_with_collection(resource, status: 200, serializer: nil)`.  
+Given that you have a Serializer that is registered to process instances of `Post` (see [Serializers](#serializers) for more info), then a controller route may simply end with `respond_with post` (as shown above) and the response payload will be serialized as expected. Use the keyword arguments, `status` and `serializer`, if you would like to override the default http response code resp. the serializer to be used.
 
 
 ## Models
-Models generated with `shaf generate` inherits from `Sequel::Model` (see [Sequel docs](http://sequel.jeremyevans.net/documentation.html) for more info) and they include `Shaf::Formable`. The Formable module adds the class method `form` which is used to associate two forms with the model. One for creating a new resource and one for editing an extension resource. The following model will add a create form with fields `foo` and `bar` and an edit form with fields `foo` and `baz`.
+Models generated with `shaf generate` inherits from `Sequel::Model` (see [Sequel docs](http://sequel.jeremyevans.net/documentation.html) for more info) and they include `Shaf::Formable`. The Formable module adds the class method `form` which is used to associate two forms with the model. One for creating a new resource and one for editing an extension resource. As an example, the following model will add a create form with fields `foo` and `bar` and an edit form with fields `foo` and `baz`.
 ```sh
 class User < Sequel::Model
   include Shaf::Formable
@@ -492,7 +496,7 @@ describe BarSerializer do
     set_payload BarSerializer.to_hal(resource)
   end
 
-  it "all embeded a foo resources has correct attributes and links" do
+  it "all embeded foo resources has correct attributes and links" do
     each_embedded :foo do
       attributes.keys.must_include(:foo)
       attributes.keys.must_include(:bar)
