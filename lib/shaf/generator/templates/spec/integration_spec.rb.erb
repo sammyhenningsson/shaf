@@ -8,6 +8,9 @@ describe <%= model_class_name %>, type: :integration do
     status.must_equal 200
     link_rels.must_include(:self)
     links[:self][:href].must_equal <%= name %>_uri(<%= name %>)
+<% params.each do |param| -%>
+    attributes.must_include(:'<%= param[0] %>')
+<% end -%>
   end
 
   it "lists all <%= plural_name %>" do
@@ -18,9 +21,13 @@ describe <%= model_class_name %>, type: :integration do
     status.must_equal 200
     link_rels.must_include(:self)
     links[:self][:href].must_include <%= plural_name %>_uri
-    embedded :'<%= plural_name %>' do
-      <%= plural_name %> = last_payload
-      <%= plural_name %>.size.must_equal 2
+    embedded(:'<%= plural_name %>').size.must_equal 2
+
+    each_embedded :'<%= plural_name %>' do
+      link_rels.must_include(:self)
+<% params.each do |param| -%>
+      attributes.must_include(:'<%= param[0] %>')
+<% end -%>
     end
   end
 

@@ -21,13 +21,13 @@ module Shaf
           @assertions = 0
         end
 
-        def call
-          instance_exec(&@block)
+        def call(*args)
+          instance_exec(*args, &@block)
         end
 
         def method_missing(method, *args, &block)
           if @context&.respond_to? method
-            define_singleton_method(method) { |*a, &b| @context.public_send method, *a, &b }
+            define_singleton_method(method) { |*a, &b| @context.public_send(method, *a, &b) }
             return public_send(method, *args, &block)
           end
           super
@@ -37,7 +37,6 @@ module Shaf
           return true if @context&.respond_to? method
           super
         end
-
       end
 
       def set_payload(payload)
@@ -67,12 +66,21 @@ module Shaf
       end
 
       def embedded(name = nil)
-        assert_has_embedded name
+        assert_has_embedded name unless name.nil?
         keys = [:_embedded, name&.to_sym].compact
         return last_payload.dig(*keys) unless block_given?
         Embedded.new(last_payload.dig(*keys), self, Proc.new).call
       end
 
+      def each_embedded(name, &block)
+        assert_has_embedded name
+        list = last_payload[:_embedded][name]
+
+        assert_instance_of Array, list,
+          "Embedded '#{name}' is not an instance of Array. Actual: #{list.class}"
+
+        list.each_with_index do |resource, i|
+          Embedded.new(resource, self, block).call(i)
         end
       end
 

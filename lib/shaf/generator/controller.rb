@@ -71,7 +71,7 @@ module Shaf
         file = "api/serializers/root_serializer.rb"
         unless File.exist? file
           puts "Warning: file '#{file}' does not exist. "\
-            "Not adding any link to the #{plural_name} collection"
+            "Skip adding link to the #{plural_name} collection"
         end
         added = false
         content = []
