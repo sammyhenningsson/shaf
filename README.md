@@ -317,7 +317,29 @@ Shaf controllers includes two helper methods that simplifies rendering responses
 
 
 ## Models
-Models generated with `shaf generate` inherits from `Sequel::Model` (see [Sequel docs](http://sequel.jeremyevans.net/documentation.html) for more info) and they include `Shaf::Formable`. The Formable module associates two forms with the model. One for creating a new resource and one for editing an extension resource. These forms contain an array of _fields_ that specifies all attributes that are accepted for create/update. Each field has a `name` property that MUST be used as key when construction a payload to be submitted. Each field also has a type which declares the kind of value that are accepted (currently only string and integer are supported) and a label that may be used when rendering the form to a user. When submitting the form it MUST be sent to the url in _href_ with the HTTP method specified in _method_ with the Content-Type header set to the value of _type_. Here's the create form from above.
+Models generated with `shaf generate` inherits from `Sequel::Model` (see [Sequel docs](http://sequel.jeremyevans.net/documentation.html) for more info) and they include `Shaf::Formable`. The Formable module adds the class method `form` which is used to associate two forms with the model. One for creating a new resource and one for editing an extension resource. The following model will add a create form with fields `foo` and `bar` and an edit form with fields `foo` and `baz`.
+```sh
+class User < Sequel::Model
+  include Shaf::Formable
+
+  form do
+    field :foo, type: "string"
+
+    create do
+      title 'Create User'
+      name  'create-user'
+      field :bar, type: "string"
+    end
+
+    edit do
+      title 'Update User'
+      name  'update-user'
+      field :baz, type: "integer"
+    end
+  end
+end
+```
+When serialized these forms contain an array of _fields_ that specifies all attributes that are accepted for create/update. Each field has a `name` property that MUST be used as key when construction a payload to be submitted. Each field also has a type which declares the kind of value that are accepted (currently only string and integer are supported) and a label that may be used when rendering the form to a user. When submitting the form it MUST be sent to the url in _href_ with the HTTP method specified in _method_ with the Content-Type header set to the value of _type_. Here's the create form from above.
 ```sh
     "create-form": {
       "method": "POST",
@@ -365,11 +387,11 @@ class PostSerializer
   end
 end
 ```
-This serializer will send `:message` to the object being serializer and use the returned value in the 'message' property. It will also add a link with rel _self_ with the href is set to the returned value from the corresponding block. `post_uri` comes from `Shaf::UriHelper` and `resource` is a `HALPresenter` method that returns the resource being serialized. See [HALPresenter](https://github.com/sammyhenningsson/hal_presenter) for more information.  
+This serializer will send `:message` to the object being serializer and set the returned value in the 'message' property. It will also add a link with rel _self_ and `href` set to the returned value of the corresponding block. `post_uri` comes from `Shaf::UriHelper` and `resource` is a `HALPresenter` method that returns the resource being serialized. See [HALPresenter](https://github.com/sammyhenningsson/hal_presenter) for more information.  
 This is also where the api should be documented. Each `attribute`/`link`/`curie`/`embed` directive should be preceeded with comments that document the corresponding usage. See [API Documentation](#api-documentation) for more info.
 
 ## Policies
-Policies generated with `shaf generate` includes `HALPresenter::Policy::DSL`. This means that they have a DSL that makes it easy to specify which attributes/links/embedded resources specfied in the serialized should be serialized or not, depending on the context. For instance, it should probably only be possible to edit/delete a post if _current_user_ is the author of that post:
+Policies generated with `shaf generate` includes `HALPresenter::Policy::DSL`. This means that they have a DSL that makes it easy to specify which attributes/links/embedded resources in the serializer should be serialized and which shouldn't, depending on the context. For instance, a serializer for posts may specify links for the normal CRUD action. However, it should probably only be possible to edit/delete a post if _current_user_ is the author of that post. This Policy will ensure that edit/delete links are hidden unless `current_user` is the author of the post:
 ```sh
 class PostPolicy
   include HALPresenter::Policy::DSL
@@ -379,7 +401,7 @@ class PostPolicy
   end
 end
 ```
-Here `resource` is the object being serialized (in our case the `post` object). Given a serializer that uses tThe links to edit, edit-form and delete will only be serialized when the block returns `true`.  
+Here `resource` is the object being serialized (in our case the `post` object). Used together with a serializer that specifies links with rels _edit_, _edit-form_ and _delete_, this will only be serialize these links when the block returns `true`.  
 Policies should also be used in Controllers (through the `authorize_with` class method). Since the links that should be serialized should coincide with which action should be allowed in the controller it makes sense to refactor this logic into a method.
 ```sh
   link :edit, :'edit-form', :delete do
@@ -402,6 +424,7 @@ The description for a Serializer spec MUST end with 'Serializer', such as `descr
 - `link_rels`
 - `embedded_resources`
 - `embedded(name, &block)`  
+- `each_embedded(name, &block)`  
 
 Given a serializer `FooSerializer` that renders attributes `:foo` and `:bar`, but not `:baz` as well as a _self_ link and a _some_action_ link. Then a simple spec might look like this:
 ```sh
@@ -429,7 +452,7 @@ describe FooSerializer do
 end
 ```
 
-The method `embedded(name, &block)` is used to verify attributes and links inside embedded resources. Given a serializer `BarSerializer` that embeds `Foo` resources then a spec might look like this:
+The method `embedded(name, &block)` is used to verify attributes and links inside embedded resources (it can also be called without a block, then the embedded resource will simply be returned instead). Given a serializer `BarSerializer` that embeds `Foo` resources then a spec might look like this:
 ```sh
 require 'ostruct'
 
@@ -445,6 +468,32 @@ describe BarSerializer do
 
   it "embeds a foo resource" do
     embedded :foo do
+      attributes.keys.must_include(:foo)
+      attributes.keys.must_include(:bar)
+      attributes.keys.wont_include(:baz)
+
+      link_rels.must_include(:self)
+      link_rels.must_include(:some_action)
+    end
+  end
+end
+```
+If an embedded resource is an array of resources, then `each_embedded(name, &block)` can be used to iterate through each embedded resource.
+```sh
+require 'ostruct'
+
+describe BarSerializer do
+  let(:resource) do
+    foo = [Ostruct.new(bar: 2, baz: 4), Ostruct.new(bar: 3, baz: 8)]
+    Ostruct.new(name: 'test', foo: foo)
+  end
+
+  before do
+    set_payload BarSerializer.to_hal(resource)
+  end
+
+  it "all embeded a foo resources has correct attributes and links" do
+    each_embedded :foo do
       attributes.keys.must_include(:foo)
       attributes.keys.must_include(:bar)
       attributes.keys.wont_include(:baz)
