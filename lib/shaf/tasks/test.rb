@@ -5,24 +5,28 @@ namespace :test do |ns|
     t.libs = %w(. api spec)
     t.pattern = "spec/integration/**/*_spec.rb"
     t.verbose = true
+    t.warning = false
   end
 
   Rake::TestTask.new(:models) do |t|
     t.libs = %w(. api spec)
     t.pattern = "spec/models/**/*_spec.rb"
     t.verbose = true
+    t.warning = false
   end
 
   Rake::TestTask.new(:serializers) do |t|
     t.libs = %w(. api spec)
     t.pattern = "spec/serializers/**/*_spec.rb"
     t.verbose = true
+    t.warning = false
   end
 
   Rake::TestTask.new(:lib) do |t|
     t.libs = %w(. api spec)
     t.pattern = "spec/lib/**/*_spec.rb"
     t.verbose = true
+    t.warning = false
   end
 
   Rake::TestTask.new(:all) do |t|
@@ -34,6 +38,7 @@ namespace :test do |ns|
       "spec/integration/**/*_spec.rb"
     ]
     t.verbose = true
+    t.warning = false
   end
 
 end
