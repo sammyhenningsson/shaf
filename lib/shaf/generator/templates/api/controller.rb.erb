@@ -6,42 +6,42 @@ class <%= controller_class_name %> < BaseController
 
   authorize_with <%= policy_class_name %>
 
-  get '/<%= plural_name %>/form' do
+  get new_<%= name %>_uri_template do
     form = <%= model_class_name %>.create_form
     form.self_link = new_<%= name %>_uri
     form.href = <%= plural_name %>_uri
     respond_with form
   end
 
-  get '/<%= plural_name %>/:id/edit' do
+  get edit_<%= name %>_uri_template do
     form = <%= name %>.edit_form
     form.self_link = edit_<%= name %>_uri(<%= name %>)
     form.href = <%= name %>_uri(<%= name %>)
     respond_with form
   end
 
-  get '/<%= plural_name %>/:id' do
+  get <%= name %>_uri_template do
     respond_with <%= name %>
   end
 
-  put '/<%= plural_name %>/:id' do
+  put <%= name %>_uri_template do
     authorize! :write
     <%= name %>.update(<%= name %>_params)
     respond_with <%= name %>
   end
 
-  delete '/<%= plural_name %>/:id' do
+  delete <%= name %>_uri_template do
     authorize! :write
     <%= name %>.destroy
     status 204
   end
 
-  get '/<%= plural_name %>' do
+  get <%= plural_name %>_uri_template do
     collection = paginate(<%= model_class_name %>.order(:created_at).reverse)
     respond_with_collection collection, serializer: <%= serializer_class_name %>
   end
 
-  post '/<%= plural_name %>' do
+  post <%= plural_name %>_uri_template do
     authorize! :write
     <%= name %> = <%= model_class_name %>.create(<%= name %>_params)
     headers({ "Location" => <%= name %>_uri(<%= name %>) })

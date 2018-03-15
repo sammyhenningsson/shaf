@@ -35,6 +35,10 @@ module Shaf
   module UriHelper
     extend UriHelperMethods
     include UriHelperMethods
+
+    def self.included(mod)
+      mod.extend self
+    end
   end
 
   # This class register uri helper methods like:

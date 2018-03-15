@@ -1,12 +1,13 @@
 class DocsController < BaseController
 
-  register_uri :doc_curie,    '/doc/:resource/rels/{rel}'
+  register_uri :doc_curie,      '/doc/:resource/rels/{rel}'
+  register_uri :documentation,  '/doc/:resource'
 
-  get '/doc/:resource/rels/:rel' do
+  get doc_curie_uri_template do
     doc.link(params[:rel])
   end
 
-  get '/doc/:resource' do
+  get documentation_uri_template do
     doc.to_s
   end
 
