@@ -4,7 +4,8 @@ module Shaf
   module ResourceUris
     def resource_uris_for(*args)
       CreateUriMethods.new(*args).call
-      include UriHelper
+
+      include UriHelper unless self < UriHelper
     end
 
     def register_uri(name, uri)
@@ -13,6 +14,9 @@ module Shaf
       end
       method_string = MethodBuilder.as_string(name, uri)
       UriHelperMethods.eval_method(method_string)
+      UriHelperMethods.register(MethodBuilder.template_method_name(name)) { uri.dup.freeze }
+
+      include UriHelper unless self < UriHelper
     end
   end
 
@@ -39,6 +43,12 @@ module Shaf
   # new_book_uri          => /books/form
   # edit_book_uri(book)   => /books/5/edit
   #
+  # And uri template methods:
+  # books_uri_template             => /books
+  # book_uri_template              => /books/:id
+  # new_book_uri_template          => /books/form
+  # edit_book_uri_template         => /books/:id/edit
+  #
   class CreateUriMethods
     def initialize(name, base: nil, plural_name: nil)
       @name = name.to_s
@@ -62,17 +72,23 @@ module Shaf
     attr_reader :name, :base, :plural_name
 
     def register_resources_uri
-      uri = "#{base}/#{plural_name}"
-      UriHelperMethods.register "#{plural_name}_uri" do
-        uri.dup.freeze
-      end
+      uri = "#{base}/#{plural_name}".freeze
+
+      UriHelperMethods.register("#{plural_name}_uri") { uri }
+      UriHelperMethods.register("#{plural_name}_uri_template") { uri }
     end
 
     def register_resource_uri
       uri = "#{base}/#{plural_name}"
+
       UriHelperMethods.register "#{name}_uri" do |resrc|
         id = resrc.is_a?(Integer) ? resrc : resrc&.id
-        "#{uri}/#{id}".freeze unless id.nil?
+        raise ArgumentError, "id must be an integer! was #{id.class}" unless id.is_a?(Integer)
+        "#{uri}/#{id}".freeze
+      end
+
+      UriHelperMethods.register "#{name}_uri_template" do
+        "#{uri}/:id".freeze
       end
     end
 
@@ -83,26 +99,36 @@ module Shaf
       uri = "#{base}/#{plural_name}"
       UriHelperMethods.register "#{plural_name}_uri" do |resrc = nil|
         if resrc.nil?
-          uri.dup.freeze
+          uri.freeze
         else
-          id = resrc.is_a?(Integer) ? resrc : resrc&.id
-          "#{uri}/#{id}".freeze unless id.nil?
+          id = (resrc.is_a?(Integer) ? resrc : resrc.id).to_i
+          raise ArgumentError, "id must be an integer! was #{id.class}" unless id.is_a?(Integer)
+          "#{uri}/#{id}".freeze
         end
+      end
+
+      UriHelperMethods.register "#{plural_name}_uri_template" do |collection = false|
+        (collection ? uri : "#{uri}/:id").freeze
       end
     end
 
     def register_new_resource_uri
-      uri = "#{base}/#{plural_name}/form"
-      UriHelperMethods.register "new_#{name}_uri" do
-        uri.dup.freeze
-      end
+      uri = "#{base}/#{plural_name}/form".freeze
+
+      UriHelperMethods.register("new_#{name}_uri") { uri }
+      UriHelperMethods.register("new_#{name}_uri_template") { uri }
     end
 
     def register_edit_resource_uri
       uri = "#{base}/#{plural_name}"
+
       UriHelperMethods.register "edit_#{name}_uri" do |resrc|
         id = resrc.is_a?(Integer) ? resrc : resrc&.id
         "#{uri}/#{id}/edit".freeze unless id.nil?
+      end
+
+      UriHelperMethods.register "edit_#{name}_uri_template" do
+        "#{uri}/:id/edit".freeze
       end
     end
   end
@@ -111,6 +137,10 @@ module Shaf
     class << self
       def method_name(name)
         "#{name}_uri"
+      end
+
+      def template_method_name(name)
+        "#{method_name(name)}_template"
       end
 
       def signature(name, uri)
