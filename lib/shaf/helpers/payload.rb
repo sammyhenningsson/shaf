@@ -1,5 +1,7 @@
 module Shaf
   module Payload
+    EXCLUDED_FORM_PARAMS = ['captures', 'splat'].freeze
+
     def supported_response_types(resource)
       [
         mime_type(:hal),
@@ -39,7 +41,7 @@ module Shaf
 
     def parse_payload
       if request.env['CONTENT_TYPE'] == 'application/x-www-form-urlencoded'
-        return params.reject { |key,_| ['captures', 'splat'].include? key }
+        return params.reject { |key,_| EXCLUDED_FORM_PARAMS.include? key }
       end
 
       input = read_input

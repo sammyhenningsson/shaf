@@ -19,7 +19,7 @@ module Shaf
 
   module Helpers
     def policy(resource)
-      return @policy if @policy
+      return @policy if defined?(@policy) && @policy
       user = current_user if respond_to? :current_user
       @policy = self.class.policy_class&.new(user, resource)
     end
