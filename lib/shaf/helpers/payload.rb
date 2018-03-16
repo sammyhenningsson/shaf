@@ -58,9 +58,11 @@ module Shaf
 
     def safe_params(*fields)
       return {} unless payload
+      field_strings = fields.map { |f| f.to_s.downcase }
+      field_strings << 'id' unless field_strings.include? 'id'
+
       {}.tap do |allowed|
-        fields.each do |field|
-          f = field.to_s.downcase
+        field_strings.each do |f|
           allowed[f.to_sym] = payload[f] if payload[f]
         end
       end
