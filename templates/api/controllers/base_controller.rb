@@ -12,20 +12,27 @@ class BaseController < Sinatra::Base
     set :public_folder, ASSETS_DIR
     disable :dump_errors
     set :show_exceptions, :after_handler
+    enable :current_user
+    set :auth_token_header, AUTH_TOKEN_HEADER
   end
 
   use Rack::Deflater
-  register(*Shaf.extensions)
-  helpers(*Shaf.helpers)
 
   def self.inherited(controller)
     super
     Shaf::App.use controller
   end
 
-  def log
+  def self.log
     $logger
   end
+
+  def log
+    self.class.log
+  end
+
+  register(*Shaf.extensions)
+  helpers(*Shaf.helpers)
 
   before do
     log.info "Processing: #{request.request_method} #{request.path_info}"
