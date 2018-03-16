@@ -7,17 +7,11 @@ class <%= controller_class_name %> < BaseController
   authorize_with <%= policy_class_name %>
 
   get new_<%= name %>_uri_template do
-    form = <%= model_class_name %>.create_form
-    form.self_link = new_<%= name %>_uri
-    form.href = <%= plural_name %>_uri
-    respond_with form
+    respond_with create_form
   end
 
   get edit_<%= name %>_uri_template do
-    form = <%= name %>.edit_form
-    form.self_link = edit_<%= name %>_uri(<%= name %>)
-    form.href = <%= name %>_uri(<%= name %>)
-    respond_with form
+    respond_with edit_form
   end
 
   get <%= name %>_uri_template do
@@ -59,4 +53,15 @@ class <%= controller_class_name %> < BaseController
     end
   end
 
+  def create_form
+    form = <%= model_class_name %>.create_form
+    form.self_link = new_<%= name %>_uri
+    form.href = <%= plural_name %>_uri
+  end
+
+  def edit_form
+    form = <%= name %>.edit_form
+    form.self_link = edit_<%= name %>_uri(<%= name %>)
+    form.href = <%= name %>_uri(<%= name %>)
+  end
 end
