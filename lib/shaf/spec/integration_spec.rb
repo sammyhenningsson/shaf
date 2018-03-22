@@ -48,6 +48,9 @@ module Shaf
         end
       end
 
+      def auth_token(token)
+        @__integration_test_auth_token = token
+      end
 
 #       def login(email, pass)
 #         params = {email: email, password: pass}
