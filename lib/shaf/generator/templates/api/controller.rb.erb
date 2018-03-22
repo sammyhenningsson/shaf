@@ -6,40 +6,44 @@ class <%= controller_class_name %> < BaseController
 
   authorize_with <%= policy_class_name %>
 
-  get new_<%= name %>_uri_template do
+  get :<%= plural_name %>_uri do
+    authorize! :read
+    collection = paginate(<%= model_class_name %>.order(:created_at).reverse)
+    respond_with_collection collection, serializer: <%= serializer_class_name %>
+  end
+
+  get :new_<%= name %>_uri do
+    authorize! :read
     respond_with create_form
   end
 
-  get edit_<%= name %>_uri_template do
-    respond_with edit_form
+  post :<%= plural_name %>_uri do
+    authorize! :write
+    <%= name %> = <%= model_class_name %>.create(<%= name %>_params)
+    headers({ "Location" => <%= name %>_uri(<%= name %>) })
+    respond_with <%= name %>, status: 201
   end
 
-  get <%= name %>_uri_template do
+  get :<%= name %>_uri do
+    authorize! :read
     respond_with <%= name %>
   end
 
-  put <%= name %>_uri_template do
+  get :edit_<%= name %>_uri do
+    authorize! :read
+    respond_with edit_form
+  end
+
+  put :<%= name %>_uri do
     authorize! :write
     <%= name %>.update(<%= name %>_params)
     respond_with <%= name %>
   end
 
-  delete <%= name %>_uri_template do
+  delete :<%= name %>_uri do
     authorize! :write
     <%= name %>.destroy
     status 204
-  end
-
-  get <%= plural_name %>_uri_template do
-    collection = paginate(<%= model_class_name %>.order(:created_at).reverse)
-    respond_with_collection collection, serializer: <%= serializer_class_name %>
-  end
-
-  post <%= plural_name %>_uri_template do
-    authorize! :write
-    <%= name %> = <%= model_class_name %>.create(<%= name %>_params)
-    headers({ "Location" => <%= name %>_uri(<%= name %>) })
-    respond_with <%= name %>, status: 201
   end
 
   def <%= name %>_params
