@@ -58,14 +58,16 @@ class <%= controller_class_name %> < BaseController
   end
 
   def create_form
-    form = <%= model_class_name %>.create_form
-    form.self_link = new_<%= name %>_uri
-    form.href = <%= plural_name %>_uri
+    <%= model_class_name %>.create_form.tap do |form|
+      form.self_link = new_<%= name %>_uri
+      form.href = <%= plural_name %>_uri
+    end
   end
 
   def edit_form
-    form = <%= name %>.edit_form
-    form.self_link = edit_<%= name %>_uri(<%= name %>)
-    form.href = <%= name %>_uri(<%= name %>)
+    <%= name %>.edit_form.tap do |form|
+      form.self_link = edit_<%= name %>_uri(<%= name %>)
+      form.href = <%= name %>_uri(<%= name %>)
+    end
   end
 end
