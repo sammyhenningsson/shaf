@@ -30,6 +30,8 @@ module Shaf
       def parse_response(body)
         return nil if body.empty?
         JSON.parse(body, symbolize_names: true)
+      rescue JSON::ParserError => e
+        assert e.nil?, "Could not parse reponse as json"
       end
 
       def app
