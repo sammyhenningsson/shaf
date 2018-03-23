@@ -3,6 +3,8 @@ class <%= policy_class_name %>
 
   # Auto generated policy: Update this file to suite your API!
  
+  alias :<%= name %> :resource
+
   <%= attributes.join("\n  ") %>
 
   link :up
@@ -16,11 +18,12 @@ class <%= policy_class_name %>
   end
 
   def read?
+    # FIXME!!
     true
   end
 
   def write?
-    # !!current_user
+    # FIXME!!
     true
   end
 end

@@ -35,6 +35,7 @@ module Shaf
       def opts
         {
           policy_class_name: "#{policy_name.capitalize}Policy",
+          name: policy_name,
           attributes: attributes,
         }
       end
