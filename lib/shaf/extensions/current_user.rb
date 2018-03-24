@@ -22,8 +22,8 @@ module Shaf
     class << self
       attr_accessor :lookup_proc
 
-      def user_lookup(token)
-        return lookup_proc.call(token) if lookup_proc
+      def user_lookup(request, token)
+        return lookup_proc.call(token, request) if lookup_proc
         return unless token
         digest = Digest::SHA256.hexdigest(token)
         User.where(auth_token_digest: digest).first
@@ -33,7 +33,8 @@ module Shaf
     def current_user
       return @current_user if defined?(@current_user)
       header = settings.auth_token_header
-      @current_user = Helpers.user_lookup(request.env[header])
+      token = request.env[header]
+      @current_user = Helpers.user_lookup(request, token)
     end
 
     def authenticated?
