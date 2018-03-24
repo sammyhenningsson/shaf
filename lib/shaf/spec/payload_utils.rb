@@ -3,42 +3,6 @@ require 'minitest/assertions'
 module Shaf
   module Spec
     module PayloadUtils
-
-      class Embedded
-        include HttpMethodUtils
-        include PayloadUtils
-        include Minitest::Assertions
-
-        # This is needed by Minitest::Assertions
-        # And we need that module to have all assert_*/refute_* methods
-        # available in this class
-        attr_accessor :assertions
-
-        def initialize(payload, context, block)
-          @payload = payload
-          @context = context
-          @block = block
-          @assertions = 0
-        end
-
-        def call(*args)
-          instance_exec(*args, &@block)
-        end
-
-        def method_missing(method, *args, &block)
-          if @context&.respond_to? method
-            define_singleton_method(method) { |*a, &b| @context.public_send(method, *a, &b) }
-            return public_send(method, *args, &block)
-          end
-          super
-        end
-
-        def respond_to_missing?(method, include_private = false)
-          return true if @context&.respond_to? method
-          super
-        end
-      end
-
       def set_payload(payload)
         @payload = payload
         @payload = JSON.parse(payload, symbolize_names: true) if payload.is_a?(String)
@@ -69,7 +33,7 @@ module Shaf
         assert_has_embedded name unless name.nil?
         keys = [:_embedded, name&.to_sym].compact
         return last_payload.dig(*keys) unless block_given?
-        Embedded.new(last_payload.dig(*keys), self, Proc.new).call
+        exec_embed_block(last_payload.dig(*keys), Proc.new)
       end
 
       def each_embedded(name, &block)
@@ -80,7 +44,7 @@ module Shaf
           "Embedded '#{name}' is not an instance of Array. Actual: #{list.class}"
 
         list.each_with_index do |resource, i|
-          Embedded.new(resource, self, block).call(i)
+          exec_embed_block(resource, block, i)
         end
       end
 
@@ -171,6 +135,15 @@ module Shaf
           refute last_payload.dig(:_embedded, name.to_sym),
             "Response contains disallowed embedded resource with name '#{name}': #{last_payload}"
         end
+      end
+
+      private
+
+      def exec_embed_block(payload, block, *args)
+        prev_payload = last_payload
+        set_payload(payload)
+        instance_exec(*args, &block)
+        set_payload(prev_payload)
       end
     end
   end
