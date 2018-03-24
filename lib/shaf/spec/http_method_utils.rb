@@ -3,7 +3,7 @@ module Shaf
     module HttpMethodUtils
       include ::Rack::Test::Methods
 
-      [:get, :put, :post, :delete].each do |m|
+      [:get, :put, :patch, :post, :delete, :options, :head, :link, :unlink].each do |m|
         define_method m do |*args|
           set_headers
           super(*args)
