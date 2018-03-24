@@ -52,6 +52,10 @@ module Shaf
         @__integration_test_auth_token = token
       end
 
+      def clear_auth_token
+        @__integration_test_auth_token = nil
+      end
+
 #       def login(email, pass)
 #         params = {email: email, password: pass}
 #         header 'Content-Type', 'application/json'
