@@ -1,6 +1,6 @@
 module Shaf
   module Spec
-    module HttpMethodUtils
+    module HttpUtils
       include ::Rack::Test::Methods
 
       [:get, :put, :patch, :post, :delete, :options, :head, :link, :unlink].each do |m|
@@ -16,9 +16,8 @@ module Shaf
       end
 
       def headers
-        last_response&.headers
+        last_response&.headers || {}
       end
-
     end
   end
 end

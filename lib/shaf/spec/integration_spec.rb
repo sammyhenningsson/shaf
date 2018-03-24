@@ -2,7 +2,7 @@ module Shaf
   module Spec
     class IntegrationSpec < Minitest::Spec
       include Minitest::Hooks
-      include HttpMethodUtils
+      include HttpUtils
       include PayloadUtils
       include UriHelper
 
