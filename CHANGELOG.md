@@ -1,3 +1,10 @@
+## 0.3.0
+ * Form fields can be specified as `required`
+ * Default implementation of `current_user`
+ * Use uri symbols as controller routes
+ * Mute warnings when running specs
+ * Require all .rb files under src/
+ * safe_params now always allows :id
 ## 0.2.1
  * Add `each_embedded` method to specs
  * Remove duplicate dependency

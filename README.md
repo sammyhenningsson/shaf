@@ -1,7 +1,7 @@
 # Shaf (Sinatra Hypermedia API Framework)
 [![Gem Version](https://badge.fury.io/rb/shaf.svg)](https://badge.fury.io/rb/shaf)  
-Shaf is a framework for building hypermedia driven REST APIs. Its goal is to be like a lightweight version of `rails new --api` with hypermedia as a first class citizen. Instead of reinventing the wheel Shaf uses [Sinatra](http://sinatrarb.com/) and adds a layer of conventions similar to [Rails](http://rubyonrails.org/). It uses [Sequel](http://sequel.jeremyevans.net/) as ORM and [HALPresenter](https://github.com/sammyhenningsson/hal_presenter) for policies and serialization (which means that the mediatype being used is [HAL](http://stateless.co/hal_specification.html)).
-Most APIs claiming to be RESTful completly lacks the concept of links and relies upon clients to construction urls to _known_ endpoints. Thoses APIs are missing some important concepts that Roy Fielding put together in is dissertation about REST. Having the server always returning payloads with links (hypermedia) makes the responsibilies more clear and allows for more robust implementations. Clients will then always know what actions are possible and not depending of which links are present in the server response. For example, there's no need for a client to try to place an order unless the server supplies the corresponding link for that action. Also if the server decides to move some resources to another location or change the access protocol (like https instead of http), this can be done without any changes to the client.
+Shaf is a framework for building hypermedia driven REST APIs. Its goal is to be like a lightweight version of `rails new --api` with hypermedia as a first class citizen. Instead of reinventing the wheel Shaf uses [Sinatra](http://sinatrarb.com/) and adds a layer of conventions similar to [Rails](http://rubyonrails.org/). It uses [Sequel](http://sequel.jeremyevans.net/) as ORM and [HALPresenter](https://github.com/sammyhenningsson/hal_presenter) for policies and serialization (which means that the mediatype being used is [HAL](http://stateless.co/hal_specification.html)).  
+Most APIs claiming to be RESTful completly lacks the concept of links and relies upon clients to construction urls to _known_ endpoints. Thoses APIs are missing some important concepts that Roy Fielding put together in is dissertation about REST. Having the server always returning payloads with links (hypermedia) makes the responsibilies more clear and allows for more robust implementations. Clients will then always know what actions are possible and not, depending of which links are present in the server response. For example, there's no need for a client to try to place an order or follow another user unless the server returns the corresponding link for those actions. Also if the server decides to move some resources to another location or change the access protocol (like https instead of http), this can be done without any changes to the client.  
 There are many pros and cons about hypermedia APIs, which means that Shaf will not suite everyone. However, if you are going to create an API driven by hypermedia then Shaf will help you, similar to how Rails helps you get up and running in no time. 
 
 ## Getting started
@@ -92,9 +92,12 @@ The project also contains a few specs that you can run with `rake`
 rake test
 ```
 
-Currently your APIs is pretty useless. Let's fix that by generating some scaffolding.
+Currently your APIs is pretty useless. Let's fix that by generating some scaffolding. The following command will create a new resource with two attributes (`title` and `message`).
 ```sh
 shaf generate scaffold post title:string message:string 
+```
+This will output:
+```sh
 Added:      api/models/post.rb
 Added:      db/migrations/20180224225335_create_posts_table.rb
 Added:      api/serializers/post_serializer.rb
@@ -104,7 +107,7 @@ Added:      api/controllers/posts_controller.rb
 Added:      spec/integration/posts_controller_spec.rb
 Modified:   api/serializers/root_serializer.rb
 ```
-This will create a new model with two attributes (`title` and `message`) as well as a controller, a serializer and a policy. It will also generate a DB migration file, some specs and add a link to the new`post` collection in the root resource. So let's check this out by migrating the DB and restarting the server. Close any running instance with `Ctrl + C` and then:
+As shown in the output, that command created, a model, a controller, a serializer and a policy. It will also generate a DB migration file, some specs and add a link to the new `post` collection in the root resource. So let's check this out by migrating the DB and restarting the server. Close any running instance with `Ctrl + C` and then:
 ```sh
 rake db:migrate
 shaf server
@@ -242,6 +245,7 @@ Note: You can also add custom migrations, see [Customizations](#Customizations)
 ## Routing/Controllers
 As usual with Sinatra applications routes are declared together with the controller code rather than in a separate file (as with Rails). All controllers SHOULD be subclasses of `BaseController` found in `api/controllers/base_controller.rb` (which was created along with the project).  
 Controllers generated with `shaf generate` uses two Shaf extensions, `Shaf::ResourceUris` and `Shaf::Authorize`.
+
 #### Shaf::ResourceUris
 This extension adds two class methods, `resource_uris_for` and `register_uri`. Both methods are used to create uri helpers.  
 `resource_uris_for(name, base: nil, plural_name: nil)` - creates four uri helpers and adds them as class methods and instance methods to the caller.
@@ -260,6 +264,7 @@ Would add the following methods to the `PostController` class as well as instanc
 | `edit_post_uri(post)`  | /posts/5/edit                 |
 
 Methods taking an argument (`post_uri` and `edit_post_uri`) may be called with either an integer or an object responding to `:id`. The keyword arguments `:base` and `:plural_name` is used to specify a path namespace (such as '/api') that will be prepended to the uri resp. the pluralization of the name (when excluded the plural name will be `name` + 's').  
+
 `register_uri` is used to create a single uri helper that does not follow the "normal" conventions of `resource_uris_for`.
 ```sh
 class PostController < BaseController
@@ -267,8 +272,18 @@ class PostController < BaseController
 end
 ```
 Would add an `archive_post_uri(post)` method to the `PostController` class as well as instances of `PostController`.  
-Uri helpers added by `resource_uris_for` and `register_uri` gets added to the module `Shaf::UriHelper` as both module methods and instance methods. So to use them outside of Controllers, either call them directly on the module (e.g. `Shaf::UriHelper.my_foo_uri`) or include `Shaf::UriHelper` and get all helpers as instance methods.
+Uri helpers added by `resource_uris_for` and `register_uri` gets added to the module `Shaf::UriHelper` as both module methods and instance methods. So to use them outside of Controllers, either call them directly on the module (e.g. `Shaf::UriHelper.my_foo_uri`) or include `Shaf::UriHelper` and get all helpers as instance methods.  
 
+To make it easier to see the connection between controller routes and uri helpers, Shaf makes it possible to specify routes with symbols. These symbols must the same as the corresponding uri helper:
+```sh
+class PostController < BaseController
+  register_uri :archive_post '/posts/:id/archive'
+
+  post :archive_post_uri do
+    "Post was archived!"
+  end
+end
+```
 
 #### Shaf::Authorize
 This module adds an `authorize_with(policy)` class method and an `authorize!(action, resource = nil)` instance method. The class method is used to register a Policy class. The instance method is used to ensure that a certain action is authorized. Given the following policy class (see [Policies](#policies) for more info)
@@ -314,6 +329,7 @@ end
 ```
 Note: that the Policy instance method MUST end with a question mark '?' while the symbol given to `authorize!` may or may not end with a symbol.  
 
+#### Rendering responses
 Shaf controllers includes two helper methods that simplifies rendering responses:
 - `respond_with(resource, status: 200, serializer: nil)`
 - `respond_with_collection(resource, status: 200, serializer: nil)`.  
@@ -321,7 +337,7 @@ Given that you have a Serializer that is registered to process instances of `Pos
 
 
 ## Models
-Models generated with `shaf generate` inherits from `Sequel::Model` (see [Sequel docs](http://sequel.jeremyevans.net/documentation.html) for more info) and they include `Shaf::Formable`. The Formable module adds the class method `form` which is used to associate two forms with the model. One for creating a new resource and one for editing an extension resource. As an example, the following model will add a create form with fields `foo` and `bar` and an edit form with fields `foo` and `baz`.
+Models generated with `shaf generate` inherits from `Sequel::Model` (see [Sequel docs](http://sequel.jeremyevans.net/documentation.html) for more info) and they include `Shaf::Formable`. The Formable module adds the class method `form` which Shaf models use to associate two forms with the model. One for creating a new resource and one for editing an extension resource. As an example, the following model will add a create form with fields `foo` and `bar` and an edit form with fields `foo` and `baz`.
 ```sh
 class User < Sequel::Model
   include Shaf::Formable
@@ -608,7 +624,8 @@ Generators work pretty much the same but they MUST inherit from `Shaf::Generator
 - `template_dir`
 - `read_template(file, directory = nil)`
 - `render(template, locals = {})`
-- `write_output(file, content)`
+- `write_output(file, content)`  
+
 Example:
 ```sh
 class FooServiceGenerator < Shaf::Generator::Base
