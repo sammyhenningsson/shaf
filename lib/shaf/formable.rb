@@ -1,7 +1,12 @@
 module Shaf
   module Formable
     class Field
-      attr_reader :name, :type, :value, :label
+      attr_reader :name, :type, :value, :label, :required
+
+      HTML_TYPE_MAPPINGS = {
+        'string' => 'text',
+        'boolean' => 'checkbox',
+      }.freeze
 
       def initialize(name, params = {})
         @name = name
@@ -9,6 +14,7 @@ module Shaf
         @label = params[:label]
         @has_value = params.key? :value
         @value = params[:value]
+        @required = params[:required] || false
       end
 
       def has_value?
@@ -32,8 +38,18 @@ module Shaf
       end
 
       def input_element
-        _value = value ? %Q( value="#{value.to_s}") : ""
-        %Q(<input type="#{type.to_s}" class="form--input" id="#{name.to_s}" name="#{name.to_s}"#{_value}>)
+        _value = value ? %Q(value="#{value.to_s}") : nil
+        _required = required ? "required" : nil
+        attributes = [
+          %Q(type="#{HTML_TYPE_MAPPINGS[type.to_s]}"),
+          'class="form--input"',
+          %Q(id="#{name.to_s}"),
+          %Q(name="#{name.to_s}"),
+        ]
+        attributes << %Q(value="#{value.to_s}") if value
+        attributes << "required" if required
+
+        "<input #{attributes.join(" ")}>"
       end
     end
 

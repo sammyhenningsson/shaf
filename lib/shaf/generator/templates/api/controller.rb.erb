@@ -2,9 +2,9 @@ require '<%= policy_file %>'
 
 class <%= controller_class_name %> < BaseController
 
-  resource_uris_for :<%= name %>
-
   authorize_with <%= policy_class_name %>
+
+  resource_uris_for :<%= name %>
 
   get :<%= plural_name %>_uri do
     authorize! :read
