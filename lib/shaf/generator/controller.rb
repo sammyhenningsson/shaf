@@ -96,7 +96,7 @@ module Shaf
           # ```
           # curl -H "Accept: application/json" \\
           #      -H "Authorization: abcdef" \\
-          #      /#{plural_name}/5
+          #      /#{plural_name}
           #```
           link :#{plural_name}, #{plural_name}_uri
         EOS
