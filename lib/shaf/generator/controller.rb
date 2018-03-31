@@ -94,7 +94,7 @@ module Shaf
           # Method: GET  
           # Example:
           # ```
-          # curl -H "Accept: application/json" \\
+          # curl -H "Accept: application/hal+json" \\
           #      -H "Authorization: abcdef" \\
           #      /#{plural_name}
           #```

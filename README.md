@@ -254,16 +254,21 @@ class PostController < BaseController
   resource_uris_for :post
 end
 ```
-Would add the following methods to the `PostController` class as well as instances of `PostController`  
+Would add the following methods as instance method on Shaf::UriHelper. This module is then both included and extended into the `PostController` (which means that all uri helpers are be available as both class methods and instance methods in the controller).  
 
-| Methods                | Returned string (id may vary) | 
-| ---------------------- | ----------------------------- |
-| `posts_uri`            | /posts                        |
-| `post_uri(post)`       | /posts/5                      |
-| `new_post_uri`         | /posts/form                   |
-| `edit_post_uri(post)`  | /posts/5/edit                 |
+| Methods                                | Returned string with no query_params (id may vary) | 
+| -------------------------------------- | -------------------------------------------------- |
+| `posts_uri(**query_params)`            | /posts                                             |
+| `post_uri(post, **query_params)`       | /posts/5                                           |
+| `new_post_uri(**query_params)`         | /posts/form                                        |
+| `edit_post_uri(post, **query_params)`  | /posts/5/edit                                      |
 
 Methods taking an argument (`post_uri` and `edit_post_uri`) may be called with either an integer or an object responding to `:id`. The keyword arguments `:base` and `:plural_name` is used to specify a path namespace (such as '/api') that will be prepended to the uri resp. the pluralization of the name (when excluded the plural name will be `name` + 's').  
+
+The optional `query_params` takes any given keyword arguments and appends a query string with them.  
+```sh
+  post_uri(post, foo: 'bar')    #  => /posts/5?foo=bar
+```
 
 `register_uri` is used to create a single uri helper that does not follow the "normal" conventions of `resource_uris_for`.
 ```sh
@@ -271,7 +276,7 @@ class PostController < BaseController
   register_uri :archive_post '/posts/:id/archive'
 end
 ```
-Would add an `archive_post_uri(post)` method to the `PostController` class as well as instances of `PostController`.  
+Would add an `archive_post_uri(post, **query_params)` method to the `PostController` class as well as instances of `PostController`.  
 Uri helpers added by `resource_uris_for` and `register_uri` gets added to the module `Shaf::UriHelper` as both module methods and instance methods. So to use them outside of Controllers, either call them directly on the module (e.g. `Shaf::UriHelper.my_foo_uri`) or include `Shaf::UriHelper` and get all helpers as instance methods.  
 
 To make it easier to see the connection between controller routes and uri helpers, Shaf makes it possible to specify routes with symbols. These symbols must the same as the corresponding uri helper:
@@ -359,7 +364,7 @@ class User < Sequel::Model
   end
 end
 ```
-When serialized these forms contain an array of _fields_ that specifies all attributes that are accepted for create/update. Each field has a `name` property that MUST be used as key when construction a payload to be submitted. Each field also has a type which declares the kind of value that are accepted (currently only string and integer are supported) and a label that may be used when rendering the form to a user. When submitting the form it MUST be sent to the url in _href_ with the HTTP method specified in _method_ with the Content-Type header set to the value of _type_. Here's the create form from above.
+When serialized these forms contain an array of _fields_ that specifies all attributes that are accepted for create/update. Each field has a `name` property that MUST be used as key when constructing a payload to be submitted. Each field also has a type which declares the kind of value that are accepted (currently only string and integer are supported) and a label that may be used when rendering the form to a user. When submitting the form it MUST be sent to the url in _href_ with the HTTP method specified in _method_ with the Content-Type header set to the value of _type_. Here's the create form from above.
 ```sh
     "create-form": {
       "method": "POST",

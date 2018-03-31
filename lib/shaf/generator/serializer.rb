@@ -83,7 +83,7 @@ module Shaf
             # Method: GET  
             # Example:
             # ```
-            # curl -H "Accept: application/json" \\
+            # curl -H "Accept: application/hal+json" \\
             #      /doc/#{name}/rels/edit
             #```
             curie :doc do
@@ -188,7 +188,7 @@ module Shaf
         <<~EOS.chomp
           # Example:
           # ```
-          # curl -H "Accept: application/json" \\
+          # curl -H "Accept: application/hal+json" \\
           #      -H "Authorization: abcdef" \\#{method_args}
           #      #{uri}
           #```

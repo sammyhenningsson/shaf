@@ -47,7 +47,7 @@ module Shaf
       input = read_input
       return {} if input.empty?
 
-      if request.env['CONTENT_TYPE'] =~ %r(\Aapplication/json)
+      if request.env['CONTENT_TYPE'] =~ %r(\Aapplication/(hal\+)?json)
         JSON.parse(input)
       else
         raise ::UnsupportedMediaTypeError.new(request: request)
