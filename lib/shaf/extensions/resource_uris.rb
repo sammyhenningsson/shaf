@@ -76,22 +76,30 @@ module Shaf
     attr_reader :name, :base, :plural_name
 
     def register_resources_uri
-      uri = "#{base}/#{plural_name}".freeze
+      uri = "#{base}/#{plural_name}"
+      helper_name = "#{plural_name}_uri"
 
-      UriHelperMethods.register("#{plural_name}_uri") { uri }
-      UriHelperMethods.register("#{plural_name}_uri_template") { uri }
+      UriHelperMethods.register(helper_name) do |**query|
+        query_string = MethodBuilder.query_string(query)
+        "#{uri}#{query_string}".freeze
+      end
+      UriHelperMethods.register("#{helper_name}_template") { uri.freeze }
     end
 
     def register_resource_uri
       uri = "#{base}/#{plural_name}"
+      helper_name = "#{name}_uri"
 
-      UriHelperMethods.register "#{name}_uri" do |resrc|
+      UriHelperMethods.register helper_name do |resrc, **query|
         id = resrc.is_a?(Integer) ? resrc : resrc&.id
-        raise ArgumentError, "id must be an integer! was #{id.class}" unless id.is_a?(Integer)
-        "#{uri}/#{id}".freeze
+        query_string = MethodBuilder.query_string(query)
+
+        next "#{uri}/#{id}#{query_string}".freeze if id.is_a?(Integer)
+        raise ArgumentError,
+          "In #{helper_name}: id must be an integer! was #{id.class}"
       end
 
-      UriHelperMethods.register "#{name}_uri_template" do
+      UriHelperMethods.register "#{helper_name}_template" do
         "#{uri}/:id".freeze
       end
     end
@@ -101,37 +109,52 @@ module Shaf
     # as argument and the resources uri when no arguments are provided.
     def register_resource_uri_by_arg
       uri = "#{base}/#{plural_name}"
-      UriHelperMethods.register "#{plural_name}_uri" do |resrc = nil|
+      helper_name = "#{plural_name}_uri"
+
+      UriHelperMethods.register helper_name do |resrc = nil, **query|
+        query_string = MethodBuilder.query_string(query)
+
         if resrc.nil?
-          uri.freeze
+          "#{uri}#{query_string}".freeze
         else
           id = (resrc.is_a?(Integer) ? resrc : resrc.id).to_i
-          raise ArgumentError, "id must be an integer! was #{id.class}" unless id.is_a?(Integer)
-          "#{uri}/#{id}".freeze
+
+          next "#{uri}/#{id}#{query_string}".freeze if id.is_a?(Integer)
+          raise ArgumentError,
+            "In #{helper_name}: id must be an integer! was #{id.class}"
         end
       end
 
-      UriHelperMethods.register "#{plural_name}_uri_template" do |collection = false|
+      UriHelperMethods.register "#{helper_name}_template" do |collection = false|
         (collection ? uri : "#{uri}/:id").freeze
       end
     end
 
     def register_new_resource_uri
-      uri = "#{base}/#{plural_name}/form".freeze
+      uri = "#{base}/#{plural_name}/form"
+      helper_name = "new_#{name}_uri"
 
-      UriHelperMethods.register("new_#{name}_uri") { uri }
-      UriHelperMethods.register("new_#{name}_uri_template") { uri }
+      UriHelperMethods.register(helper_name) do |**query|
+        query_string = MethodBuilder.query_string(query)
+        "#{uri}#{query_string}".freeze
+      end
+      UriHelperMethods.register("#{helper_name}_template") { uri.freeze }
     end
 
     def register_edit_resource_uri
       uri = "#{base}/#{plural_name}"
+      helper_name = "edit_#{name}_uri"
 
-      UriHelperMethods.register "edit_#{name}_uri" do |resrc|
+      UriHelperMethods.register helper_name do |resrc, **query|
         id = resrc.is_a?(Integer) ? resrc : resrc&.id
-        "#{uri}/#{id}/edit".freeze unless id.nil?
+        query_string = MethodBuilder.query_string(query)
+
+        next "#{uri}/#{id}/edit#{query_string}".freeze if id.is_a?(Integer)
+        raise ArgumentError,
+          "In #{helper_name}: id must be an integer! was #{id.class}"
       end
 
-      UriHelperMethods.register "edit_#{name}_uri_template" do
+      UriHelperMethods.register "#{helper_name}_template" do
         "#{uri}/:id/edit".freeze
       end
     end
@@ -149,18 +172,23 @@ module Shaf
 
       def signature(name, uri)
         args = extract_symbols(uri)
-        s = method_name(name)
-        s << "(#{args.join(', ')})" unless args.empty?
-        s
+        s = "#{method_name(name)}("
+        s << (args.empty? ? "**query)" : "#{args.join(', ')}, **query)")
+      end
+
+      def query_string(query)
+        return "" unless query.any?
+        "?#{query.map { |key,value| "#{key}=#{value}" }.join("&")}"
       end
 
       def as_string(name, uri)
         signature = signature(name, uri)
-        <<~EOM
+        <<~Ruby
       def #{signature}
-        \"#{interpolated_uri_string(uri)}\".freeze
+        query_string = MethodBuilder.query_string(query)
+        \"#{interpolated_uri_string(uri)}\#{query_string}\".freeze
       end
-        EOM
+        Ruby
       end
 
       private
