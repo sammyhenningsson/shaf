@@ -43,12 +43,23 @@ namespace :db do
     end
   end
 
-  desc "Perform rollback to specified target or full rollback as default"
+  desc "Perform rollback to specified number of steps back or to the previous version"
   task :rollback, :target do |t, args|
-    args.with_defaults(target: 0)
+    args.with_defaults(target: 1)
     require 'config/database'
     Sequel.extension :migration
-    Sequel::Migrator.run(DB, MIGRATIONS_DIR, target: args[:target].to_i)
+    all_migrations = DB[:schema_migrations].all
+    target = -(args[:target].to_i + 1)
+    target = 0 if -target > all_migrations.size
+    filename = all_migrations.dig(target, :filename)
+    version = filename[/(\d*)_.*.rb/, 1].to_i
+
+    warn_if_rolling_back_more_than = 5
+    if target == 0 || -target > warn_if_rolling_back_more_than
+      puts "This would migrate the Database to version: #{version}. Continue [N/y]?"
+      next unless /\Ay/i =~ STDIN.gets.chomp&.downcase
+    end
+    Sequel::Migrator.run(DB, MIGRATIONS_DIR, target: version)
   end
 
   Rake::Task["db:migrate"].enhance do
