@@ -10,6 +10,9 @@ Gem::Specification.new do |gem|
   gem.email       = 'sammy.henningsson@gmail.com'
   gem.homepage    = "https://github.com/sammyhenningsson/shaf"
   gem.license     = "MIT"
+  gem.metadata    = {
+    "changelog_uri" => "https://github.com/sammyhenningsson/shaf/blob/master/CHANGELOG.md"
+  }
 
   gem.cert_chain  = ['certs/sammyhenningsson.pem']
   gem.signing_key = File.expand_path("~/.ssh/gem-private_key.pem") if $0 =~ /gem\z/
@@ -18,6 +21,7 @@ Gem::Specification.new do |gem|
   gem.files         = Dir['lib/**/*rb'] + Dir['templates/**/*']
   gem.require_paths = ["lib"]
 
+  gem.required_ruby_version = '>= 2.3'
   gem.add_development_dependency "rake", '~> 12.0', '>= 10.0'
   gem.add_development_dependency "minitest", '~> 5.10', '>= 5.0'
   gem.add_development_dependency "hal_presenter", '~> 0.4.3', '>= 0.4.0'
