@@ -5,17 +5,16 @@ module Shaf
       usage 'generate serializer MODEL_NAME [attribute] [..]'
 
       def call
-        if name.empty?
-          raise "Please provide a model name when using the serializer generator!"
-        end
-
         create_serializer
         create_serializer_spec
         create_policy
       end
 
       def name
-        args.first || ""
+        n = args.first || ""
+        return n unless n.empty?
+        raise Command::ArgumentError,
+          "Please provide a model name when using the serializer generator!"
       end
 
       def plural_name
@@ -23,11 +22,11 @@ module Shaf
       end
 
       def model_class_name
-        "::#{name.capitalize}"
+        Utils::model_name(name)
       end
 
       def policy_class_name
-        "::#{name.capitalize}Policy"
+        "#{model_class_name}Policy"
       end
 
       def template
@@ -234,7 +233,7 @@ module Shaf
       def opts
         {
           name: name,
-          class_name: "#{name.capitalize}Serializer",
+          class_name: "#{model_class_name}Serializer",
           model_class_name: model_class_name,
           policy_class_name: policy_class_name,
           policy_name: "#{name}_policy",

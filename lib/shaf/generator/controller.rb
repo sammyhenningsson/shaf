@@ -6,26 +6,32 @@ module Shaf
       usage 'generate controller RESOURCE_NAME [attribute:type] [..]'
 
       def call
-        if name.empty?
-          raise Command::ArgumentError,
-            "Please provide a controller name when using the controller generator!"
-        end
-
         create_controller
         create_integration_spec
         add_link_to_root
-      end
-
-      def name
-        args.first || ""
       end
 
       def params
         args[1..-1].map { |param| param.split(':')}
       end
 
+      def name
+        n = args.first || ""
+        return n unless n.empty?
+        raise Command::ArgumentError,
+          "Please provide a controller name when using the controller generator!"
+      end
+
+      def model_class_name
+        Utils::model_name(name)
+      end
+
       def plural_name
         Utils::pluralize(name)
+      end
+
+      def pluralized_model_name
+        Utils::pluralize(model_class_name)
       end
 
       def template
@@ -58,10 +64,10 @@ module Shaf
         {
           name: name,
           plural_name: plural_name,
-          serializer_class_name: "#{name.capitalize}Serializer",
-          model_class_name: name.capitalize,
-          controller_class_name: "#{plural_name.capitalize}Controller",
-          policy_class_name: "#{name.capitalize}Policy",
+          serializer_class_name: "#{model_class_name}Serializer",
+          model_class_name: model_class_name,
+          controller_class_name: "#{pluralized_model_name}Controller",
+          policy_class_name: "#{model_class_name}Policy",
           policy_file: "policies/#{name}_policy",
           params: params
         }

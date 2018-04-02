@@ -5,14 +5,18 @@ module Shaf
       usage 'generate policy MODEL_NAME [attribute] [..]'
 
       def call
-        if policy_name.empty?
-          raise "Please provide a policy name when using the policy generator!"
-        end
         create_policy
       end
 
       def policy_name
-        args.first || ""
+        n = args.first || ""
+        return n unless n.empty?
+        raise Command::ArgumentError,
+          "Please provide a policy name when using the policy generator!"
+      end
+
+      def model_class_name
+        Utils::model_name(policy_name)
       end
 
       def template
@@ -34,7 +38,7 @@ module Shaf
 
       def opts
         {
-          policy_class_name: "#{policy_name.capitalize}Policy",
+          policy_class_name: "#{model_class_name}Policy",
           name: policy_name,
           attributes: attributes,
         }

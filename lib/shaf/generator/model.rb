@@ -6,17 +6,20 @@ module Shaf
       usage 'generate model MODEL_NAME [attribute:type] [..]'
 
       def call
-        if model_name.empty?
-          raise "Please provide a model name when using the model generator!"
-        end
-
         create_model
         create_migration
         create_serializer
       end
 
       def model_name
-        args.first || ""
+        n = args.first || ""
+        return n unless n.empty?
+        raise Command::ArgumentError,
+          "Please provide a model name when using the model generator!"
+      end
+
+      def model_class_name
+        Utils::model_name(model_name)
       end
 
       def table_name
@@ -48,7 +51,7 @@ module Shaf
       def opts
         {
           model_name: model_name,
-          class_name: model_name.capitalize,
+          class_name: model_class_name,
           form_fields: form_fields
         }
       end

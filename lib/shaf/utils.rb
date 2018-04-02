@@ -6,6 +6,10 @@ module Shaf
       noun + 's' #FIXME
     end
 
+    def self.model_name(name)
+      name.capitalize.gsub(/[_-](\w)/) { $1.upcase }
+    end
+
     def project_root
       dir = Dir.pwd
       20.times do
