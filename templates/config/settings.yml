@@ -5,6 +5,7 @@ default: &default
   views_folder: frontend/views
   documents_dir: doc/api
   migrations_dir: db/migrations
+  fixtures_dir: spec/fixtures
   paginate_per_page: 25
 
 production:

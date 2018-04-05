@@ -2,12 +2,20 @@ module Shaf
   module Utils
     class ProjectRootNotFound < StandardError; end
 
+    # FIXME!!!
     def self.pluralize(noun)
-      noun + 's' #FIXME
+      noun + 's' # FIXME!!
     end
 
     def self.model_name(name)
       name.capitalize.gsub(/[_-](\w)/) { $1.upcase }
+    end
+
+    # FIXME!!!
+    def self.singularize(noun)
+      return singularize(noun.to_s).to_sym if noun.is_a? Symbol
+      return noun unless noun.end_with? 's'
+      noun[0..-2]
     end
 
     def project_root

@@ -1,24 +1,12 @@
 module Shaf
   module Spec
-    class IntegrationSpec < Minitest::Spec
-      include Minitest::Hooks
+    class IntegrationSpec < Base
       include HttpUtils
-      include PayloadUtils
       include UriHelper
-
-      TRANSACTION_OPTIONS = {
-        rollback: :always,
-        savepoint: true,
-        auto_savepoint: true
-      }.freeze
 
       register_spec_type self do |desc, args|
         next unless args && args.is_a?(Hash)
         args[:type]&.to_s == 'integration'
-      end
-
-      around do |&block|
-        DB.transaction(TRANSACTION_OPTIONS) { super(&block) }
       end
 
       def set_headers
