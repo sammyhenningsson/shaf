@@ -29,17 +29,17 @@ module Shaf
       private
 
       def method_missing(method, *args, &block)
-        if load_fixture_if_missing_method_is_fixture?(method, *args)
-          send(method, args[0])
-        elsif resource_alias?(method)
-          resource(*args, &block)
+        if load_fixture_if_missing_method_is_fixture?(method, args.size)
+          send(method, args.first)
+        elsif resource_name?(args.size, block_given?)
+          resource(method, args.first, &block)
         else
           super
         end
       end
 
-      def load_fixture_if_missing_method_is_fixture?(method, *args)
-        return false if args.size > 1 # Fixtures should only be called with one argument
+      def load_fixture_if_missing_method_is_fixture?(method, arg_count)
+        return false if arg_count > 1 # Fixtures should only be called with one argument
 
         fixture_files = Fixtures.fixture_files
         fixtures = fixture_files.map { |f| File.basename(f, ".rb") }
@@ -50,9 +50,12 @@ module Shaf
         respond_to? method
       end
 
-      def resource_alias?(method)
-        return true if method == :r
-        Utils.singularize(@collection_name) == method
+      def resource_name?(arg_count, block_given)
+        if block_given
+          arg_count == 0
+        else
+          arg_count == 1
+        end
       end
     end
   end
