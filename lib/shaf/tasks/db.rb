@@ -62,6 +62,15 @@ namespace :db do
     Sequel::Migrator.run(DB, MIGRATIONS_DIR, target: version)
   end
 
+  desc "Reset the database by deleting all rows in all columns"
+  task :reset do
+    require 'config/database'
+    Sequel.extension :migration
+    version = 0
+    Sequel::Migrator.run(DB, MIGRATIONS_DIR, target: version)
+    Sequel::Migrator.run(DB, MIGRATIONS_DIR)
+  end
+
   Rake::Task["db:migrate"].enhance do
     Rake::Task["db:version"].invoke
   end

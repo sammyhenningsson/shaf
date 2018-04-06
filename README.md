@@ -92,7 +92,7 @@ The project also contains a few specs that you can run with `rake`
 rake test
 ```
 
-Currently your APIs is pretty useless. Let's fix that by generating some scaffolding. The following command will create a new resource with two attributes (`title` and `message`).
+Currently your API is pretty useless. Let's fix that by generating some scaffolding. The following command will create a new resource with two attributes (`title` and `message`).
 ```sh
 shaf generate scaffold post title:string message:string 
 ```
@@ -182,7 +182,7 @@ The response looks like this
   }
 }
 ```
-This is the collection of posts (which currently is empty, see _'\_embedded'_ => _'posts'_). Besides from the emtpy list of posts we also get an embedded form (with rel _doc:create-form_). This form should be used to create a new post.
+This is the collection of posts (which currently is empty, see `$response['_embedded']['posts']`). Besides from the emtpy list of posts we also get an embedded form (with rel _doc:create-form_). This form should be used to create a new post.
 
 
 ## HAL
@@ -273,7 +273,7 @@ The optional `query_params` takes any given keyword arguments and appends a quer
 `register_uri` is used to create a single uri helper that does not follow the "normal" conventions of `resource_uris_for`.
 ```sh
 class PostController < BaseController
-  register_uri :archive_post '/posts/:id/archive'
+  register_uri :archive_post, '/posts/:id/archive'
 end
 ```
 Would add an `archive_post_uri(post, **query_params)` method to the `PostController` class as well as instances of `PostController`.  
