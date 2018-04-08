@@ -337,7 +337,8 @@ Note: that the Policy instance method MUST end with a question mark '?' while th
 #### Rendering responses
 Shaf controllers includes two helper methods that simplifies rendering responses:
 - `respond_with(resource, status: 200, serializer: nil)`
-- `respond_with_collection(resource, status: 200, serializer: nil)`.  
+- `respond_with_collection(resource, status: 200, serializer: nil)`
+
 Given that you have a Serializer that is registered to process instances of `Post` (see [Serializers](#serializers) for more info), then a controller route may simply end with `respond_with post` (as shown above) and the response payload will be serialized as expected. Use the keyword arguments, `status` and `serializer`, if you would like to override the default http response code resp. the serializer to be used.
 
 
@@ -575,6 +576,23 @@ This spec will:
 - Verify HTTP Status code and HTTP Location header.
 - Fetch the posts_uri again.
 - Verify that the new resource created in step 4 is included in the response.
+
+#### Fixtures
+Shaf loads any fixture files found in `specs/fixtures/*.rb`. A fixture is looks like this:
+```ruby
+Shaf::Spec::Fixture.define :users do
+  alice User.create(email: "alice@test.io")
+  bob   User.create(email: "bob@test.io")
+end
+```
+The fixture above will create two resources before all specs are run. They can be retrieved in specs with `users(:alice)` resp. `users(:bob)`, where "users" is the argument passed to `Shaf::Spec::Fixture.define` and alice/bob is from inside the block (created via `method_missing`). You may also use fixtures inside other fixture. For example:
+```ruby
+Shaf::Spec::Fixture.define :posts do
+  by_alice1 Post.create(message: "lorem ipsum", author: users(:alice))
+  by_alice2 Post.create(message: "dolor sit", author: users(:alice))
+end
+```
+(Which would of course be retrieved via `posts(:by_alice1)` and `posts(:by_alice2)`)
 
 ## API Documentation
 Since API clients should basically only have to care about the payloads that are returned from the API, it makes sense to keep the API documentation in the serializer files. Each `attribute`, `link`, `curie` and `embed` should be preceeded with code comments that documents how client should interpret/use it. The comments should be in markdown format. This makes it possible to generate API documentation with `rake doc:generate`. This documentation can then be retrieved from a running server at `/doc/RESOURCE_NAME`, where `RESOURCE_NAME` is the name of the resource to fetch doc for, e.g `curl localhost:3000/doc/post`.

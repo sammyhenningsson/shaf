@@ -1,3 +1,9 @@
+## 0.3.1
+ * Support spec fixtures
+ * Support model names with underscore
+ * db:rollback task defaults to one step
+ * Accept application/hal+json
+ * Support query parameters in uri helpers
 ## 0.3.0
  * Form fields can be specified as `required`
  * Default implementation of `current_user`
