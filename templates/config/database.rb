@@ -3,7 +3,7 @@ require 'sequel'
 require 'config/constants'
 require 'fileutils'
 
-CONFIG = {
+config = {
 
   production: {
     adapter: 'postgres',
@@ -28,7 +28,7 @@ CONFIG = {
 
 env = Sinatra::Application.settings.environment
 
-unless CONFIG[env]
+unless config[env]
   STDERR.puts "No Database config for environment '#{env}'"
   exit 1
 end
@@ -36,5 +36,5 @@ end
 MIGRATIONS_DIR = File.join(APP_ROOT, Shaf::Settings.migrations_dir)
 FileUtils.mkdir_p(MIGRATIONS_DIR) unless Dir.exist?(MIGRATIONS_DIR)
 
-DB = Sequel.connect(CONFIG[env])
+DB = Sequel.connect(config[env])
 
