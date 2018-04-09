@@ -2,7 +2,6 @@ require 'fileutils'
 require 'yaml'
 require 'redcarpet'
 require 'redcarpet/render_strip'
-require 'shaf/api_doc/comment'
 
 module Shaf
   module ApiDoc

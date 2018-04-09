@@ -1,4 +1,7 @@
-require 'shaf/settings'
-require 'shaf/tasks/db'
-require 'shaf/tasks/test'
+require 'shaf/tasks/test_task'
+require 'shaf/tasks/db_task'
+require 'shaf/tasks/api_doc_task'
 
+module Shaf
+  include Tasks
+end

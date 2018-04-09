@@ -1,8 +1,9 @@
 require 'shaf/api_doc/document'
+require 'shaf/api_doc/comment'
 
 module Shaf
-  module ApiDoc
-    class Task
+  module Tasks
+    class ApiDocTask
       include Rake::DSL
 
       attr_accessor :document_class, :source_dir, :html_output_dir, :yaml_output_dir
@@ -10,7 +11,7 @@ module Shaf
       def initialize
         yield self if block_given?
         validate_attributes!
-        @document_class ||= Document
+        @document_class ||= ApiDoc::Document
         define_tasks
       end
 
@@ -48,7 +49,7 @@ module Shaf
 
       def read_file(file)
         doc = document_class.new
-        comment = Comment.new
+        comment = ApiDoc::Comment.new
 
         File.readlines(file).each do |line|
           next if empty_line?(line)
@@ -59,7 +60,7 @@ module Shaf
           end
 
           parse_line(line, doc, comment)
-          comment = Comment.new
+          comment = ApiDoc::Comment.new
         end
 
         return doc unless block_given?

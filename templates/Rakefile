@@ -2,11 +2,10 @@ require 'rubygems'
 require 'bundler'
 Bundler.setup(:default, :development)
 $:.unshift __dir__
-require 'shaf/tasks'
+require 'shaf/rake'
 require 'shaf/settings'
-require 'shaf/api_doc'
 
-Shaf::ApiDoc::Task.new do |api_doc|
+Shaf::ApiDocTask.new do |api_doc|
   api_doc.source_dir = File.join(%w(api serializers))
   api_doc.html_output_dir = File.join(Shaf::Settings.public_folder, "doc")
   api_doc.yaml_output_dir = Shaf::Settings.documents_dir || "doc/api"
