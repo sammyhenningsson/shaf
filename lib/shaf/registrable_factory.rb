@@ -29,7 +29,7 @@ module Shaf
 
     def usage
       reg.compact.map do |entry|
-        usage = entry.instance_eval { @usage }
+        usage = entry.instance_variable_get(:@usage)
         usage.respond_to?(:call) ? usage.call : usage
       end
     end
@@ -49,7 +49,7 @@ module Shaf
     end
 
     def matching_class?(strings, clazz)
-      identifiers = clazz.instance_eval { @identifiers }
+      identifiers = clazz.instance_variable_get(:@identifiers)
       return false if strings.size < identifiers.size
       identifiers.zip(strings).all? { |pattern, str| matching_identifier? str, pattern }
     end
@@ -62,7 +62,7 @@ module Shaf
     end
 
     def identifier_count(clazz)
-      clazz.instance_eval { @identifiers }&.size || 0
+      clazz.instance_variable_get(:@identifiers)&.size || 0
     end
 
     def init_args(clazz, params)

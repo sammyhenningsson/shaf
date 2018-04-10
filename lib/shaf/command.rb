@@ -1,3 +1,4 @@
+require 'optparse'
 require 'shaf/utils'
 require 'shaf/registrable_factory'
 
@@ -13,7 +14,7 @@ module Shaf
     class Base
       include Utils
 
-      attr_reader :args
+      attr_reader :args, :options
 
       class << self
         def inherited(child)
@@ -32,10 +33,22 @@ module Shaf
           STDERR.puts msg
           exit status
         end
+
+        def options(option_parser, options); end
       end
 
       def initialize(*args)
         @args = args.dup
+        @options = {}
+        parse_options!
+      end
+
+      private
+
+      def parse_options!
+        parser = OptionParser.new
+        self.class.options(parser, @options)
+        parser.parse!(@args)
       end
     end
   end
