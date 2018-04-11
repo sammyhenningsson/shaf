@@ -134,7 +134,7 @@ module Shaf
               identifier :my_generator
               usage 'generate my_generator'
 
-              def call
+              def call(*)
                 write_output('#{filename}', '#{content}')
               end
             end

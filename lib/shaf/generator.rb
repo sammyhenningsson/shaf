@@ -24,11 +24,15 @@ module Shaf
         def usage(str = nil, &block)
           @usage = str || block
         end
+
+        def options(option_parser, options); end
       end
 
       def initialize(*args)
         @args = args.dup
       end
+
+      def call(options = {}); end
 
       def template_dir
         File.expand_path('../generator/templates', __FILE__)

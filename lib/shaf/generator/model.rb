@@ -5,10 +5,10 @@ module Shaf
       identifier :model
       usage 'generate model MODEL_NAME [attribute:type] [..]'
 
-      def call
+      def call(options = {})
         create_model
         create_migration
-        create_serializer
+        create_serializer(options)
       end
 
       def model_name
@@ -61,10 +61,10 @@ module Shaf
         Migration::Generator.new(*migration_args).call
       end
 
-      def create_serializer
+      def create_serializer(options)
         serializer_args = %W(serializer #{model_name})
         serializer_args += args[1..-1].map { |arg| arg.split(':').first }
-        Generator::Factory.create(*serializer_args).call
+        Generator::Factory.create(*serializer_args).call(options)
       end
     end
   end

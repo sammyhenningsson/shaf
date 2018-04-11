@@ -11,9 +11,11 @@ module Shaf
           parser.on("-f", "--foo") do |n|
             options[:foo] = n
           end
+
           parser.on("-b", "--bar BAR") do |b|
             options[:bar] = b
           end
+
           parser.on("-z", "--baz NUM", Integer) do |b|
             options[:baz] = b
           end

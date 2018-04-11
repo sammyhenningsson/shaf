@@ -4,7 +4,7 @@ module Shaf
       identifier :policy
       usage 'generate policy MODEL_NAME [attribute] [..]'
 
-      def call
+      def call(options = {})
         create_policy
       end
 

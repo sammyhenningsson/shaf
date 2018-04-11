@@ -7,6 +7,11 @@ module Shaf
       reg.dup
     end
 
+    def each
+      return all.each unless block_given?
+      all.each { |c| yield c }
+    end
+
     def size
       reg.size
     end
