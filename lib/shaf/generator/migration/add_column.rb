@@ -34,9 +34,7 @@ module Shaf
         end
 
         def add_columns_change
-          cols = columns.map do |s|
-            "add_column #{column_def(s, create: false)}"
-          end
+          cols = columns.map { |s| column_def(s, create: false) }
           [
             "alter_table(:#{table_name}) do",
             *cols.map { |col| col.prepend("  ") }, # indent body with 2 spaces

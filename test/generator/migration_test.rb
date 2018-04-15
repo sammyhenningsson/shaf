@@ -25,7 +25,7 @@ module Shaf
         describe "create table" do
           let(:table_name) { "blogs" }
           let(:generator) do
-            Generator.new(*%w(create table blogs message:string user_id:integer))
+            Generator.new(*%w(create table blogs message:string word_count:integer user_id:foreign_key(users)))
           end
 
           it "creates file in db/migrations" do
@@ -46,7 +46,8 @@ module Shaf
             assert_match %r(create_table\(:#{table_name}\) do$), output
             assert_match %r(primary_key :id$), output
             assert_match %r(String :message$), output
-            assert_match %r(Integer :user_id$), output
+            assert_match %r(Integer :word_count$), output
+            assert_match %r(foreign_key :user_id, :users), output
           end
         end
 
@@ -64,6 +65,23 @@ module Shaf
           it "has the right content" do
             assert_match %r(alter_table\(:#{table_name}\) do$), output
             assert_match %r(add_column :comment, String), output
+          end
+        end
+
+        describe "add a foreign_key" do
+          let(:table_name) { "blogs" }
+          let(:generator) do
+            Generator.new(*%w(add column blogs user_id:foreign_key(users)))
+          end
+
+          it "names the migration file correctly" do
+            file = File.basename output_file
+            assert_match %r(_add_user_id_to_#{table_name}\.rb\Z), file
+          end
+
+          it "has the right content" do
+            assert_match %r(alter_table\(:#{table_name}\) do$), output
+            assert_match %r(add_foreign_key :user_id, :users), output
           end
         end
 

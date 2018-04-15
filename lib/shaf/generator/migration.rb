@@ -23,19 +23,19 @@ module Shaf
 
       class Base
         DB_COL_TYPES = {
-          integer:    ['Integer :%s', ':%s, Integer'],
-          varchar:    ['String %s', ':%s, String'],
-          string:     ['String :%s', ':%s, String'],
-          text:       ['String :%s, text: true', ':%s, String, text: true'],
-          blob:       ['File :%s', ':%s, File'],
-          bigint:     ['Bignum :%s', ':%s, Bignum'],
-          double:     ['Float :%s', ':%s, Float'],
-          numeric:    ['BigDecimal :%s', ':%s, BigDecimal'],
-          date:       ['Date :%s', ':%s, Date'],
-          timestamp:  ['DateTime :%s', ':%s, DateTime'],
-          time:       ['Time :%s', ':%s, Time'],
-          bool:       ['TrueClass :%s', ':%s, TrueClass'],
-          boolean:    ['TrueClass :%s', ':%s, TrueClass'],
+          integer:    ['Integer :%s',             'add_column :%s, Integer'],
+          varchar:    ['String %s',               'add_column :%s, String'],
+          string:     ['String :%s',              'add_column :%s, String'],
+          text:       ['String :%s, text: true',  'add_column :%s, String, text: true'],
+          blob:       ['File :%s',                'add_column :%s, File'],
+          bigint:     ['Bignum :%s',              'add_column :%s, Bignum'],
+          double:     ['Float :%s',               'add_column :%s, Float'],
+          numeric:    ['BigDecimal :%s',          'add_column :%s, BigDecimal'],
+          date:       ['Date :%s',                'add_column :%s, Date'],
+          timestamp:  ['DateTime :%s',            'add_column :%s, DateTime'],
+          time:       ['Time :%s',                'add_column :%s, Time'],
+          bool:       ['TrueClass :%s',           'add_column :%s, TrueClass'],
+          boolean:    ['TrueClass :%s',           'add_column :%s, TrueClass'],
         }
 
         attr_reader :args
@@ -74,6 +74,7 @@ module Shaf
 
         def db_type(type)
           type ||= :string
+          return foreign_key_def(type) if db_type_foreign_key?(type)
           DB_COL_TYPES[type.to_sym] or raise "Column type '#{type}' not supported"
         end
 
@@ -91,6 +92,17 @@ module Shaf
 
         def timestamp
           DateTime.now.strftime("%Y%m%d%H%M%S")
+        end
+
+        def db_type_foreign_key?(type)
+          type =~ /\Aforeign_key\(\w+\)/
+        end
+
+        def foreign_key_def(type)
+          m = type.match /\Aforeign_key(?:\((\w+)\))?/
+          raise "Column type '#{type}' not supported" unless m && m[1]
+          str = "foreign_key :%s, :#{m[1]}"
+          [str, "add_#{str}"]
         end
 
         def add_timestamp_columns?
