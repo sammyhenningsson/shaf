@@ -36,6 +36,7 @@ module Shaf
           time:       ['Time :%s',                'add_column :%s, Time'],
           bool:       ['TrueClass :%s',           'add_column :%s, TrueClass'],
           boolean:    ['TrueClass :%s',           'add_column :%s, TrueClass'],
+          index:      [nil,                       'add_index :%s'],
         }
 
         attr_reader :args
@@ -99,7 +100,7 @@ module Shaf
         end
 
         def foreign_key_def(type)
-          m = type.match /\Aforeign_key(?:\((\w+)\))?/
+          m = type.match(/\Aforeign_key(?:\((\w+)\))?/)
           raise "Column type '#{type}' not supported" unless m && m[1]
           str = "foreign_key :%s, :#{m[1]}"
           [str, "add_#{str}"]
@@ -128,6 +129,7 @@ module Shaf
 end
 
 require 'shaf/generator/migration/add_column'
+require 'shaf/generator/migration/add_index'
 require 'shaf/generator/migration/create_table'
 require 'shaf/generator/migration/drop_column'
 require 'shaf/generator/migration/empty'

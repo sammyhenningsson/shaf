@@ -85,6 +85,23 @@ module Shaf
           end
         end
 
+        describe "add an index" do
+          let(:table_name) { "blogs" }
+          let(:generator) do
+            Generator.new(*%w(add index blogs user_id))
+          end
+
+          it "names the migration file correctly" do
+            file = File.basename output_file
+            assert_match %r(_add_user_id_index_to_#{table_name}\.rb\Z), file
+          end
+
+          it "has the right content" do
+            assert_match %r(alter_table\(:#{table_name}\) do$), output
+            assert_match %r(add_index :user_id), output
+          end
+        end
+
         describe "drop column" do
           let(:table_name) { "blogs" }
           let(:generator) do
