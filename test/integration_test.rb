@@ -88,7 +88,7 @@ module Shaf
 
     it "passes specs" do
       Dir.chdir(project_path) do
-        assert system("shaf generate scaffold post message:string:Meddelande author:integer:Författare", out: File::NULL)
+        assert system("shaf generate scaffold --specs post message:string:Meddelande author:integer:Författare", out: File::NULL)
         assert system("rake db:migrate", out: File::NULL)
         assert system("rake test", out: File::NULL, err: File::NULL)
       end
