@@ -25,7 +25,15 @@ module Shaf
         describe "create table" do
           let(:table_name) { "blogs" }
           let(:generator) do
-            Generator.new(*%w(create table blogs message:string word_count:integer user_id:foreign_key(users)))
+            Generator.new(
+              'create',
+              'table',
+              'blogs',
+              'message:string',
+              'word_count:integer',
+              'user_id:foreign_key(users)',
+              'message:index'
+            )
           end
 
           it "creates file in db/migrations" do
@@ -48,6 +56,7 @@ module Shaf
             assert_match %r(String :message$), output
             assert_match %r(Integer :word_count$), output
             assert_match %r(foreign_key :user_id, :users), output
+            assert_match %r(index :message, unique: true), output
           end
         end
 

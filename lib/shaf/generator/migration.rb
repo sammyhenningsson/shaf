@@ -36,7 +36,11 @@ module Shaf
           time:       ['Time :%s',                'add_column :%s, Time'],
           bool:       ['TrueClass :%s',           'add_column :%s, TrueClass'],
           boolean:    ['TrueClass :%s',           'add_column :%s, TrueClass'],
-          index:      [nil,                       'add_index :%s'],
+          index:      ['index :%s, unique: true', 'add_index :%s'],
+        }
+
+        REGEXP_DB_TYPES = {
+          /\Aforeign_key\((\w+)\)/ => ['foreign_key :%s, :\1', 'add_foreign_key :%s, :\1'],
         }
 
         attr_reader :args
@@ -75,8 +79,13 @@ module Shaf
 
         def db_type(type)
           type ||= :string
-          return foreign_key_def(type) if db_type_foreign_key?(type)
-          DB_COL_TYPES[type.to_sym] or raise "Column type '#{type}' not supported"
+          result = DB_COL_TYPES[type.to_sym]
+          result ||= REGEXP_DB_TYPES.each do |pattern, strings|
+            m = pattern.match(type) or next
+            break strings.map { |a| replace_backreferences(m, a) }
+          end
+          raise "Column type '#{type}' not supported" unless result
+          result
         end
 
         def column_def(str, create: true)
@@ -95,15 +104,11 @@ module Shaf
           DateTime.now.strftime("%Y%m%d%H%M%S")
         end
 
-        def db_type_foreign_key?(type)
-          type =~ /\Aforeign_key\(\w+\)/
-        end
-
-        def foreign_key_def(type)
-          m = type.match(/\Aforeign_key(?:\((\w+)\))?/)
-          raise "Column type '#{type}' not supported" unless m && m[1]
-          str = "foreign_key :%s, :#{m[1]}"
-          [str, "add_#{str}"]
+        def replace_backreferences(match, str)
+          groups = match.size
+          (1...groups).inject(str) do |s, i|
+            s.gsub("\\#{i}", match[i])
+          end
         end
 
         def add_timestamp_columns?
