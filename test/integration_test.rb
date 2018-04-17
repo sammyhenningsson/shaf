@@ -20,10 +20,10 @@ module Shaf
       FileUtils.remove_dir(tmp_dir)
     end
 
-    def with_server
+    def with_server(port: 3030)
       pid = nil
       Dir.chdir(project_path) do
-        pid = spawn("shaf server", out: File::NULL, err: [:child, :out])
+        pid = spawn("shaf server -p #{port}", out: File::NULL, err: [:child, :out])
         sleep 1
         yield
       end
@@ -38,8 +38,8 @@ module Shaf
       @response = JSON.parse(response)
     end
 
-    def get_root
-      get("http://localhost:3000/")
+    def get_root(port: 3030)
+      get("http://localhost:#{port}/")
     end
 
     def get_link(rel)

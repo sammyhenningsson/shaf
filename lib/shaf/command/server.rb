@@ -5,7 +5,14 @@ module Shaf
       identifier %r(\As(erver)?\Z)
       usage 'server'
 
+      def self.options(parser, options)
+        parser.on("-p", "--port PORT", Integer, "Listen port") do |p|
+          options[:port] = p
+        end
+      end
+
       def call
+        Settings.port = options[:port] if options[:port]
         bootstrap
         App.instance.run!
       end

@@ -10,7 +10,7 @@ module Shaf
 
       def create_instance
         @instance = Sinatra.new
-        @instance.set :port, Shaf::Settings.port || 3000
+        @instance.set :port, Settings.port || 3000
         @instance.use Shaf::Middleware::RequestId
       end
 
