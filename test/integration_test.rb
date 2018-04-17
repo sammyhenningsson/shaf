@@ -145,5 +145,49 @@ module Shaf
         assert_equal File.read(filename), content
       end
     end
+
+    it "seed the db" do
+      Dir.chdir(project_path) do
+        assert system("shaf generate scaffold user name:string", out: File::NULL)
+        # Currenly the model generator creates a borken serializer, due to undefined uri helpers.
+        # (Unless the corresponding controller and uri_helpers have been defined).
+        # Change scaffold to model, when that has been fixed!!
+        # assert system("shaf generate model user name:string", out: File::NULL)
+
+        Dir.mkdir "db/seeds"
+        File.open("db/seeds.rb", "w") do |f|
+          f.puts <<~RUBY
+            User.create(name: "user1")
+          RUBY
+        end
+
+        File.open("db/seeds/users.rb", "w") do |f|
+          f.puts <<~RUBY
+            User.create(name: "user2")
+          RUBY
+        end
+
+        File.open("db/seeds/more_users.rb", "w") do |f|
+          f.puts <<~RUBY
+            User.create(name: "user3")
+          RUBY
+        end
+
+        assert system("rake db:migrate", out: File::NULL)
+        assert system("rake db:seed", out: File::NULL)
+
+        user_count = nil
+
+        open("| shaf console", 'w+') do |process|
+          process.write("User.count")
+          process.close_write
+          output_rows = process.read.split("\n").map(&:strip)
+          i = output_rows.find_index "User.count"
+          user_count = output_rows[i + 1].to_i
+        end
+
+        assert_equal 3, user_count
+      end
+    end
   end
 end

@@ -62,3 +62,18 @@ Shaf::DbTask.new(:reset, description: "Reset the database by deleting all rows i
   Sequel::Migrator.run(DB, MIGRATIONS_DIR, target: version)
   Sequel::Migrator.run(DB, MIGRATIONS_DIR)
 end
+
+Shaf::DbTask.new(:seed, description: "Seed the Database") do
+  ENV['RACK_ENV'] ||= 'development'
+  require 'config/bootstrap'
+
+  if File.exist? "db/seeds.rb"
+    require "db/seeds"
+  end
+
+  if Dir.exist? "db/seeds"
+    Dir['db/seeds/**/*.rb'].each do |file|
+      require file.sub(".rb", "")
+    end
+  end
+end
