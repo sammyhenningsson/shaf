@@ -77,6 +77,52 @@ module Shaf
       end
     end
 
+    describe "nested resource uris" do
+
+      CreateUriMethods.new(:comment, base: '/users/:foo').call
+
+      it "adds a nested comments_uri method" do
+        assert_method_registered :comments_uri
+        assert_equal '/users/3/comments', Shaf::UriHelper.comments_uri(3)
+        assert_equal '/users/4/comments', Shaf::UriHelper.comments_uri(OpenStruct.new(foo: 4))
+        assert_equal '/users/:foo/comments', Shaf::UriHelper.comments_uri_template
+        assert_equal '/users/3/comments?bar=5&baz=fem', Shaf::UriHelper.comments_uri(3, bar: 5, baz: "fem")
+      end
+
+      it "adds a nested comment_uri method" do
+        assert_method_registered :comment_uri
+        assert_equal '/users/3/comments/5', Shaf::UriHelper.comment_uri(3, resrc)
+        assert_equal '/users/4/comments/6', Shaf::UriHelper.comment_uri(OpenStruct.new(foo: 4), 6)
+        assert_equal '/users/:foo/comments/:id', Shaf::UriHelper.comment_uri_template
+        assert_equal '/users/3/comments/5?bar=5&baz=fem', Shaf::UriHelper.comment_uri(3, resrc, bar: 5, baz: "fem")
+      end
+
+      it "adds a nested new_comment_uri method" do
+        assert_method_registered :new_comment_uri
+        assert_equal '/users/3/comments/form', Shaf::UriHelper.new_comment_uri(3)
+        assert_equal '/users/4/comments/form', Shaf::UriHelper.new_comment_uri(OpenStruct.new(foo: 4))
+        assert_equal '/users/:foo/comments/form', Shaf::UriHelper.new_comment_uri_template
+        assert_equal '/users/3/comments/form?bar=5&baz=fem', Shaf::UriHelper.new_comment_uri(3, bar: 5, baz: "fem")
+      end
+
+      it "adds a nested edit_comment_uri method" do
+        assert_method_registered :edit_comment_uri
+        assert_equal '/users/3/comments/5/edit', Shaf::UriHelper.edit_comment_uri(3, resrc)
+        assert_equal '/users/4/comments/6/edit', Shaf::UriHelper.edit_comment_uri(OpenStruct.new(foo: 4), 6)
+        assert_equal '/users/:foo/comments/:id/edit', Shaf::UriHelper.edit_comment_uri_template
+        assert_equal '/users/3/comments/5/edit?bar=5&baz=fem', Shaf::UriHelper.edit_comment_uri(3, resrc, bar: 5, baz: "fem")
+      end
+    end
+
+    describe "too deeply nested resources" do
+
+      it "raise and exceptions" do
+        assert_raises CreateUriMethods::UriTemplateNestingError do
+          CreateUriMethods.new(:note, base: '/users/:foo/bar/:baz/notes').call
+        end
+      end
+    end
+
     describe "uri methods with specified plural name" do
 
       CreateUriMethods.new(:baz, plural_name: 'baz').call

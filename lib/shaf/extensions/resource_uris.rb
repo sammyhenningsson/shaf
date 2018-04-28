@@ -54,10 +54,53 @@ module Shaf
   # edit_book_uri_template         => /books/:id/edit
   #
   class CreateUriMethods
+
+    # Resources should never be nested more than 1 level deep.
+    MAX_NESTING_DEPTH = 1
+
+    class UriTemplateNestingError < StandardError
+      def initialize(msg = nil)
+        msg ||= "Uri templates only supports a nesting depth of #{MAX_NESTING_DEPTH}"
+        super(msg)
+      end
+    end
+
+    class UriTemplateVariableError < StandardError
+      def initialize(msg = nil)
+        msg ||= "Mismatch between uri templates and resources"
+        super(msg)
+      end
+    end
+
+    class << self
+      def resource_helper_uri(template_uri, *resources, query)
+        uri = replace_templates(template_uri, *resources)
+        query_string = MethodBuilder.query_string(query)
+        "#{uri}#{query_string}".freeze
+      end
+
+      def replace_templates(template_uri, *resources)
+        symbols = MethodBuilder.extract_symbols(template_uri)
+        resources.compact!
+        raise UriTemplateVariableError if symbols.size != resources.size
+
+        MethodBuilder.transform_symbols(template_uri) do |segment|
+          resrc = resources.shift
+          sym = symbols.shift
+          resrc.respond_to?(sym) ? resrc.public_send(sym) : resrc
+        end
+      end
+    end
+
     def initialize(name, base: nil, plural_name: nil)
       @name = name.to_s
       @base = base&.sub(%r(/\Z), '') || ''
-      @plural_name = plural_name&.to_s || name.to_s + 's'
+      @plural_name = plural_name&.to_s || Utils::pluralize(name.to_s)
+
+      if nesting_depth > MAX_NESTING_DEPTH
+        raise UriTemplateNestingError,
+          "Too deep nesting level (max #{MAX_NESTING_DEPTH}): #{@base}"
+      end
     end
 
     def call
@@ -76,87 +119,100 @@ module Shaf
     attr_reader :name, :base, :plural_name
 
     def register_resources_uri
-      uri = "#{base}/#{plural_name}"
-      helper_name = "#{plural_name}_uri"
-
-      UriHelperMethods.register(helper_name) do |**query|
-        query_string = MethodBuilder.query_string(query)
-        "#{uri}#{query_string}".freeze
-      end
-      UriHelperMethods.register("#{helper_name}_template") { uri.freeze }
+      template_uri = "#{base}/#{plural_name}".freeze
+      helper_name = "#{plural_name}_uri".freeze
+      register(template_uri, helper_name)
     end
 
     def register_resource_uri
-      uri = "#{base}/#{plural_name}"
-      helper_name = "#{name}_uri"
-
-      UriHelperMethods.register helper_name do |resrc, **query|
-        id = resrc.is_a?(Integer) ? resrc : resrc&.id
-        query_string = MethodBuilder.query_string(query)
-
-        next "#{uri}/#{id}#{query_string}".freeze if id.is_a?(Integer)
-        raise ArgumentError,
-          "In #{helper_name}: id must be an integer! was #{id.class}"
-      end
-
-      UriHelperMethods.register "#{helper_name}_template" do
-        "#{uri}/:id".freeze
-      end
+      template_uri = "#{base}/#{plural_name}/:id".freeze
+      helper_name = "#{name}_uri".freeze
+      register(template_uri, helper_name)
     end
 
     # If a resource has the same singular and plural names, then this method
     # should be used. It will return the resource uri when a resource is given
     # as argument and the resources uri when no arguments are provided.
     def register_resource_uri_by_arg
-      uri = "#{base}/#{plural_name}"
+      resource_template_uri =   "#{base}/#{plural_name}/:id"
+      collection_template_uri = "#{base}/#{plural_name}"
       helper_name = "#{plural_name}_uri"
 
-      UriHelperMethods.register helper_name do |resrc = nil, **query|
-        query_string = MethodBuilder.query_string(query)
-
-        if resrc.nil?
-          "#{uri}#{query_string}".freeze
-        else
-          id = (resrc.is_a?(Integer) ? resrc : resrc.id).to_i
-
-          next "#{uri}/#{id}#{query_string}".freeze if id.is_a?(Integer)
-          raise ArgumentError,
-            "In #{helper_name}: id must be an integer! was #{id.class}"
-        end
-      end
-
-      UriHelperMethods.register "#{helper_name}_template" do |collection = false|
-        (collection ? uri : "#{uri}/:id").freeze
+      block = resource_or_collection_method_proc(resource_template_uri, collection_template_uri)
+      UriHelperMethods.register(helper_name, &block)
+      UriHelperMethods.register("#{helper_name}_template") do |collection = false|
+        (collection ? collection_template_uri : resource_template_uri).freeze
       end
     end
 
     def register_new_resource_uri
-      uri = "#{base}/#{plural_name}/form"
-      helper_name = "new_#{name}_uri"
-
-      UriHelperMethods.register(helper_name) do |**query|
-        query_string = MethodBuilder.query_string(query)
-        "#{uri}#{query_string}".freeze
-      end
-      UriHelperMethods.register("#{helper_name}_template") { uri.freeze }
+      template_uri = "#{base}/#{plural_name}/form".freeze
+      helper_name = "new_#{name}_uri".freeze
+      register(template_uri, helper_name)
     end
 
     def register_edit_resource_uri
-      uri = "#{base}/#{plural_name}"
-      helper_name = "edit_#{name}_uri"
+      template_uri = "#{base}/#{plural_name}/:id/edit".freeze
+      helper_name = "edit_#{name}_uri".freeze
+      register(template_uri, helper_name)
+    end
 
-      UriHelperMethods.register helper_name do |resrc, **query|
-        id = resrc.is_a?(Integer) ? resrc : resrc&.id
-        query_string = MethodBuilder.query_string(query)
+    def register(template_uri, helper_name)
+      block = resource_helper_method_proc(template_uri)
+      UriHelperMethods.register(helper_name, &block)
+      UriHelperMethods.register("#{helper_name}_template") { template_uri }
+    end
 
-        next "#{uri}/#{id}/edit#{query_string}".freeze if id.is_a?(Integer)
-        raise ArgumentError,
-          "In #{helper_name}: id must be an integer! was #{id.class}"
+    def resource_helper_method_proc(template_uri)
+      arg_count = MethodBuilder.extract_symbols(template_uri).size
+
+      case arg_count
+      when 0
+        ->(**query) do
+          CreateUriMethods.resource_helper_uri(template_uri, query)
+        end
+      when 1
+        ->(resrc, **query) do
+          CreateUriMethods.resource_helper_uri(template_uri, resrc, query)
+        end
+      when 2
+        ->(parent_resrc, resrc, **query) do
+          CreateUriMethods.resource_helper_uri(template_uri, parent_resrc, resrc, query)
+        end
+      else
+        raise UriTemplateNestingError,
+          "Too deep nesting level (max #{MAX_NESTING_DEPTH}): #{template_uri}"
       end
+    end
 
-      UriHelperMethods.register "#{helper_name}_template" do
-        "#{uri}/:id/edit".freeze
+    def resource_or_collection_method_proc(resource_template_uri, collection_template_uri)
+      case nesting_depth
+      when 0
+        ->(resrc = nil, **query) {
+          args = if resrc.nil?
+                   [collection_template_uri, query]
+                 else
+                   [resource_template_uri, resrc, query]
+                 end
+          CreateUriMethods.resource_helper_uri(*args)
+        }
+      when 1
+        ->(parent_resrc, resrc = nil, **query) {
+          args = if resrc.nil?
+                   [collection_template_uri, parent_resrc, query]
+                 else
+                   [resource_template_uri, parent_resrc, resrc, query]
+                 end
+          CreateUriMethods.resource_helper_uri(*args)
+        }
+      else
+        raise UriTemplateNestingError,
+          "Too deep nesting level (max #{MAX_NESTING_DEPTH}): #{template_uri}"
       end
+    end
+
+    def nesting_depth
+      MethodBuilder.extract_symbols(base).size
     end
   end
 
@@ -191,24 +247,26 @@ module Shaf
         Ruby
       end
 
-      private
-
       def extract_symbols(uri)
         uri.split('/').grep(/:.*/).map { |t| t[1..-1] }.map(&:to_sym)
       end
 
-      def interpolated_uri_string(uri)
-        return uri if uri.split('/').empty?
+      def transform_symbols(uri)
+        uri.split('/').map do |segment|
+          next segment unless segment.start_with? ':'
+          yield segment
+        end.join('/')
+      end
 
-        segments = uri.split('/').map do |segment|
-          if segment.start_with? ':'
-            str = segment[1..-1]
-            "\#{#{str}.respond_to?(#{segment}) ? #{str}.#{str} : #{str}}"
-          else
-            segment
-          end
+      private
+
+      def interpolated_uri_string(uri)
+        return uri if uri == '/'
+
+        transform_symbols(uri) do |segment|
+          str = segment[1..-1]
+          "\#{#{str}.respond_to?(#{segment}) ? #{str}.#{str} : #{str}}"
         end
-        segments.join('/')
       end
     end
   end
