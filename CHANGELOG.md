@@ -1,3 +1,14 @@
+## 0.4.0
+ * Refactored tasks
+ * Support command options
+ * Specs not generated unless flag `--specs`
+ * Support foreign keys in migrations generators
+ * Support add index migrations
+ * Add -p, --port option to server command
+ * Support db seed files
+ * Support nested resources in uri helpers
+ * Removed dev dependencies
+ * Add support for upgrading projects
 ## 0.3.1
  * Support spec fixtures
  * Support model names with underscore
