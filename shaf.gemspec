@@ -23,14 +23,4 @@ Gem::Specification.new do |gem|
 
   gem.required_ruby_version = '>= 2.3'
   gem.add_development_dependency "rake", '~> 12.0', '>= 10.0'
-  gem.add_development_dependency "minitest", '~> 5.10', '>= 5.0'
-  gem.add_development_dependency "hal_presenter", '~> 0.4.3', '>= 0.4.0'
-  gem.add_development_dependency "sinatra", '~> 2.0.1', '>= 2.0.0'
-  gem.add_development_dependency "sequel", '~> 5.6'
-  gem.add_development_dependency "sinatra-sequel", '~> 0.9.0'
-  gem.add_development_dependency "thin", '~> 1.7', '>= 1.7.2'
-  gem.add_development_dependency "bcrypt", '~> 3.1', '>= 3.1.11'
-  gem.add_development_dependency "redcarpet", '~> 3.4'
-  gem.add_development_dependency "minitest-hooks", '~> 1.4', '>= 1.4.2'
-  gem.add_development_dependency "rack-test", '~> 0.8.3'
 end
