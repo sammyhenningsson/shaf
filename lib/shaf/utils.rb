@@ -2,6 +2,8 @@ module Shaf
   module Utils
     class ProjectRootNotFound < StandardError; end
 
+    SHAF_VERSION_FILE = '.shaf'.freeze
+
     # FIXME!!!
     def self.pluralize(noun)
       noun + 's' # FIXME!!
@@ -60,6 +62,13 @@ module Shaf
 
     def pluralize(noun)
       Utils::pluralize(noun)
+    end
+
+    def write_shaf_version_file(version = nil)
+      version ||= Shaf::VERSION
+      File.write SHAF_VERSION_FILE,
+        YAML.dump({'version' => version})
+      version
     end
   end
 end

@@ -21,7 +21,7 @@ module Shaf
         Dir.chdir(@project_name) do
           copy_templates
           create_gemfile
-          create_shaf_version_file
+          write_shaf_version_file
           create_ruby_version_file
         end
       end
@@ -44,11 +44,6 @@ module Shaf
         template_files.each do |template|
           copy_template(template)
         end
-      end
-
-      def create_shaf_version_file
-        File.write '.shaf',
-          YAML.dump({'version' => Shaf::VERSION})
       end
 
       def create_ruby_version_file
