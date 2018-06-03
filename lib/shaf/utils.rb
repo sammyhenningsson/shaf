@@ -13,11 +13,19 @@ module Shaf
       name.capitalize.gsub(/[_-](\w)/) { $1.upcase }
     end
 
+    def self.gem_root
+      File.expand_path('../../..', __FILE__)
+    end
+
     # FIXME!!!
     def self.singularize(noun)
       return singularize(noun.to_s).to_sym if noun.is_a? Symbol
       return noun unless noun.end_with? 's'
       noun[0..-2]
+    end
+
+    def gem_root
+      self.class.gem_root
     end
 
     def project_root
