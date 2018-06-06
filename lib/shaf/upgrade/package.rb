@@ -2,6 +2,7 @@ require 'rubygems/package'
 require 'zlib'
 require 'set'
 require 'digest'
+require 'open3'
 
 module Shaf
   module Upgrade
@@ -140,8 +141,18 @@ module Shaf
       end
 
       def apply_patch(file, patch)
-        puts "applying patch for file: #{file}!!!"
+        success = nil
+        Open3.popen3('patch', file, '-r', '-') do |i, o, e, t|
+          i.write patch
+          i.close
+          puts o.read
+          err = e.read
+          puts err unless err.empty?
+          success = t.value.success?
+        end
+        success
       end
+
     end
   end
 end

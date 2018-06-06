@@ -72,11 +72,24 @@ module Shaf
       Utils::pluralize(noun)
     end
 
-    def write_shaf_version_file(version = nil)
-      version ||= Shaf::VERSION
+    def read_shaf_file
+      return {} unless File.exist? SHAF_VERSION_FILE
+      str = File.read(SHAF_VERSION_FILE)
+      YAML.load(str) || {}
+    end
+
+    def write_shaf_file(data = {})
+      data = read_shaf_file.merge(data)
       File.write SHAF_VERSION_FILE,
-        YAML.dump({'version' => version})
-      version
+        YAML.dump(data)
+    end
+
+    def read_shaf_version
+      read_shaf_file['version']
+    end
+
+    def write_shaf_version(version = nil)
+      write_shaf_file('version' => version || Shaf::VERSION)
     end
   end
 end

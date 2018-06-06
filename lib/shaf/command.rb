@@ -5,7 +5,8 @@ require 'shaf/registrable_factory'
 module Shaf
   module Command
 
-    class ArgumentError < StandardError; end
+    class CommandError < StandardError; end
+    class ArgumentError < CommandError; end
 
     class Factory
       extend RegistrableFactory
@@ -57,6 +58,7 @@ module Shaf
 end
 
 require 'shaf/command/new'
+require 'shaf/command/upgrade'
 require 'shaf/command/server'
 require 'shaf/command/console'
 require 'shaf/command/generate'

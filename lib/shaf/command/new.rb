@@ -21,7 +21,7 @@ module Shaf
         Dir.chdir(@project_name) do
           copy_templates
           create_gemfile
-          write_shaf_version_file
+          write_shaf_version
           create_ruby_version_file
         end
       end

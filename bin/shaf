@@ -24,6 +24,9 @@ module Shaf
       STDERR.puts "This command can only be executed inside a Shaf project directory. " \
         "Please change directory and try again!"
       exit 2
+    rescue Command::CommandError => e
+      STDERR.puts "Command failed: #{e.message}\n"
+      exit 3
     end
 
     def show_help
