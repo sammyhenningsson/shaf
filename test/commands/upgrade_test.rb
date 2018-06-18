@@ -1,7 +1,6 @@
 require 'test_helper'
 
 module Shaf
-
   describe Command::Upgrade do
     let(:cmd) { Command::Upgrade.new }
 
@@ -27,6 +26,28 @@ module Shaf
           selected_versions= cmd.upgrade_packages.map { |u| u.version.to_s }
           assert_equal [], selected_versions
         end
+      end
+    end
+  end
+
+  describe "Upgrading an old project" do
+    let(:tmp_dir) { Dir.mktmpdir }
+    let(:project_path) { File.join(tmp_dir, 'old_project') }
+    let(:project_tar) do
+      File.expand_path('../../data/0.3.1_project.tar.gz', __FILE__)
+    end
+
+    before do
+      Dir.chdir(tmp_dir) { `tar xzf #{project_tar}` }
+    end
+
+    after do
+      FileUtils.remove_dir(tmp_dir)
+    end
+
+    it 'upgrades a 0.3.1 project to latest version' do
+      Dir.chdir(project_path) do
+        assert system({'RUBYLIB' => Test::gem_lib_dir}, "shaf upgrade", out: File::NULL)
       end
     end
   end

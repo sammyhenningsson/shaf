@@ -23,7 +23,7 @@ module Shaf
     def with_server(port: 3030)
       pid = nil
       Dir.chdir(project_path) do
-        pid = spawn("shaf server -p #{port}", out: File::NULL, err: [:child, :out])
+        pid = spawn({'RUBYLIB' => Test::gem_lib_dir}, "shaf server -p #{port}", out: File::NULL, err: [:child, :out])
         sleep 1
         yield
       end
@@ -77,8 +77,8 @@ module Shaf
 
     it "adds a link to a new resource" do
       Dir.chdir(project_path) do
-        assert system("shaf generate scaffold post message:string:Meddelande author:integer:Författare", out: File::NULL)
-        assert system("rake db:migrate", out: File::NULL)
+        assert system({'RUBYLIB' => Test::gem_lib_dir}, "shaf generate scaffold post message:string:Meddelande author:integer:Författare", out: File::NULL)
+        assert system({'RUBYLIB' => Test::gem_lib_dir}, "rake db:migrate", out: File::NULL)
         with_server do
           get_root
           get_link('posts')
@@ -88,9 +88,9 @@ module Shaf
 
     it "passes specs" do
       Dir.chdir(project_path) do
-        assert system("shaf generate scaffold --specs post message:string:Meddelande author:integer:Författare", out: File::NULL)
-        assert system("rake db:migrate", out: File::NULL)
-        assert system("rake test", out: File::NULL, err: File::NULL)
+        assert system({'RUBYLIB' => Test::gem_lib_dir}, "shaf generate scaffold --specs post message:string:Meddelande author:integer:Författare", out: File::NULL)
+        assert system({'RUBYLIB' => Test::gem_lib_dir}, "rake db:migrate", out: File::NULL)
+        assert system({'RUBYLIB' => Test::gem_lib_dir}, "rake test", out: File::NULL, err: File::NULL)
       end
     end
 
@@ -173,8 +173,8 @@ module Shaf
           RUBY
         end
 
-        assert system("rake db:migrate", out: File::NULL)
-        assert system("rake db:seed", out: File::NULL)
+        assert system({'RUBYLIB' => Test::gem_lib_dir}, "rake db:migrate", out: File::NULL)
+        assert system({'RUBYLIB' => Test::gem_lib_dir}, "rake db:seed", out: File::NULL)
 
         user_count = nil
 
