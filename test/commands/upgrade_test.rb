@@ -47,7 +47,7 @@ module Shaf
 
     it 'upgrades a 0.3.1 project to latest version' do
       Dir.chdir(project_path) do
-        assert system({'RUBYLIB' => Test::gem_lib_dir}, "shaf upgrade", out: File::NULL)
+        assert Test.system("shaf upgrade", out: File::NULL)
       end
     end
   end

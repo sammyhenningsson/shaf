@@ -18,5 +18,15 @@ module Shaf
     def self.gem_lib_dir
       File.expand_path('../../lib', __FILE__)
     end
+
+    def self.system(*args)
+      env = {'RUBYLIB' => gem_lib_dir}
+      Kernel::system(env, *args)
+    end
+
+    def self.spawn(*args)
+      env = {'RUBYLIB' => gem_lib_dir}
+      Kernel::spawn(env, *args)
+    end
   end
 end
