@@ -254,7 +254,7 @@ class PostController < BaseController
   resource_uris_for :post
 end
 ```
-Would add the following methods as instance method on Shaf::UriHelper. This module is then both included and extended into the `PostController` (which means that all uri helpers are be available as both class methods and instance methods in the controller).  
+Would add the following methods as instance method on Shaf::UriHelper. This module is then both included and extended into the `PostController` (which means that all uri helpers are available as both class methods and instance methods in the controller).  
 
 | Methods                                | Returned string with no query_params (id may vary) | 
 | -------------------------------------- | -------------------------------------------------- |
@@ -279,7 +279,7 @@ end
 Would add an `archive_post_uri(post, **query_params)` method to the `PostController` class as well as instances of `PostController`.  
 Uri helpers added by `resource_uris_for` and `register_uri` gets added to the module `Shaf::UriHelper` as both module methods and instance methods. So to use them outside of Controllers, either call them directly on the module (e.g. `Shaf::UriHelper.my_foo_uri`) or include `Shaf::UriHelper` and get all helpers as instance methods.  
 
-To make it easier to see the connection between controller routes and uri helpers, Shaf makes it possible to specify routes with symbols. These symbols must the same as the corresponding uri helper:
+To make it easier to see the connection between controller routes and uri helpers, Shaf makes it possible to specify routes with symbols. These symbols must be the same as the corresponding uri helper:
 ```sh
 class PostController < BaseController
   register_uri :archive_post '/posts/:id/archive'
@@ -296,7 +296,7 @@ This module adds an `authorize_with(policy)` class method and an `authorize!(act
 class PostPolicy
   include HALPresenter::Policy::DSL
 
-  alias :post :resource
+  alias post resource
 
   def show?
     !!current_user
