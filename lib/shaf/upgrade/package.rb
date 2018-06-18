@@ -74,10 +74,10 @@ module Shaf
       end
 
       def apply(dir = nil)
-        files_in(dir).each do |file|
-          chksum = @manifest.chksum_for(file)
-          next unless chksum
-          patch = @patches[chksum]
+        files_in(dir).all? do |file|
+          name = @manifest.patch_name_for(file) # returns nil when file
+          next true unless name                 # shouldn't be patched
+          patch = @patches[name]
           apply_patch(file, patch)
         end
       end

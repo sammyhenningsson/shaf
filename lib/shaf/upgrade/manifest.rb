@@ -16,7 +16,7 @@ module Shaf
         end
       end
 
-      def chksum_for(file)
+      def patch_name_for(file)
         @patches.select { |_, pattern| pattern =~ file }.keys.first
       end
     end
