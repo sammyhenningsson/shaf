@@ -11,16 +11,19 @@ module Shaf
       usage 'upgrade'
 
       def call
-        upgrade_packages.each do |package|
-          package.load.apply or raise UpgradeFailedError
-          write_shaf_version package.version.to_s
+        in_project_root do
+          upgrade_packages.each { |package| apply(package) }
+          puts "\nProject is up-to-date! Shaf version: #{current_version}"
         end
-        puts "\nProject is up-to-date! Shaf version: #{current_version}"
+      end
+
+      def apply(package)
+        package.load.apply or raise UpgradeFailedError
+        write_shaf_version package.version.to_s
       rescue Errno::ENOENT
         raise UpgradeFailedError,
           "Failed to execute system command 'patch'. Make sure that 'patch' installed!" \
           " (E.g. `sudo apt install patch` for Ubuntu)"
-
       end
 
       def upgrade_packages
