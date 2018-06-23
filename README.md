@@ -184,6 +184,12 @@ The response looks like this
 ```
 This is the collection of posts (which currently is empty, see `$response['_embedded']['posts']`). Besides from the emtpy list of posts we also get an embedded form (with rel _doc:create-form_). This form should be used to create a new post.
 
+## Upgrading a project created with shaf version < 0.4.0
+Shaf version 0.4.0 introduced a few changes that are not backward compatible with previous version. This means that if you created your Shaf project with an older gem version and then upgrade this gem to v0.4.0 your project will not function. To remedy this you will need to execute (from inside your project directory):
+```sh
+cd /path/to/my_project
+shaf upgrade
+```
 
 ## HAL
 The [HAL](http://stateless.co/hal_specification.html) mediatype is very simple and looks like a any JSON object, except for two reserved keys __links_ and __embedded_. __links_ displays possible actions that may be taken. __embedded_ contains nested resources. A HAL payload may contain a special link with rel _curies_, which is similar to namespaces in XML. Shaf uses a curie called _doc_ and makes it possible to fetch documentation for any link or embedded resources with a rel begining with 'doc:'. The href for curies are always templated, meaning that a part of the href (in our case '{rel}') must be replaced with a value. In the payload above the href of the doc curie is 'http://localhost:3000/doc/post/rels/{rel}' and there is one embedded resource prefixed with 'doc:', namely 'doc:create-form'. So this means that if we would like to find out information about what this embedded resource is and how it relates to the posts collection we replace '{rel}' with 'create-form' and perform a GET request to this url.
@@ -231,10 +237,11 @@ shaf generate policy some_resource attr1 attr2
 This will add a new policy.
 
 #### Migration
-Shaf currently supports 4 db migrations to be generated plus the possibility to generate an empty migration. These are:
+Shaf currently supports 5 db migrations to be generated plus the possibility to generate an empty migration. These are:
 ```sh
   generate migration
   generate migration add column TABLE_NAME field:type
+  generate migration add index TABLE_NAME COLUMN_NAME
   generate migration create table TABLE_NAME [field:type] [..]
   generate migration drop column TABLE_NAME COLUMN_NAME
   generate migration rename column TABLE_NAME OLD_NAME NEW_NAME
@@ -244,7 +251,7 @@ Note: You can also add custom migrations, see [Customizations](#Customizations)
 
 ## Routing/Controllers
 As usual with Sinatra applications routes are declared together with the controller code rather than in a separate file (as with Rails). All controllers SHOULD be subclasses of `BaseController` found in `api/controllers/base_controller.rb` (which was created along with the project).  
-Controllers generated with `shaf generate` uses two Shaf extensions, `Shaf::ResourceUris` and `Shaf::Authorize`.
+Controllers generated with `shaf generate` uses two extensions, `Shaf::ResourceUris` and `Shaf::Authorize`.
 
 #### Shaf::ResourceUris
 This extension adds two class methods, `resource_uris_for` and `register_uri`. Both methods are used to create uri helpers.  
@@ -312,13 +319,13 @@ The following controller will make sure that a user must be authenticated to be 
 class PostController < BaseController
   authorize_with PostPolicy
 
-  get '/posts/:id' do
+  get :post_uri do
     authorize! :show
 
     respond_with post 
   end
 
-  put '/posts/:id/edit' do
+  put :edit_post_uri do
     authorize! :edit, post
 
     post.update(params)
@@ -601,7 +608,7 @@ Since API clients should basically only have to care about the payloads that are
 To make it easy to explore the API in a brower, Shaf includes a some very basic html views. They are only meant to be a quick and easy way to view the api and to add/edit resources that does not require authentication. They are really ugly and you should not look at them if you are a frontend developer ;) (PRs are welcome!).
 
 ## Customizations
-Currently Shaf only support four commands (`new`, `server`, `console` and `generate`). Luckily it's possible to extend Shaf with custom commands and generators. Whenever the `shaf` command is executed the file `config/customize.rb` is loaded and checked for additional commands. To add a custom command, create a class that inherits from `Shaf::Command::Base`. Either put it directly in `config/customize.rb` or put it in a separate file and require that file inside `config/customize.rb`. Your customized class must call the inherited class method `identifier` with a `String`/`Symbol`/`Regexp` (or an array of `String`/`Symbol`/`Regexp` values) that _identifies_ the command. The identifier is used to match arguments passed to `shaf`. The command/generator must respond to `call` without any arguments. The arguments after the identifer will be availble from the instance method `args`. Writing a couple of simple command that echos back the arguments would be written as:
+Currently Shaf only support four commands (`new`, `server`, `console` and `generate`). Luckily it's possible to extend Shaf with custom commands and generators. Whenever the `shaf` command is executed the file `config/customize.rb` is loaded and checked for additional commands. To add a custom command, create a class that inherits from `Shaf::Command::Base`. Either put it directly in `config/customize.rb` or put it in a separate file and require that file inside `config/customize.rb`. Your customized class must call the inherited class method `identifier` with a `String`/`Symbol`/`Regexp` (or an array of `String`/`Symbol`/`Regexp` values) that _identifies_ the command. The identifier is used to match arguments passed to `shaf`. The command/generator must respond to `call` without any arguments. The arguments after the identifer will be availble from the instance method `args`. Writing a couple of simple commands that echos back the arguments would be written as:
 ```sh
 class EchoCommand < Shaf::Command::Base
   identifier :echo
