@@ -1,3 +1,5 @@
+require 'shaf/version'
+
 module Shaf
   module Utils
     class ProjectRootNotFound < StandardError; end
@@ -24,18 +26,19 @@ module Shaf
       noun[0..-2]
     end
 
+    def pluralize(noun)
+      Utils::pluralize(noun)
+    end
+
     def gem_root
       self.class.gem_root
     end
 
     def project_root
+      return @project_root if defined? @project_root
       dir = Dir.pwd
-      20.times do
-        if is_project_root?(dir)
-          return dir
-        elsif dir == '/'
-          break
-        end
+      while dir != '/' do
+        return @project_root = dir if is_project_root?(dir)
         dir = File.expand_path("..", dir)
       end
     end
@@ -68,14 +71,16 @@ module Shaf
       end
     end
 
-    def pluralize(noun)
-      Utils::pluralize(noun)
-    end
-
     def read_shaf_file
       return {} unless File.exist? SHAF_VERSION_FILE
       str = File.read(SHAF_VERSION_FILE)
       YAML.load(str) || {}
+    end
+
+    def read_shaf_file!
+      in_project_root do
+        read_shaf_file
+      end
     end
 
     def write_shaf_file(data = {})

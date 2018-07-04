@@ -1,7 +1,6 @@
 require 'fileutils'
 require 'yaml'
 require 'erb'
-require 'shaf/version'
 
 module Shaf
   module Command

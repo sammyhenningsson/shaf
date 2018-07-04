@@ -12,6 +12,15 @@ module Shaf
       $stdout.reopen original_stdout
       $stderr.reopen original_stderr
     end
+
+    def self.capture_output
+      original_stdout = $stdout.clone
+      $stdout = StringIO.new
+      yield
+      $stdout.string
+    ensure
+      $stdout = original_stdout
+    end
   end
 
   module Test
