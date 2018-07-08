@@ -77,8 +77,8 @@ module Shaf
 
     it "adds a link to a new resource" do
       Dir.chdir(project_path) do
-        assert Test.system("shaf generate scaffold post message:string:Meddelande author:integer:Författare", out: File::NULL)
-        assert Test.system("rake db:migrate", out: File::NULL)
+        assert Test.system("shaf generate scaffold post message:string:Meddelande author:integer:Författare")
+        assert Test.system("rake db:migrate")
         with_server do
           get_root
           get_link('posts')
@@ -88,9 +88,9 @@ module Shaf
 
     it "passes specs" do
       Dir.chdir(project_path) do
-        assert Test.system("shaf generate scaffold --specs post message:string:Meddelande author:integer:Författare", out: File::NULL)
-        assert Test.system("rake db:migrate", out: File::NULL)
-        assert Test.system("rake test", out: File::NULL, err: File::NULL)
+        assert Test.system("shaf generate scaffold --specs post message:string:Meddelande author:integer:Författare")
+        assert Test.system("rake db:migrate")
+        assert Test.system("rake test")
       end
     end
 
@@ -173,8 +173,8 @@ module Shaf
           RUBY
         end
 
-        assert Test.system("rake db:migrate", out: File::NULL)
-        assert Test.system("rake db:seed", out: File::NULL)
+        assert Test.system("rake db:migrate")
+        assert Test.system("rake db:seed")
 
         user_count = nil
 

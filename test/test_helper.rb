@@ -1,3 +1,4 @@
+require 'open3'
 require 'shaf'
 require 'minitest/autorun'
 
@@ -24,18 +25,29 @@ module Shaf
   end
 
   module Test
-    def self.gem_lib_dir
-      File.expand_path('../../lib', __FILE__)
-    end
+    class << self
+      def gem_lib_dir
+        File.expand_path('../../lib', __FILE__)
+      end
 
-    def self.system(*args)
-      env = {'RUBYLIB' => gem_lib_dir}
-      Kernel::system(env, *args)
-    end
+      def system(*args)
+        return if args.size.zero?
+        env = {'RUBYLIB' => gem_lib_dir}
+        cmd = args.join(' ')
 
-    def self.spawn(*args)
-      env = {'RUBYLIB' => gem_lib_dir}
-      Kernel::spawn(env, *args)
+        Open3.popen3(env, cmd) do |stdin, stdout, stderr, wait_thr|
+          exit_status = wait_thr.value # Process::Status object returned.
+          yield [stdout, stderr].map(&:read) if block_given?
+          exit_status.success?
+        end
+      end
+
+
+      def spawn(*args)
+        return if args.size.zero?
+        env = {'RUBYLIB' => gem_lib_dir}
+        Kernel::spawn(env, *args)
+      end
     end
   end
 end

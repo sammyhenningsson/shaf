@@ -36,13 +36,13 @@ module Shaf
         private
 
         def target_versions
-          return @target_versions if @target_versions
+          return @target_versions if defined? @target_versions
 
           files = Dir[File.join(UPGRADE_FILES_PATH, '*.tar.gz')]
-          @target_versions = files.each_with_object([]) do |file, versions|
+          @target_versions = files.map do |file|
             str = File.basename(file, '.tar.gz')
-            versions << Version.new(str)
-          end
+            Version.new(str)
+          end.sort
         end
 
         def strip_suffix(file)
