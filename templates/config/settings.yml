@@ -7,6 +7,7 @@ default: &default
   migrations_dir: db/migrations
   fixtures_dir: spec/fixtures
   paginate_per_page: 25
+  http_cache: on
 
 production:
   <<: *default

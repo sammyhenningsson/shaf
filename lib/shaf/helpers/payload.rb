@@ -72,15 +72,24 @@ module Shaf
       return name == '_method'
     end
 
-    def respond_with_collection(resource, status: 200, serializer: nil)
-      respond_with(resource, status: status, serializer: serializer, collection: true)
+    def respond_with_collection(resource, status: 200, serializer: nil, **kwargs)
+      respond_with(
+        resource,
+        status: status,
+        serializer: serializer,
+        collection: true,
+        **kwargs
+      )
     end
 
-    def respond_with(resource, status: 200, serializer: nil, collection: false)
+    def respond_with(resource, status: 200, serializer: nil, collection: false, **kwargs)
       status(status)
 
       preferred_response = preferred_response_type(resource)
       serialized = serialize(resource, serializer, collection)
+
+      http_cache = kwargs.fetch(:http_cache, Settings.http_cache)
+      add_cache_headers(serialized) if http_cache
 
       if preferred_response == mime_type(:html)
         respond_with_html(resource, serialized)
@@ -108,12 +117,18 @@ module Shaf
       log.debug "Responding with html. Output payload (#{resource.class}): #{serialized}"
       content_type :html
       case resource
-      when Shaf::Formable::Form
+      when Formable::Form
         body erb(:form, locals: {form: resource, serialized: serialized})
       else
         body erb(:payload, locals: {serialized: serialized})
       end
     end
 
+    def add_cache_headers(payload)
+      return if payload.nil? || payload.empty?
+
+      sha1 = Digest::SHA1.hexdigest payload
+      etag sha1, :weak # Weak or Strong??
+    end
   end
 end
