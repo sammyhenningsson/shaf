@@ -1,3 +1,8 @@
+## 0.4.1
+ * Add command to show shaf version
+ * Fix upgrade problem
+ * Shaf::Error - common base for all exceptions 
+ * Support HTTP cache headers
 ## 0.4.0
  * Refactored tasks
  * Support command options
