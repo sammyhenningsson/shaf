@@ -1,7 +1,7 @@
 # Shaf (Sinatra Hypermedia API Framework)
 [![Gem Version](https://badge.fury.io/rb/shaf.svg)](https://badge.fury.io/rb/shaf)  
 Shaf is a framework for building hypermedia driven REST APIs. Its goal is to be like a lightweight version of `rails new --api` with hypermedia as a first class citizen. Instead of reinventing the wheel Shaf uses [Sinatra](http://sinatrarb.com/) and adds a layer of conventions similar to [Rails](http://rubyonrails.org/). It uses [Sequel](http://sequel.jeremyevans.net/) as ORM and [HALPresenter](https://github.com/sammyhenningsson/hal_presenter) for policies and serialization (which means that the mediatype being used is [HAL](http://stateless.co/hal_specification.html)).  
-Most APIs claiming to be RESTful completly lacks the concept of links and relies upon clients to construction urls to _known_ endpoints. Thoses APIs are missing some important concepts that Roy Fielding put together in is dissertation about REST. Having the server always returning payloads with links (hypermedia) makes the responsibilies more clear and allows for more robust implementations. Clients will then always know what actions are possible and not, depending of which links are present in the server response. For example, there's no need for a client to try to place an order or follow another user unless the server returns the corresponding link for those actions. Also if the server decides to move some resources to another location or change the access protocol (like https instead of http), this can be done without any changes to the client.  
+Most APIs claiming to be RESTful completly lacks the concept of links and relies upon clients to construction urls to _known_ endpoints. Thoses APIs are missing some important concepts that Roy Fielding put together in is dissertation about REST. Having the server always returning payloads with links (hypermedia) makes the responsibilies more clear and allows for more robust implementations. Clients then always knows which actions are possible and which aren't, depending of the links present in the server response. For example, there's no need for a client to try to place an order or follow another user unless the server returns the corresponding link for those actions. Also if the server decides to move some resources to another location or change the access protocol (like https instead of http), this can be done without any changes to the client.  
 There are many pros and cons about hypermedia APIs, which means that Shaf will not suite everyone. However, if you are going to create an API driven by hypermedia then Shaf will help you, similar to how Rails helps you get up and running in no time. 
 
 ## Getting started
@@ -61,7 +61,7 @@ Your newly created project should contain the following files:
     │   └── root_serializer_spec.rb
     └── spec_helper.rb
 ```
-You should now have a functional API. Start the server with
+You now have a functional API. Start the server with
 ```sh
 shaf server
 ```
@@ -85,7 +85,7 @@ curl command to `ruby -rjson -e "puts (JSON.pretty_generate JSON.parse(STDIN.rea
 ```sh
 curl localhost:3000/ | ruby -rjson -e "puts (JSON.pretty_generate JSON.parse(STDIN.read))"
 ```
-(Or better yet, put it in an alias, e.g. `alias pretty_json='ruby -rjson -e "puts (JSON.pretty_generate JSON.parse(STDIN.read))"'`)
+(Or better yet, use `jq` which is a great a tool for dealing with json strings)
 
 The project also contains a few specs that you can run with `rake`
 ```sh
@@ -114,7 +114,7 @@ shaf server
 ```
 Again in another terminal run
 ```sh
-curl localhost:3000/ | pretty_json
+curl localhost:3000/ | jq
 ```
 Which should now return the following payload.
 ```sh
@@ -131,7 +131,7 @@ Which should now return the following payload.
 ```
 The root payload now contains a link with _rel_ 'posts'. Lets follow that link..
 ```sh
-curl localhost:3000/posts | pretty_json
+curl localhost:3000/posts | jq
 ```
 The response looks like this
 ```sh
@@ -185,14 +185,14 @@ The response looks like this
 This is the collection of posts (which currently is empty, see `$response['_embedded']['posts']`). Besides from the emtpy list of posts we also get an embedded form (with rel _doc:create-form_). This form should be used to create a new post.
 
 ## Upgrading a project created with shaf version < 0.4.0
-Shaf version 0.4.0 introduced a few changes that are not backward compatible with previous version. This means that if you created your Shaf project with an older gem version and then upgrade this gem to v0.4.0 your project will not function. To remedy this you will need to execute (from inside your project directory):
+Shaf version 0.4.0 introduced a few changes that are not backward compatible with previous versions. This means that if you created your Shaf project with an older version of this gem and then upgrade this gem to v0.4.0, your project will not function. To remedy this you will need to execute (from inside your project directory):
 ```sh
 cd /path/to/my_project
 shaf upgrade
 ```
 
 ## HAL
-The [HAL](http://stateless.co/hal_specification.html) mediatype is very simple and looks like a any JSON object, except for two reserved keys __links_ and __embedded_. __links_ displays possible actions that may be taken. __embedded_ contains nested resources. A HAL payload may contain a special link with rel _curies_, which is similar to namespaces in XML. Shaf uses a curie called _doc_ and makes it possible to fetch documentation for any link or embedded resources with a rel begining with 'doc:'. The href for curies are always templated, meaning that a part of the href (in our case '{rel}') must be replaced with a value. In the payload above the href of the doc curie is 'http://localhost:3000/doc/post/rels/{rel}' and there is one embedded resource prefixed with 'doc:', namely 'doc:create-form'. So this means that if we would like to find out information about what this embedded resource is and how it relates to the posts collection we replace '{rel}' with 'create-form' and perform a GET request to this url.
+The [HAL](http://stateless.co/hal_specification.html) mediatype is very simple and looks like any JSON object, except for two reserved keys __links_ and __embedded_. __links_ displays possible actions that may be taken. __embedded_ contains nested resources. A HAL payload may contain a special link with rel _curies_, which is similar to namespaces in XML. Shaf uses a curie called _doc_ and makes it possible to fetch documentation for any link or embedded resources with a rel begining with 'doc:'. The href for curies are always templated, meaning that a part of the href (in our case '{rel}') must be replaced with a value. In the payload above the href of the doc curie is 'http://localhost:3000/doc/post/rels/{rel}' and there is one embedded resource prefixed with 'doc:', namely 'doc:create-form'. So this means that if we would like to find out information about what this embedded resource is and how it relates to the posts collection we replace '{rel}' with 'create-form' and perform a GET request to this url.
 ```sh
 curl http://localhost:3000/doc/post/rels/create-form
 ```
@@ -209,14 +209,14 @@ shaf generate scaffold some_resource attr1:string attr2:integer
 The scaffold generator will call the model generator and the controller generator, see below.
 
 #### Controller
-A new controller is generated with the _controller_ identifier and a resource name and an arbitrary number of attribute:type arguments.
+A new controller is generated with the _controller_ identifier, a resource name and an arbitrary number of attribute:type arguments.
 ```sh
 shaf generate controller some_resource attr1:string attr2:integer
 ```
 This will add a new controller and an integration spec. It will also modify the root resource to include a link the the collection endpoint for _some_resource_.
 
 #### Model
-A new model is generated with the _model_ identifier and a resource name and an arbitrary number of attribute:type arguments.
+A new model is generated with the _model_ identifier, a resource name and an arbitrary number of attribute:type arguments.
 ```sh
 shaf generate model some_resource attr1:string attr2:integer
 ```
@@ -263,7 +263,7 @@ end
 ```
 Would add the following methods as instance method on Shaf::UriHelper. This module is then both included and extended into the `PostController` (which means that all uri helpers are available as both class methods and instance methods in the controller).  
 
-| Methods                                | Returned string with no query_params (id may vary) | 
+| Method                                | Returned string with no query_params (id may vary) | 
 | -------------------------------------- | -------------------------------------------------- |
 | `posts_uri(**query_params)`            | /posts                                             |
 | `post_uri(post, **query_params)`       | /posts/5                                           |
@@ -298,7 +298,7 @@ end
 ```
 
 #### Shaf::Authorize
-This module adds an `authorize_with(policy)` class method and an `authorize!(action, resource = nil)` instance method. The class method is used to register a Policy class. The instance method is used to ensure that a certain action is authorized. Given the following policy class (see [Policies](#policies) for more info)
+This module adds an `authorize_with(policy)` class method and an `authorize!(action, resource = nil)` instance method. The class method is used to register a Policy class. The instance method is used to ensure that a certain action is authorized. The following policy class requires makes sure that a user is logged in to be able to see posts and that users may only edit their own posts. See [Policies](#policies) for more info.
 ```sh
 class PostPolicy
   include HALPresenter::Policy::DSL
@@ -314,7 +314,7 @@ class PostPolicy
   end
 end
 ```
-The following controller will make sure that a user must be authenticated to be able to view a post and must be the author of a certain post to be able to edit it.
+The following controller validates actions using the `PostPolicy`. If the policy rejects the action, then a "403 Forbidden" is returned.
 ```sh
 class PostController < BaseController
   authorize_with PostPolicy
@@ -350,21 +350,23 @@ Given that you have a Serializer that is registered to process instances of `Pos
 
 
 ## Models
-Models generated with `shaf generate` inherits from `Sequel::Model` (see [Sequel docs](http://sequel.jeremyevans.net/documentation.html) for more info) and they include `Shaf::Formable`. The Formable module adds the class method `form` which Shaf models use to associate two forms with the model. One for creating a new resource and one for editing an extension resource. As an example, the following model will add a create form with fields `foo` and `bar` and an edit form with fields `foo` and `baz`.
+Models generated with `shaf generate` inherit from `Sequel::Model` (see [Sequel docs](http://sequel.jeremyevans.net/documentation.html) for more info) and they include `Shaf::Formable`. The Formable module adds the class method `form` which Shaf models use to associate two forms with the model. One for creating a new resource and one for editing an existing resource. As an example, the following model will add a create form with fields `foo` and `bar` and an edit form with fields `foo` and `baz`.
 ```sh
 class User < Sequel::Model
   include Shaf::Formable
 
   form do
-    field :foo, type: "string"
+    field :foo, type: "string" # common field
 
     create do
+      # These properties are only for the create form
       title 'Create User'
       name  'create-user'
       field :bar, type: "string"
     end
 
     edit do
+      # These properties are only for the edit form
       title 'Update User'
       name  'update-user'
       field :baz, type: "integer"
@@ -434,7 +436,7 @@ class PostPolicy
   end
 end
 ```
-Here `resource` is the object being serialized (in our case the `post` object). Used together with a serializer that specifies links with rels _edit_, _edit-form_ and _delete_, this will only be serialize these links when the block returns `true`.  
+Here `resource` is the object being serialized (in our case the `post` object). Used together with a serializer that specifies links with rels _edit_, _edit-form_ and _delete_, those links will only be serialized when the block returns `true`.  
 Policies should also be used in Controllers (through the `authorize_with` class method). Since the links that should be serialized should coincide with which action should be allowed in the controller it makes sense to refactor this logic into a method.
 ```sh
   link :edit, :'edit-form', :delete do
@@ -445,7 +447,7 @@ Policies should also be used in Controllers (through the `authorize_with` class 
     current_user&.id == resource.author.id
   end
 ```
-Then the controller can call `authorize! :write` in the actions for editing/deleting and fetching of edit-form.
+Then the controller can call `authorize! :write` in the actions for editing/deleting and fetching of edit-form. If the block returns true nothing happens. If the block returns false, then the server will respond with "403 Forbidden".
 
 ## Testing
 Shaf helps you create `MiniTest::Spec`s for serializers and integration.
@@ -568,10 +570,8 @@ describe "Post", type: :integration do
     links[:self][:href].must_include posts_uri
     embedded(:'posts').size.must_equal 1
 
-    embedded :'posts' do
-      post = last_payload.first
-      post[:message].must_equal "value for message"
-    end
+    all_messages = embedded(:posts).map { |post| post[:message] }
+    all_messages.must_include("value for message")
   end
 end
 ```
