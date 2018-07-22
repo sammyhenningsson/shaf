@@ -1,6 +1,8 @@
 module Shaf
+  class Error < StandardError; end
+
   module Errors
-    class ServerError < StandardError
+    class ServerError < Error
       attr_reader :code, :title
 
       def http_status
