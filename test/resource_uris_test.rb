@@ -114,15 +114,6 @@ module Shaf
       end
     end
 
-    describe "too deeply nested resources" do
-
-      it "raise and exceptions" do
-        assert_raises CreateUriMethods::UriTemplateNestingError do
-          CreateUriMethods.new(:note, base: '/users/:foo/bar/:baz/notes').call
-        end
-      end
-    end
-
     describe "uri methods with specified plural name" do
 
       CreateUriMethods.new(:baz, plural_name: 'baz').call
@@ -158,31 +149,36 @@ module Shaf
 
     describe MethodBuilder do
 
-      it "::method_name" do
-        assert_equal "foo_uri", MethodBuilder::method_name("foo")
+      let(:builder) { MethodBuilder.new("hide_book", "/my/books/:id/archive") }
+
+      it "#method_name" do
+        assert_equal "hide_book_uri", builder.send(:method_name)
       end
 
-      it "::template_method_name" do
-        assert_equal "foo_uri_template", MethodBuilder::template_method_name("foo")
+      it "#template_method_name" do
+        assert_equal "hide_book_uri_template", builder.send(:template_method_name)
       end
 
-      it "::signature" do
-        assert_equal "some_method_uri(id, **query)", MethodBuilder::signature(:some_method, "/some_resource/:id/edit")
+      it "#signature" do
+        assert_equal "hide_book_uri(arg0, **query)", builder.send(:signature)
       end
 
-      it "::as_string" do
-        method_string = MethodBuilder.as_string("book", "/books/:id")
+      it "#as_string" do
+        method_string = builder.send(:method_string)
 
         a_clazz = Class.new
         an_instance = a_clazz.new
         an_instance.instance_eval method_string
 
-        assert an_instance.respond_to? :book_uri
+        assert an_instance.respond_to? :hide_book_uri
 
         book = OpenStruct.new(id: 5)
-        assert_equal "/books/6", an_instance.book_uri(6)
-        assert_equal "/books/5", an_instance.book_uri(book)
-        assert_equal "/books/5?bar=5&baz=fem", an_instance.book_uri(book, bar: 5, baz: "fem")
+        assert_equal "/my/books/6/archive", an_instance.hide_book_uri(6)
+        assert_equal "/my/books/5/archive", an_instance.hide_book_uri(book)
+        assert_equal(
+          "/my/books/5/archive?bar=5&baz=fem",
+          an_instance.hide_book_uri(book, bar: 5, baz: "fem")
+        )
       end
     end
   end
