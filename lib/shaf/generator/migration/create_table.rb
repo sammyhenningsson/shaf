@@ -11,12 +11,12 @@ module Shaf
           raise "Please provide a table name when generation a create table migration"
         end
 
-        def compile_migration_name
-          "create_#{table_name}_table"
-        end
-
         def table_name
           args.first || ""
+        end
+
+        def compile_migration_name
+          "create_#{table_name}_table"
         end
 
         def compile_changes

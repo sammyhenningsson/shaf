@@ -22,7 +22,7 @@ module Shaf
       end
 
       class Base
-        DB_COL_TYPES = {
+        DB_COL_FORMAT_STRINGS = {
           integer:    ['Integer :%s',             'add_column :%s, Integer'],
           varchar:    ['String %s',               'add_column :%s, String'],
           string:     ['String :%s',              'add_column :%s, String'],
@@ -77,20 +77,10 @@ module Shaf
           @changes << change if change
         end
 
-        def db_type(type)
-          type ||= :string
-          result = DB_COL_TYPES[type.to_sym]
-          result ||= REGEXP_DB_TYPES.each do |pattern, strings|
-            m = pattern.match(type) or next
-            break strings.map { |a| replace_backreferences(m, a) }
-          end
-          raise "Column type '#{type}' not supported" unless result
-          result
-        end
-
         def column_def(str, create: true)
           name, type = str.split(':')
-          format db_type(type)[create ? 0 : 1], name.downcase
+          format_string = db_format_string(type, create ? 0 : 1)
+          format format_string, name.downcase
         end
 
         def target(name)
@@ -104,17 +94,32 @@ module Shaf
           DateTime.now.strftime("%Y%m%d%H%M%S")
         end
 
-        def replace_backreferences(match, str)
-          groups = match.size
-          (1...groups).inject(str) do |s, i|
-            s.gsub("\\#{i}", match[i])
-          end
-        end
-
         def add_timestamp_columns?
           if File.exist? 'config/initializers/sequel.rb'
             require 'config/initializers/sequel'
             Sequel::Model.plugins.include? Sequel::Plugins::Timestamps
+          end
+        end
+
+        def db_format_string(type, range = 0..1)
+          type ||= :string
+          result = DB_COL_FORMAT_STRINGS[type.to_sym]
+          result ||= regexp_db_format_string(type)
+          raise "Column type '#{type}' not supported" unless result
+          result[range]
+        end
+
+        def regexp_db_format_string(type)
+          REGEXP_DB_TYPES.each do |pattern, strings|
+            m = pattern.match(type) or next
+            return strings.map { |a| replace_backreferences(m, a) }
+          end
+        end
+
+        def replace_backreferences(match, str)
+          groups = match.size
+          (1...groups).inject(str) do |s, i|
+            s.gsub("\\#{i}", match[i])
           end
         end
 

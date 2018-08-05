@@ -73,7 +73,7 @@ Shaf::DbTask.new(:seed, description: "Seed the Database") do
 
   if Dir.exist? "db/seeds"
     Dir['db/seeds/**/*.rb'].each do |file|
-      require file.sub(".rb", "")
+      require file.sub(/.rb\Z/, "")
     end
   end
 end
