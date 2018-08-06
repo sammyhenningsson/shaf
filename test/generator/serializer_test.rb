@@ -28,16 +28,13 @@ module Shaf
           assert_includes output.keys, "api/serializers/blog_serializer.rb"
         end
 
-        it "requires policy" do
+        it "requires base_serializer and policy" do
+          assert_match %r(^\s*require 'serializers/base_serializer'), output["api/serializers/blog_serializer.rb"]
           assert_match %r(^\s*require 'policies/blog_policy'), output["api/serializers/blog_serializer.rb"]
         end
 
-        it "extends HALPresenter" do
-          assert_match %r(^\s*extend HALPresenter$), output["api/serializers/blog_serializer.rb"]
-        end
-
-        it "extends UriHelper" do
-          assert_match %r(^\s*extend Shaf::UriHelper$), output["api/serializers/blog_serializer.rb"]
+        it "inherits from BaseSerializer" do
+          assert_match %r(^class BlogSerializer < BaseSerializer$), output["api/serializers/blog_serializer.rb"]
         end
       end
 

@@ -1,8 +1,7 @@
+require 'serializers/base_serializer'
 require 'policies/<%= policy_name %>'
 
-class <%= class_name %>
-  extend HALPresenter
-  extend Shaf::UriHelper
+class <%= class_name %> < BaseSerializer
 
   model <%= model_class_name %>
   policy <%= policy_class_name %>

@@ -1,5 +1,6 @@
-class <%= policy_class_name %>
-  include HALPresenter::Policy::DSL
+require 'policies/base_policy'
+
+class <%= policy_class_name %> < BasePolicy
 
   # Auto generated policy: Update this file to suite your API!
  

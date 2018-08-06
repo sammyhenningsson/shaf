@@ -29,12 +29,12 @@ module Shaf
           assert_includes output.keys, file
         end
 
-        it "declares the blog policy class" do
-          assert_match %r(^class BlogPolicy$), output[file]
+        it "declares the blog policy class inheriting from BaseSerializer" do
+          assert_match %r(^class BlogPolicy < BasePolicy$), output[file]
         end
 
-        it "includes HALPresenter::Policy::DSL" do
-          assert_match %r(^\s*include HALPresenter::Policy::DSL$), output[file]
+        it "requires base_policy" do
+          assert_match %r(^\s*require 'policies/base_policy'), output["api/policies/blog_policy.rb"]
         end
       end
 

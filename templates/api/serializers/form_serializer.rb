@@ -1,7 +1,7 @@
+require 'serializers/base_serializer'
 require 'shaf/formable'
 
-class FormSerializer
-  extend HALPresenter
+class FormSerializer < BaseSerializer
 
   model Shaf::Formable::Form
 

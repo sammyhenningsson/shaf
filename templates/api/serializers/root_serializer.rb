@@ -1,6 +1,6 @@
-class RootSerializer
-  extend HALPresenter
-  extend Shaf::UriHelper
+require 'serializers/base_serializer'
+
+class RootSerializer < BaseSerializer
 
   # Auto generated doc:  
   # Link to the root resource. All clients should fetch this resource
