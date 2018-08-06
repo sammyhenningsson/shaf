@@ -17,7 +17,9 @@ module Shaf
         before do
           File.stub :write, write_stub do
             Dir.stub :exist?, true do
-              Mutable.suppress_output { generator.call }
+              DB.stub :table_exists?, true do
+                Mutable.suppress_output { generator.call }
+              end
             end
           end
         end

@@ -39,9 +39,16 @@ module Shaf
           index:      ['index :%s, unique: true', 'add_index :%s'],
         }
 
-        REGEXP_DB_TYPES = {
-          /\Aforeign_key\((\w+)\)/ => ['foreign_key :%s, :\1', 'add_foreign_key :%s, :\1'],
-        }
+        COMPLEX_DB_TYPES = [
+          {
+            pattern: /\Aforeign_key\((\w+)\)/,
+            strings: ['foreign_key :%s, :\1',     'add_foreign_key :%s, :\1'],
+            validator: ->(type, match) {
+              break if ::DB.table_exists?(match[1])
+              ["Foreign key table '#{match[1]}' does not exist!"]
+            }
+          }
+        ]
 
         attr_reader :args
 
@@ -110,9 +117,14 @@ module Shaf
         end
 
         def regexp_db_format_string(type)
-          REGEXP_DB_TYPES.each do |pattern, strings|
-            m = pattern.match(type) or next
-            return strings.map { |a| replace_backreferences(m, a) }
+          COMPLEX_DB_TYPES.each do |complex_type|
+            match = complex_type[:pattern].match(type) or next
+            validator = complex_type[:validator]
+            errors = validator&.call(type, match)
+            if errors.nil? || errors.empty?
+              return complex_type[:strings].map { |s| replace_backreferences(match, s) }
+            end
+            raise "Failed to process '#{type}': #{errors.join(', ')}"
           end
         end
 

@@ -1,6 +1,9 @@
 require 'open3'
 require 'shaf'
+require 'sequel'
 require 'minitest/autorun'
+
+DB = Sequel.connect('mock://test', database: 'test')
 
 module Shaf
   module Mutable
