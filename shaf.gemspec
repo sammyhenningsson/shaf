@@ -22,5 +22,9 @@ Gem::Specification.new do |gem|
   gem.require_paths = ["lib"]
 
   gem.required_ruby_version = '>= 2.3'
-  gem.add_development_dependency "rake", '~> 12.0', '>= 10.0'
+  gem.add_development_dependency "rake", '~> 12.0'
+  gem.add_development_dependency "sinatra", '~> 2.0'
+  gem.add_development_dependency "sequel", '~> 5'
+  gem.add_development_dependency "minitest", '~> 5', '>= 5.10'
+  gem.add_development_dependency "sqlite3", '~> 1.3'
 end

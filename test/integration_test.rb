@@ -13,6 +13,9 @@ module Shaf
     before do
       Dir.chdir(tmp_dir) do
         Command::New.new(project_name).call
+        Dir.chdir(project_name) do
+          Bundler.with_clean_env { `bundle install` }
+        end
       end
     end
 
@@ -23,7 +26,7 @@ module Shaf
     def with_server(port: 3030)
       pid = nil
       Dir.chdir(project_path) do
-        pid = Test.spawn("shaf server -p #{port}", out: File::NULL, err: [:child, :out])
+        pid = Test.spawn("bundle exec shaf server -p #{port}", out: File::NULL, err: [:child, :out])
         sleep 1
         yield
       end
@@ -77,8 +80,9 @@ module Shaf
 
     it "adds a link to a new resource" do
       Dir.chdir(project_path) do
-        assert Test.system("shaf generate scaffold post message:string:Meddelande author:integer:Författare")
-        assert Test.system("rake db:migrate")
+        assert Test.system("bundle exec shaf generate scaffold post message:string:Meddelande author:integer:Författare")
+        assert Test.system("bundle exec rake db:migrate")
+
         with_server do
           get_root
           get_link('posts')
@@ -88,9 +92,9 @@ module Shaf
 
     it "passes specs" do
       Dir.chdir(project_path) do
-        assert Test.system("shaf generate scaffold --specs post message:string:Meddelande author:integer:Författare")
-        assert Test.system("rake db:migrate")
-        assert Test.system("rake test")
+        assert Test.system("bundle exec shaf generate scaffold --specs post message:string:Meddelande author:integer:Författare")
+        assert Test.system("bundle exec rake db:migrate")
+        assert Test.system("bundle exec rake test")
       end
     end
 
@@ -110,12 +114,12 @@ module Shaf
             end
           EOS
         end
-        r, w = IO.pipe
-        assert system("shaf my_command", out: w, err: [:child, :out])
-        w.close
-        output = r.read.chomp
-        r.close
-        assert_equal "hej", output
+
+        exit_status =  Test.system("bundle exec shaf my_command") do |out, err|
+          assert_equal "hej", out
+          assert err.empty?
+        end
+        assert exit_status
       end
     end
 
@@ -140,7 +144,7 @@ module Shaf
             end
           EOS
         end
-        assert system("shaf generate my_generator", out: File::NULL, err: [:child, :out])
+        assert Test.system("bundle exec shaf generate my_generator")
         assert File.exist?(filename)
         assert_equal File.read(filename), content
       end
@@ -148,7 +152,7 @@ module Shaf
 
     it "seed the db" do
       Dir.chdir(project_path) do
-        assert system("shaf generate scaffold user name:string", out: File::NULL)
+        assert Test.system("bundle exec shaf generate scaffold user name:string")
         # Currenly the model generator creates a borken serializer, due to undefined uri helpers.
         # (Unless the corresponding controller and uri_helpers have been defined).
         # Change scaffold to model, when that has been fixed!!
@@ -173,20 +177,16 @@ module Shaf
           RUBY
         end
 
-        assert Test.system("rake db:migrate")
-        assert Test.system("rake db:seed")
+        assert Test.system("bundle exec rake db:migrate")
+        assert Test.system("bundle exec rake db:seed")
 
-        user_count = nil
-
-        open("| shaf console", 'w+') do |process|
-          process.write("User.count")
-          process.close_write
-          output_rows = process.read.split("\n").map(&:strip)
+        exit_status = Test.system("bundle exec shaf console", stdin: "User.count") do |out, err|
+          output_rows = out.split("\n").map(&:strip)
           i = output_rows.find_index "User.count"
           user_count = output_rows[i + 1].to_i
+          assert_equal 3, user_count
         end
-
-        assert_equal 3, user_count
+        assert exit_status
       end
     end
   end
