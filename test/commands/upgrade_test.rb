@@ -39,6 +39,9 @@ module Shaf
 
     before do
       Dir.chdir(tmp_dir) { `tar xzf #{project_tar}` }
+      Dir.chdir(project_path) do
+        Bundler.with_clean_env { `bundle install` }
+      end
     end
 
     after do
@@ -47,16 +50,16 @@ module Shaf
 
     it 'upgrades a 0.3.1 project to latest version' do
       Dir.chdir(project_path) do
-        Test.system("shaf version") do |out, _|
+        Test.system("bundle exec shaf version") do |out, _|
           assert_match(/Installed Shaf version: #{VERSION}/, out)
           assert_match(/Project .* created with Shaf version: 0.3.1/, out)
         end
 
-        assert Test.system("shaf upgrade")
+        assert Test.system("bundle exec shaf upgrade")
 
         expected_new_version = Upgrade::Package.all.last.version
 
-        Test.system("shaf version") do |out, _|
+        Test.system("bundle exec shaf version") do |out, _|
           assert_match(/Installed Shaf version: #{VERSION}/, out)
           assert_match(/Project .* created with Shaf version: #{expected_new_version}/, out)
         end
