@@ -34,6 +34,13 @@ module Shaf
     def self.included(mod)
       mod.extend self
     end
+
+    def self.base_uri
+      protocol = Settings.protocol || 'http'
+      host = Settings.host || 'localhost'
+      port = Settings.port ? ":#{Settings.port}" : ""
+      "#{protocol}://#{host}#{port}"
+    end
   end
 
   # This class register uri helper methods like:
@@ -169,23 +176,25 @@ module Shaf
     end
 
     def method_string
+      base_uri = UriHelper.base_uri
       <<~Ruby
         def #{signature}
           query_str = Shaf::MethodBuilder.query_string(query)
-          \"#{interpolated_uri_string(@uri)}\#{query_str}\".freeze
+          \"#{base_uri}#{interpolated_uri_string(@uri)}\#{query_str}\".freeze
         end
       Ruby
     end
 
     def method_with_optional_arg_string
+      base_uri = UriHelper.base_uri
       arg_no = extract_symbols.size - 1
       <<~Ruby
         def #{signature(optional_args: 1)}
           query_str = Shaf::MethodBuilder.query_string(query)
           if arg#{arg_no}.nil?
-            \"#{interpolated_uri_string(@alt_uri)}\#{query_str}\".freeze
+            \"#{base_uri}#{interpolated_uri_string(@alt_uri)}\#{query_str}\".freeze
           else
-            \"#{interpolated_uri_string(@uri)}\#{query_str}\".freeze
+            \"#{base_uri}#{interpolated_uri_string(@uri)}\#{query_str}\".freeze
           end
         end
       Ruby

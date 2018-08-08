@@ -1,3 +1,5 @@
+## x.x.x
+ * Add base_uri to all uris
 ## 0.4.1
  * Add command to show shaf version
  * Fix upgrade problem
