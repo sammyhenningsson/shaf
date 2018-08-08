@@ -1,6 +1,5 @@
 ---
 default: &default
-  port: 3000
   public_folder: frontend/assets
   views_folder: frontend/views
   documents_dir: doc/api
@@ -8,14 +7,18 @@ default: &default
   fixtures_dir: spec/fixtures
   paginate_per_page: 25
   http_cache: on
+  hostname: localhost
+  protocol: http
+  port: 3000
 
 production:
   <<: *default
-  port: 80
+  port: 443
+  protocol: https
 
 development:
   <<: *default
 
 test:
   <<: *default
-  port: 3000
+  port: 3030
