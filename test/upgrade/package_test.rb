@@ -13,7 +13,10 @@ module Shaf
     it "parses a tarball" do
       upgrade = Upgrade::Package.new("0.4.0")
       assert upgrade.load
-      assert_equal upgrade.to_s, "Shaf::Upgrade::Package for version 0.4.0, containing 2 patches"
+      assert_equal(
+        upgrade.to_s,
+        "Shaf::Upgrade::Package for version 0.4.0, Add: 0, Del: 0, Patch: 2"
+      )
     end
   end
 end

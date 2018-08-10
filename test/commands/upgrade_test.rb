@@ -55,7 +55,9 @@ module Shaf
           assert_match(/Project .* created with Shaf version: 0.3.1/, out)
         end
 
-        assert Test.system("bundle exec shaf upgrade")
+        Test.system("bundle exec shaf upgrade") do |out, err|
+          puts "out: #{out}"
+        end
 
         expected_new_version = Upgrade::Package.all.last.version
 

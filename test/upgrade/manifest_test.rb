@@ -8,8 +8,8 @@ module Shaf
     end
 
     it "returns checksum for mathching files" do
-      assert_equal "foo", manifest.patch_name_for("/home/dev/some/file.rb")
-      assert_nil manifest.patch_name_for("/home/dev/some/other/file.rb")
+      assert_equal "foo", manifest.patch_for("/home/dev/some/file.rb")
+      assert_nil manifest.patch_for("/home/dev/some/other/file.rb")
     end
   end
 end

@@ -3,6 +3,7 @@ require 'zlib'
 require 'set'
 require 'digest'
 require 'open3'
+require 'fileutils'
 
 module Shaf
   module Upgrade
@@ -13,8 +14,8 @@ module Shaf
       class VersionNotFoundError < UpgradeError; end
       class VersionConflictError < UpgradeError; end
       class ManifestNotFoundError < UpgradeError; end
-      class MissingPatchError < UpgradeError; end
-      class PatchNotInManifestError < UpgradeError; end
+      class MissingFileError < UpgradeError; end
+      class FileNotInManifestError < UpgradeError; end
       class BadChecksumError < UpgradeError; end
 
       UPGRADE_FILES_PATH = File.join(Utils.gem_root, 'upgrades').freeze
@@ -53,7 +54,7 @@ module Shaf
       def initialize(version)
         @version = Version.new(version)
         @manifest = nil
-        @patches = {}
+        @files = {}
       end
 
       def load
@@ -74,22 +75,14 @@ module Shaf
       end
 
       def apply(dir = nil)
-        files_in(dir).all? do |file|
-          name = @manifest.patch_name_for(file) # returns nil when file
-          next true unless name                 # shouldn't be patched
-          patch = @patches[name]
-          apply_patch(file, patch)
-        end
+        apply_patches
+        apply_additions
       end
 
       def to_s
-        if @manifest.nil?
-          "Shaf::Upgrade::Package for version #{@version}"
-        else
-          count = @patches.size
-          count_str = "#{count} patch#{count == 1 ? "" : "es"}" 
-          "Shaf::Upgrade::Package for version #{@version}, containing #{count_str}"
-        end
+        str = "Shaf::Upgrade::Package for version #{@version}"
+        return str if @manifest.nil?
+        "#{str}, containing #{@manifest.stats}"
       end
 
       private
@@ -107,32 +100,55 @@ module Shaf
         if filename == MANIFEST_FILENAME
           parse_manifest content
         else
-          @patches[filename] = content
+          @files[filename] = content
         end
       end
 
       def parse_manifest(content)
         h = YAML.safe_load(content)
-        @manifest = Manifest.new(
-          target_version: h['target_version'],
-          patches: h['patches']
-        )
+        @manifest = Manifest.new(h)
       end
 
       def validate
         raise ManifestNotFoundError unless @manifest
         raise VersionConflictError unless @version == @manifest.target_version
 
-        from_manifest = @manifest.patches.keys.to_set
-        from_file = @patches.keys.to_set
-        raise MissingPatchError if from_file < from_manifest
-        raise PatchNotInManifestError if from_manifest < from_file
+        from_file = @files.keys.to_set
 
-        @patches.each do |md5, content|
+        manifest_patches = @manifest.patches.keys.to_set
+        raise MissingFileError if from_file < manifest_patches
+
+
+        manifest_added = @manifest.added.keys.to_set
+        raise MissingFileError if from_file < manifest_added
+
+        manifest_removed = @manifest.added.keys.to_set
+        raise MissingFileError if from_file < manifest_removed
+
+        raise FileNotInManifestError if @manifest.files.keys.to_set < from_file
+
+        @files.each do |md5, content|
           raise BadChecksumError unless Digest::MD5.hexdigest(content) == md5
         end
 
         true
+      end
+
+      def apply_patches
+        files_in(dir).all? do |file|
+          name = @manifest.patch_for(file) # returns nil when file
+          next true unless name                 # shouldn't be patched
+          patch = @files[name]
+          apply_patch(file, patch)
+        end
+      end
+
+      def apply_additions
+        @manifest.each_addition do |chksum, filename|
+          content = @files[chksum]
+          FileUtils.mkdir_p File.dirname(filename)
+          File.open(filename, 'w') { |file| file.write(content) }
+        end
       end
 
       def files_in(dir)
@@ -152,7 +168,6 @@ module Shaf
         end
         success
       end
-
     end
   end
 end
