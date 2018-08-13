@@ -13,9 +13,7 @@ module Shaf
     before do
       Dir.chdir(tmp_dir) do
         Command::New.new(project_name).call
-        Dir.chdir(project_name) do
-          Bundler.with_clean_env { `bundle install` }
-        end
+        Dir.chdir(project_name) { Test.bundle_install }
       end
     end
 

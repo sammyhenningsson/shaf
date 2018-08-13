@@ -13,17 +13,17 @@ module Shaf
 
       Shaf::Upgrade::Package.stub :all, packages do
         cmd.stub :read_shaf_version, '1.2.0' do
-          selected_versions= cmd.upgrade_packages.map { |u| u.version.to_s }
+          selected_versions = cmd.upgrade_packages.map { |u| u.version.to_s }
           assert_equal ['2.0.0', '3.0.0'], selected_versions
         end
 
         cmd.stub :read_shaf_version, '2.0.0' do
-          selected_versions= cmd.upgrade_packages.map { |u| u.version.to_s }
+          selected_versions = cmd.upgrade_packages.map { |u| u.version.to_s }
           assert_equal ['3.0.0'], selected_versions
         end
 
         cmd.stub :read_shaf_version, '3.0.0' do
-          selected_versions= cmd.upgrade_packages.map { |u| u.version.to_s }
+          selected_versions = cmd.upgrade_packages.map { |u| u.version.to_s }
           assert_equal [], selected_versions
         end
       end
@@ -39,9 +39,7 @@ module Shaf
 
     before do
       Dir.chdir(tmp_dir) { `tar xzf #{project_tar}` }
-      Dir.chdir(project_path) do
-        Bundler.with_clean_env { `bundle install` }
-      end
+      Dir.chdir(project_path) { Test.bundle_install }
     end
 
     after do
@@ -55,9 +53,7 @@ module Shaf
           assert_match(/Project .* created with Shaf version: 0.3.1/, out)
         end
 
-        Test.system("bundle exec shaf upgrade") do |out, err|
-          puts "out: #{out}"
-        end
+        Test.system("bundle exec shaf upgrade")
 
         expected_new_version = Upgrade::Package.all.last.version
 

@@ -34,6 +34,11 @@ module Shaf
         File.expand_path('../../lib', __FILE__)
       end
 
+      def bundle_install
+        return if ENV['SKIP_BUNDLE_INSTALL']
+        Bundler.with_clean_env { `bundle install` }
+      end
+
       def system(*args, stdin: nil)
         return if args.size.zero?
         env = {'RUBYLIB' => gem_lib_dir}

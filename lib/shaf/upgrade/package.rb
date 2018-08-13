@@ -75,14 +75,15 @@ module Shaf
       end
 
       def apply(dir = nil)
-        apply_patches
+        apply_patches(dir)
         apply_additions
+        apply_drops(dir)
       end
 
       def to_s
         str = "Shaf::Upgrade::Package for version #{@version}"
         return str if @manifest.nil?
-        "#{str}, containing #{@manifest.stats}"
+        "#{str} (#{@manifest.stats})"
       end
 
       private
@@ -105,8 +106,13 @@ module Shaf
       end
 
       def parse_manifest(content)
-        h = YAML.safe_load(content)
-        @manifest = Manifest.new(h)
+        hash = YAML.safe_load(content)
+        @manifest = Manifest.new(
+          target_version: hash["target_version"],
+          patches: hash["patches"],
+          add: hash["add"],
+          drop: hash["drop"]
+        )
       end
 
       def validate
@@ -115,17 +121,14 @@ module Shaf
 
         from_file = @files.keys.to_set
 
-        manifest_patches = @manifest.patches.keys.to_set
+        manifest_patches = @manifest.files[:patch].keys.to_set
         raise MissingFileError if from_file < manifest_patches
 
 
-        manifest_added = @manifest.added.keys.to_set
-        raise MissingFileError if from_file < manifest_added
+        to_add = @manifest.files[:add].keys.to_set
+        raise MissingFileError if from_file < to_add
 
-        manifest_removed = @manifest.added.keys.to_set
-        raise MissingFileError if from_file < manifest_removed
-
-        raise FileNotInManifestError if @manifest.files.keys.to_set < from_file
+        raise FileNotInManifestError if (manifest_patches + to_add) < from_file
 
         @files.each do |md5, content|
           raise BadChecksumError unless Digest::MD5.hexdigest(content) == md5
@@ -134,26 +137,18 @@ module Shaf
         true
       end
 
-      def apply_patches
-        files_in(dir).all? do |file|
-          name = @manifest.patch_for(file) # returns nil when file
-          next true unless name                 # shouldn't be patched
-          patch = @files[name]
-          apply_patch(file, patch)
-        end
-      end
-
-      def apply_additions
-        @manifest.each_addition do |chksum, filename|
-          content = @files[chksum]
-          FileUtils.mkdir_p File.dirname(filename)
-          File.open(filename, 'w') { |file| file.write(content) }
-        end
-      end
-
       def files_in(dir)
         dir += '/' if !dir.nil? && dir[-1] != '/'
         Dir["#{dir}**/*"]
+      end
+
+      def apply_patches(dir = nil)
+        files_in(dir).all? do |file|
+          name = @manifest.patch_for(file) # returns nil when file
+          next true unless name            # shouldn't be patched
+          patch = @files[name]
+          apply_patch(file, patch)
+        end
       end
 
       def apply_patch(file, patch)
@@ -167,6 +162,20 @@ module Shaf
           success = t.value.success?
         end
         success
+      end
+
+      def apply_additions
+        @manifest.files[:add].each do |chksum, filename|
+          content = @files[chksum]
+          FileUtils.mkdir_p File.dirname(filename)
+          File.open(filename, 'w') { |file| file.write(content) }
+        end
+      end
+
+      def apply_drops(dir = nil)
+        files_in(dir).map do |file|
+          File.unlink(file) if @manifest.drop?(file)
+        end
       end
     end
   end
