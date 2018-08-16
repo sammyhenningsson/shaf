@@ -51,10 +51,10 @@ module Shaf
         end
       end
 
-      def initialize(version)
+      def initialize(version, manifest = nil, files = {})
         @version = Version.new(version)
-        @manifest = nil
-        @files = {}
+        @manifest = manifest
+        @files = files
       end
 
       def load

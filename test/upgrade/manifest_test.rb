@@ -55,5 +55,11 @@ module Shaf
         assert("drop/some/file1.rb" =~ pattern || "drop/some/file2.rb" =~ pattern)
       end
     end
+
+    it "#drop?" do
+      assert manifest.drop?("drop/some/file1.rb")
+      assert manifest.drop?("nested/dir/drop/some/file2.rb")
+      refute manifest.drop?("some/file.rb")
+    end
   end
 end
