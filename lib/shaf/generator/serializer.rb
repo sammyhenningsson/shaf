@@ -194,38 +194,13 @@ module Shaf
         EOS
       end
 
-      def embeds
-        [:'doc:edit-form']
-      end
-
-      def embeds_with_doc
-        [
-          <<~EOS.split("\n")
-            # Auto generated doc:  
-            # A form to edit this #{name}
-            embed :'doc:edit-form' do
-              resource.edit_form.tap do |form|
-                form.self_link = edit_#{name}_uri(resource)
-                form.href = #{name}_uri(resource)
-              end
-            end
-          EOS
-        ]
-      end
-
       def collection_with_doc
         <<~EOS.split("\n")
           collection of: '#{plural_name}' do
             link :self, #{plural_name}_uri
             link :up, root_uri
+            link :'doc:create-form', new_#{name}_uri
             curie(:doc) { doc_curie_uri('#{name}') }
-          
-            embed :'doc:create-form' do
-              #{model_class_name}.create_form.tap do |form|
-                form.self_link = new_#{name}_uri
-                form.href = #{plural_name}_uri
-              end
-            end
           end
         EOS
       end
@@ -239,11 +214,9 @@ module Shaf
           policy_name: "#{name}_policy",
           attributes: attributes,
           links: links,
-          embeds: embeds,
           attributes_with_doc: attributes_with_doc,
           curies_with_doc: curies_with_doc,
           links_with_doc: links_with_doc,
-          embeds_with_doc: embeds_with_doc,
           collection_with_doc: collection_with_doc,
         }
       end

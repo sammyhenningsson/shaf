@@ -34,21 +34,21 @@ describe <%= model_class_name %>, type: :integration do
   it "can create <%= plural_name %>" do
     get <%= plural_name %>_uri
 
-    embedded :'doc:create-form' do
-      links[:self][:href].must_equal new_<%= name %>_uri
-      attributes[:href].must_equal <%= plural_name %>_uri
-      attributes[:method].must_equal "POST"
-      attributes[:name].must_equal "create-<%= name %>"
-      attributes[:title].must_equal "Create <%= model_class_name %>"
-      attributes[:type].must_equal "application/json"
-      attributes[:fields].size.must_equal <%= params.size %>
+    link_rels.must_include(:'doc:create-form')
+    follow_rel :'doc:create-form'
+    links[:self][:href].must_equal new_<%= name %>_uri
+    attributes[:href].must_equal <%= plural_name %>_uri
+    attributes[:method].must_equal "POST"
+    attributes[:name].must_equal "create-<%= name %>"
+    attributes[:title].must_equal "Create <%= model_class_name %>"
+    attributes[:type].must_equal "application/json"
+    attributes[:fields].size.must_equal <%= params.size %>
 
-      payload = fill_form attributes[:fields]
-      post attributes[:href], payload
-      status.must_equal 201
-      link_rels.must_include(:self)
-      headers["Location"].must_equal links[:self][:href]
-    end
+    payload = fill_form attributes[:fields]
+    post attributes[:href], payload
+    status.must_equal 201
+    link_rels.must_include(:self)
+    headers["Location"].must_equal links[:self][:href]
 
     get <%= plural_name %>_uri
     status.must_equal 200
@@ -71,22 +71,22 @@ describe <%= model_class_name %>, type: :integration do
     <%= name %> = <%= model_class_name %>.create
     get <%= name %>_uri(<%= name %>)
     status.must_equal 200
+
     link_rels.must_include(:'doc:edit-form')
+    follow_rel :'doc:edit-form'
 
-    embedded :'doc:edit-form' do
-      links[:self][:href].must_equal edit_<%= name %>_uri(<%= name %>)
-      attributes[:href].must_equal <%= name %>_uri(<%= name %>)
-      attributes[:method].must_equal "PUT"
-      attributes[:name].must_equal "update-<%= name %>"
-      attributes[:title].must_equal "Update <%= model_class_name %>"
-      attributes[:type].must_equal "application/json"
-      attributes[:fields].size.must_equal <%= params.size %>
+    links[:self][:href].must_equal edit_<%= name %>_uri(<%= name %>)
+    attributes[:href].must_equal <%= name %>_uri(<%= name %>)
+    attributes[:method].must_equal "PUT"
+    attributes[:name].must_equal "update-<%= name %>"
+    attributes[:title].must_equal "Update <%= model_class_name %>"
+    attributes[:type].must_equal "application/json"
+    attributes[:fields].size.must_equal <%= params.size %>
 
-      payload = fill_form attributes[:fields]
-      put attributes[:href], payload
-      status.must_equal 200
-      link_rels.must_include(:self)
-    end
+    payload = fill_form attributes[:fields]
+    put attributes[:href], payload
+    status.must_equal 200
+    link_rels.must_include(:self)
   end
 
   it "<%= plural_name %> can be deleted" do

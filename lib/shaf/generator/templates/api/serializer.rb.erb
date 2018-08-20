@@ -14,9 +14,6 @@ class <%= class_name %> < BaseSerializer
   <% links_with_doc.each do |link| %>
   <%= link.join("\n  ") %>
   <% end %>
-  <% embeds_with_doc.each do |embed| %>
-  <%= embed.join("\n  ") %>
-  <% end %>
   <% if collection_with_doc %>
   <%= collection_with_doc.join("\n  ") %>
   <% end %>
