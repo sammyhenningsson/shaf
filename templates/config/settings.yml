@@ -7,6 +7,8 @@ default: &default
   fixtures_dir: spec/fixtures
   paginate_per_page: 25
   http_cache: on
+  http_cache_max_age_long: 86400 # 60 * 60 * 24 = 1 day
+  http_cache_max_age_short: 3600 #      60 * 60 = 1 hour
   hostname: localhost
   protocol: http
   port: 3000
