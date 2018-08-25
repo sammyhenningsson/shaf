@@ -519,11 +519,9 @@ curl -H "Content-Type: application/json" \
 ```
 
 ## Serializers
-Serializers generated with `shaf generate` extends `HALPresenter` and `Shaf::UriHelper`. This means that they have a clean DSL that makes it easy to specify what should be serialized. `Shaf::UriHelper` makes all uri helpers accessible. Serializing a message attribute and a self link is as simple as:
+Serializers generated with `shaf generate` inherits from `BaseSerializer` which extends `HALPresenter` and `Shaf::UriHelper`. This means that they have a clean DSL that makes it easy to specify what should be serialized. `Shaf::UriHelper` makes all uri helpers accessible. Serializing a message attribute and a self link is as simple as:
 ```sh
-class PostSerializer
-  extend HALPresenter
-  extend Shaf::UriHelper
+class PostSerializer < BaseSerializer
 
   attribute :message
 
@@ -536,10 +534,9 @@ This serializer will send `:message` to the object being serializer and set the 
 This is also where the api should be documented. Each `attribute`/`link`/`curie`/`embed` directive should be preceeded with comments that document the corresponding usage. See [API Documentation](#api-documentation) for more info.
 
 ## Policies
-Policies generated with `shaf generate` includes `HALPresenter::Policy::DSL`. This means that they have a DSL that makes it easy to specify which attributes/links/embedded resources in the serializer should be serialized and which shouldn't, depending on the context. For instance, a serializer for posts may specify links for the normal CRUD action. However, it should probably only be possible to edit/delete a post if _current_user_ is the author of that post. This Policy will ensure that edit/delete links are hidden unless `current_user` is the author of the post:
+Policies generated with `shaf generate` inherits from `BasePolicy` which includes `HALPresenter::Policy::DSL`. This means that they have a DSL that makes it easy to specify which attributes/links/embedded resources in the serializer should be serialized and which shouldn't, depending on the context. For instance, a serializer for posts may specify links for the normal CRUD action. However, it should probably only be possible to edit/delete a post if _current_user_ is the author of that post. This Policy will ensure that edit/delete links are hidden unless `current_user` is the author of the post:
 ```sh
-class PostPolicy
-  include HALPresenter::Policy::DSL
+class PostPolicy < BasePolicy
 
   link :edit, :'edit-form', :delete do
     current_user&.id == resource.author.id
