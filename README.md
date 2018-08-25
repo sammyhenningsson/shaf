@@ -27,13 +27,17 @@ Your newly created project should contain the following files:
 │   │   ├── base_controller.rb
 │   │   ├── docs_controller.rb
 │   │   └── root_controller.rb
+│   ├── policies
+│   │   └── base_policy.rb
 │   └── serializers
+│       ├── base_serializer.rb
 │       ├── error_serializer.rb
 │       ├── form_serializer.rb
 │       └── root_serializer.rb
 ├── config
 │   ├── bootstrap.rb
 │   ├── constants.rb
+│   ├── customize.rb
 │   ├── database.rb
 │   ├── directories.rb
 │   ├── helpers.rb
@@ -45,6 +49,9 @@ Your newly created project should contain the following files:
 │   ├── initializers.rb
 │   └── settings.yml
 ├── config.ru
+├── db
+│   ├── development.sqlite3
+│   └── migrations
 ├── frontend
 │   ├── assets
 │   │   └── css
@@ -54,6 +61,9 @@ Your newly created project should contain the following files:
 │       ├── layout.erb
 │       └── payload.erb
 ├── Gemfile
+├── Gemfile.lock
+├── logs
+│   └── development.log
 ├── Rakefile
 └── spec
     ├── integration
@@ -144,6 +154,9 @@ The response looks like this
     "up": {
       "href": "http://localhost:3000/"
     },
+    "doc:create-form": {
+      "href": "http://localhost:3000/posts/form"
+    },
     "curies": [
       {
         "name": "doc",
@@ -153,40 +166,136 @@ The response looks like this
     ]
   },
   "_embedded": {
-    "doc:create-form": {
-      "method": "POST",
-      "name": "create-post",
-      "title": "Create Post",
-      "href": "/posts",
-      "type": "application/json",
-      "_links": {
-        "self": {
-          "href": "http://localhost:3000/posts/form"
-        }
-      },
-      "fields": [
-        {
-          "name": "title",
-          "type": "string",
-          "label": null
-        },
-        {
-          "name": "message",
-          "type": "string",
-          "label": null
-        }
-      ]
+    "posts": []
+  }
+}
+```
+This is the collection of posts (which currently is empty, see `$response['_embedded']['posts']`). Notice the link with rel _doc:create-form_. This is how we add new post resources. Let's follow it!
+```sh
+curl http://localhost:3000/posts/form | jq
+```
+The response looks like this
+```sh
+{
+  "method": "POST",
+  "name": "create-post",
+  "title": "Create Post",
+  "href": "http://localhost:3000/posts",
+  "type": "application/json",
+  "_links": {
+    "self": {
+      "href": "http://localhost:3000/posts/form"
+    }
+  },
+  "fields": [
+    {
+      "name": "title",
+      "type": "string",
+      "label": null
     },
-    "posts": [
+    {
+      "name": "message",
+      "type": "string",
+      "label": null
+    }
+  ]
+}
 
+```
+This form tell us how to how to create new post resources. This is done with the following request (see [Models](#models) for more info on forms)
+```sh
+curl -H "Content-Type: application/json" \
+     -d '{"title": "hello", "message": "lorem ipsum"}' \
+     localhost:3000/posts | jq
+```
+The response shows us the new resource:
+```sh
+{
+  "title": "hello",
+  "message": "lorem ipsum",
+  "_links": {
+    "doc:up": {
+      "href": "http://localhost:3000/posts"
+    },
+    "self": {
+      "href": "http://localhost:3000/posts/1"
+    },
+    "doc:edit-form": {
+      "href": "http://localhost:3000/posts/1/edit"
+    },
+    "doc:delete": {
+      "href": "http://localhost:3000/posts/1"
+    },
+    "curies": [
+      {
+        "name": "doc",
+        "href": "http://localhost:3000/doc/post/rels/{rel}",
+        "templated": true
+      }
     ]
   }
 }
 ```
-This is the collection of posts (which currently is empty, see `$response['_embedded']['posts']`). Besides from the emtpy list of posts we also get an embedded form (with rel _doc:create-form_). This form should be used to create a new post.
+This new resource is of course added to the collection of posts, which can now be retrieved by the link with rel _up_.
+```sh
+curl localhost:3000/posts | jq
+```
+Response:
+```sh
+{
+  "_links": {
+    "self": {
+      "href": "http://localhost:3000/posts?page=1&per_page=25"
+    },
+    "up": {
+      "href": "http://localhost:3000/"
+    },
+    "doc:create-form": {
+      "href": "http://localhost:3000/posts/form"
+    },
+    "curies": [
+      {
+        "name": "doc",
+        "href": "http://localhost:3000/doc/post/rels/{rel}",
+        "templated": true
+      }
+    ]
+  },
+  "_embedded": {
+    "posts": [
+      {
+        "title": "hello",
+        "message": "lorem ipsum",
+        "_links": {
+          "doc:up": {
+            "href": "http://localhost:3000/posts"
+          },
+          "self": {
+            "href": "http://localhost:3000/posts/1"
+          },
+          "doc:edit-form": {
+            "href": "http://localhost:3000/posts/1/edit"
+          },
+          "doc:delete": {
+            "href": "http://localhost:3000/posts/1"
+          },
+          "curies": [
+            {
+              "name": "doc",
+              "href": "http://localhost:3000/doc/post/rels/{rel}",
+              "templated": true
+            }
+          ]
+        }
+      }
+    ]
+  }
+}
+```
 
-## Upgrading a project created with shaf version < 0.4.0
-Shaf version 0.4.0 introduced a few changes that are not backward compatible with previous versions. This means that if you created your Shaf project with an older version of this gem and then upgrade this gem to v0.4.0, your project will not function. To remedy this you will need to execute (from inside your project directory):
+
+## Upgrading a project created with shaf version < 0.5.0
+Shaf version 0.5.0 introduced a few changes that are not backward compatible with previous versions. This means that if you created your Shaf project with an older version of this gem and then upgrade this gem to v0.5.0, your project will not function. To remedy this you will need to execute (from inside your project directory):
 ```sh
 cd /path/to/my_project
 shaf upgrade
@@ -375,7 +484,7 @@ class User < Sequel::Model
   end
 end
 ```
-When serialized these forms contain an array of _fields_ that specifies all attributes that are accepted for create/update. Each field has a `name` property that MUST be used as key when constructing a payload to be submitted. Each field also has a type which declares the kind of value that are accepted (currently only string and integer are supported) and a label that may be used when rendering the form to a user. When submitting the form it MUST be sent to the url in _href_ with the HTTP method specified in _method_ with the Content-Type header set to the value of _type_. Here's the create form from above.
+When serialized these forms contain an array of _fields_ that specifies all attributes that are accepted for create/update. Each field has a `name` property that MUST be used as key when constructing a payload to be submitted. Each field also has a type which declares the kind of value that are accepted (currently only string and integer are supported) and a label that may be used when rendering the form to a user. When submitting the form it MUST be sent to the url in _href_ with the HTTP method specified in _method_ with the Content-Type header set to the value of _type_. Here's the create form from the [Getting started](#getting-started) section.
 ```sh
     "create-form": {
       "method": "POST",
@@ -449,6 +558,41 @@ Policies should also be used in Controllers (through the `authorize_with` class 
   end
 ```
 Then the controller can call `authorize! :write` in the actions for editing/deleting and fetching of edit-form. If the block returns true nothing happens. If the block returns false, then the server will respond with "403 Forbidden".
+
+## Settings
+Settings are kept in a yaml file found in `$PROJECT_ROOT/config/settings.yml`. When a new project is created it looks like this:
+```sh
+---
+default: &default
+  public_folder: frontend/assets
+  views_folder: frontend/views
+  documents_dir: doc/api
+  migrations_dir: db/migrations
+  fixtures_dir: spec/fixtures
+  paginate_per_page: 25
+  http_cache: on
+  http_cache_max_age_long: 86400 # 60 * 60 * 24 = 1 day
+  http_cache_max_age_short: 3600 #      60 * 60 = 1 hour
+  hostname: localhost
+  protocol: http
+  port: 3000
+
+production:
+  <<: *default
+  port: 443
+  protocol: https
+
+development:
+  <<: *default
+
+test:
+  <<: *default
+  port: 3030
+```
+These settings can be read from your code with `Shaf::Settings.NAME_OF_SETTINGS`. So for example `Shaf::Settings.port` would return 443 in production environment and 300 in development.
+
+## Database
+The database connection is configure in the ruby file `$PROJECT_ROOT/config/database.rb`. By default the test and development environments are running an sqlite3 DB.
 
 ## Testing
 Shaf helps you create `MiniTest::Spec`s for serializers and integration.
