@@ -69,7 +69,7 @@ module Shaf
       end
 
       def links
-        %w(doc:up self doc:edit-form doc:edit doc:delete)
+        %w(doc:up self doc:edit-form doc:delete)
       end
 
       def curies_with_doc
@@ -83,7 +83,7 @@ module Shaf
             # Example:
             # ```
             # curl -H "Accept: application/hal+json" \\
-            #      /doc/#{name}/rels/edit
+            #      /doc/#{name}/rels/delete
             #```
             curie :doc do
               doc_curie_uri('#{name}')
@@ -97,7 +97,6 @@ module Shaf
           collection_link,
           self_link,
           edit_link,
-          update_link,
           delete_link,
         ]
       end
@@ -128,16 +127,6 @@ module Shaf
           desc: "Link to a form to edit this resource",
           uri: "/#{plural_name}/5/edit",
           uri_helper: "edit_#{name}_uri(resource)"
-        )
-      end
-
-      def update_link
-        link(
-          rel: "doc:edit",
-          desc: "Link to update this #{name}",
-          method: "PUT",
-          uri: "/#{plural_name}/5",
-          uri_helper: "#{name}_uri(resource)"
         )
       end
 
