@@ -1,5 +1,13 @@
-## x.x.x
+## 0.5.0
  * Add base_uri to all uris
+ * Validate foreign key table
+ * Base class for serializers and policies
+ * Add base_uri to uris
+ * Adding/dropping files in upgrades
+ * Forms are no longer embedded
+ * Add http cache control to forms and docs
+ * Remove create form from resources
+ * Remove update link from resources
 ## 0.4.1
  * Add command to show shaf version
  * Fix upgrade problem
