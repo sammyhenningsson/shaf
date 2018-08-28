@@ -4,20 +4,36 @@ $:.unshift APP_DIR
 
 def sort_files(files)
   files.sort_by do |file|
-    case file
-    when /\Alib/
-      0
-    when /\Ahelpers/
-      1
-    when /\Amodels/
-      2
-    when /\Acontrollers/
-      3
-    when /\Apolicies/
-      4
-    else
-      5
-    end
+    directory_priority(file) + file_priority(file)
+  end
+end
+
+def directory_priority(file)
+  case file
+  when /\Alib/
+    0
+  when /\Ahelpers/
+    10
+  when /\Amodels/
+    20
+  when /\Apolicies/
+    30
+  when /\Acontrollers/
+    40
+  when /\Aserializers/
+    50
+  else
+    60
+  end
+end
+
+
+def file_priority(file)
+  case File.basename(file)
+  when /\Abase[\._]/
+    0
+  else
+    9
   end
 end
 
