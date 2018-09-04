@@ -126,9 +126,9 @@ module Shaf
     end
 
     def call
-      if UriHelper.respond_to? method_name
+      if UriHelper.respond_to? uri_method_name
         raise "resource uri #{@name} can't be registered. " \
-          "Method :#{method_name} already exist!"
+          "Method :#{uri_method_name} already exist!"
       end
 
       if @alt_uri.nil?
@@ -141,24 +141,38 @@ module Shaf
     private
 
     def build_methods
-      UriHelperMethods.eval_method method_string
+      UriHelperMethods.eval_method uri_method_string
+      UriHelperMethods.eval_method path_method_string
       UriHelperMethods.register(template_method_name, &template_proc)
     end
 
     def build_methods_with_optional_arg
-      UriHelperMethods.eval_method method_with_optional_arg_string
+      UriHelperMethods.eval_method uri_method_with_optional_arg_string
+      UriHelperMethods.eval_method path_method_with_optional_arg_string
       UriHelperMethods.register(template_method_name, &template_proc)
     end
 
-    def method_name
+    def uri_method_name
       "#{@name}_uri".freeze
     end
 
-    def template_method_name
-      "#{method_name}_template".freeze
+    def path_method_name
+      "#{@name}_path".freeze
     end
 
-    def signature(optional_args: 0)
+    def template_method_name
+      "#{uri_method_name}_template".freeze
+    end
+
+    def uri_signature(optional_args: 0)
+      signature(uri_method_name, optional_args: optional_args)
+    end
+
+    def path_signature(optional_args: 0)
+      signature(path_method_name, optional_args: optional_args)
+    end
+
+    def signature(method_name, optional_args: 0)
       s = "#{method_name}("
 
       symbols = extract_symbols.size.times.map { |i| "arg#{i}" }
@@ -175,26 +189,49 @@ module Shaf
       s << (args.empty? ? "**query)" : "#{args.join(', ')}, **query)")
     end
 
-    def method_string
+    def uri_method_string
       base_uri = UriHelper.base_uri
       <<~Ruby
-        def #{signature}
+        def #{uri_signature}
           query_str = Shaf::MethodBuilder.query_string(query)
           \"#{base_uri}#{interpolated_uri_string(@uri)}\#{query_str}\".freeze
         end
       Ruby
     end
 
-    def method_with_optional_arg_string
+    def path_method_string
+      <<~Ruby
+        def #{path_signature}
+          query_str = Shaf::MethodBuilder.query_string(query)
+          \"#{interpolated_uri_string(@uri)}\#{query_str}\".freeze
+        end
+      Ruby
+    end
+
+    def uri_method_with_optional_arg_string
       base_uri = UriHelper.base_uri
       arg_no = extract_symbols.size - 1
       <<~Ruby
-        def #{signature(optional_args: 1)}
+        def #{uri_signature(optional_args: 1)}
           query_str = Shaf::MethodBuilder.query_string(query)
           if arg#{arg_no}.nil?
             \"#{base_uri}#{interpolated_uri_string(@alt_uri)}\#{query_str}\".freeze
           else
             \"#{base_uri}#{interpolated_uri_string(@uri)}\#{query_str}\".freeze
+          end
+        end
+      Ruby
+    end
+
+    def path_method_with_optional_arg_string
+      arg_no = extract_symbols.size - 1
+      <<~Ruby
+        def #{path_signature(optional_args: 1)}
+          query_str = Shaf::MethodBuilder.query_string(query)
+          if arg#{arg_no}.nil?
+            \"#{interpolated_uri_string(@alt_uri)}\#{query_str}\".freeze
+          else
+            \"#{interpolated_uri_string(@uri)}\#{query_str}\".freeze
           end
         end
       Ruby
