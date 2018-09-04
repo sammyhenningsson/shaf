@@ -2,8 +2,8 @@
 [![Gem Version](https://badge.fury.io/rb/shaf.svg)](https://badge.fury.io/rb/shaf)
 [![Build Status](https://travis-ci.org/sammyhenningsson/shaf.svg?branch=master)](https://travis-ci.org/sammyhenningsson/shaf)  
 Shaf is a framework for building hypermedia driven REST APIs. Its goal is to be like a lightweight version of `rails new --api` with hypermedia as a first class citizen. Instead of reinventing the wheel Shaf uses [Sinatra](http://sinatrarb.com/) and adds a layer of conventions similar to [Rails](http://rubyonrails.org/). It uses [Sequel](http://sequel.jeremyevans.net/) as ORM and [HALPresenter](https://github.com/sammyhenningsson/hal_presenter) for policies and serialization (which means that the mediatype being used is [HAL](http://stateless.co/hal_specification.html)).  
-Most APIs claiming to be RESTful completly lacks the concept of links and relies upon clients to construction urls to _known_ endpoints. Thoses APIs are missing some important concepts that Roy Fielding put together in is dissertation about REST. Having the server always returning payloads with links (hypermedia) makes the responsibilies more clear and allows for more robust implementations. Clients then always knows which actions are possible and which aren't, depending of the links present in the server response. For example, there's no need for a client to try to place an order or follow another user unless the server returns the corresponding link for those actions. Also if the server decides to move some resources to another location or change the access protocol (like https instead of http), this can be done without any changes to the client.  
-There are many pros and cons about hypermedia APIs, which means that Shaf will not suite everyone. However, if you are going to create an API driven by hypermedia then Shaf will help you, similar to how Rails helps you get up and running in no time. 
+Most APIs claiming to be RESTful completly lacks the concept of links and relies upon clients to construction urls to _known_ endpoints. Thoses APIs are missing some important concepts that Roy Fielding put together in is dissertation about REST. Having the server always returning payloads with links (hypermedia) makes the responsibilies more clear and allows for robust implementations. Clients then always knows which actions are possible and which aren't, depending of the links present in the server response. For example, there's no need for a client to try to place an order or follow another user unless the server returns the corresponding link for those actions. Also if the server decides to move some resources to another location or change the access protocol (like https instead of http), this can be done without any changes to the client.  
+There are both pros and cons with hypermedia APIs, which means that Shaf will not suite everyone. However, if you are going to create an API driven by hypermedia then Shaf will help you, similar to how Rails helps you get up and running in no time. 
 
 ## Getting started
 Install Shaf with
@@ -61,9 +61,6 @@ Your newly created project should contain the following files:
 │       ├── layout.erb
 │       └── payload.erb
 ├── Gemfile
-├── Gemfile.lock
-├── logs
-│   └── development.log
 ├── Rakefile
 └── spec
     ├── integration
@@ -302,7 +299,7 @@ shaf upgrade
 ```
 
 ## HAL
-The [HAL](http://stateless.co/hal_specification.html) mediatype is very simple and looks like any JSON object, except for two reserved keys __links_ and __embedded_. __links_ displays possible actions that may be taken. __embedded_ contains nested resources. A HAL payload may contain a special link with rel _curies_, which is similar to namespaces in XML. Shaf uses a curie called _doc_ and makes it possible to fetch documentation for any link or embedded resources with a rel begining with 'doc:'. The href for curies are always templated, meaning that a part of the href (in our case '{rel}') must be replaced with a value. In the payload above the href of the doc curie is 'http://localhost:3000/doc/post/rels/{rel}' and there is one embedded resource prefixed with 'doc:', namely 'doc:create-form'. So this means that if we would like to find out information about what this embedded resource is and how it relates to the posts collection we replace '{rel}' with 'create-form' and perform a GET request to this url.
+The [HAL](http://stateless.co/hal_specification.html) mediatype is very simple and looks like your ordinary JSON objects, except for two reserved keys __links_ and __embedded_. __links_ displays possible actions that may be taken. __embedded_ contains nested resources. A HAL payload may contain a special link with rel _curies_, which is similar to namespaces in XML. Shaf uses a curie called _doc_ and makes it possible to fetch documentation for any link or embedded resources with a rel begining with 'doc:'. The href for curies are always templated, meaning that a part of the href (in our case '{rel}') must be replaced with a value. In the payload above the href of the doc curie is 'http://localhost:3000/doc/post/rels/{rel}' and there is one embedded resource prefixed with 'doc:', namely 'doc:create-form'. So this means that if we would like to find out information about what this embedded resource is and how it relates to the posts collection we replace '{rel}' with 'create-form' and perform a GET request to this url.
 ```sh
 curl http://localhost:3000/doc/post/rels/create-form
 ```
@@ -360,7 +357,7 @@ See [the Sequel migrations documentation](http://sequel.jeremyevans.net/rdoc/fil
 Note: You can also add custom migrations, see [Customizations](#Customizations)
 
 ## Routing/Controllers
-As usual with Sinatra applications routes are declared together with the controller code rather than in a separate file (as with Rails). All controllers SHOULD be subclasses of `BaseController` found in `api/controllers/base_controller.rb` (which was created along with the project).  
+As usual with Sinatra applications routes are declared together with the controller code rather than in a separate file (as with Rails). All controllers should be subclasses of `BaseController` found in `api/controllers/base_controller.rb` (which was created along with the project).  
 Controllers generated with `shaf generate` uses two extensions, `Shaf::ResourceUris` and `Shaf::Authorize`.
 
 #### Shaf::ResourceUris
@@ -371,16 +368,20 @@ class PostController < BaseController
   resource_uris_for :post
 end
 ```
-Would add the following methods as instance method on Shaf::UriHelper. This module is then both included and extended into the `PostController` (which means that all uri helpers are available as both class methods and instance methods in the controller).  
+Would add the following methods as instance method on Shaf::UriHelper. This module is then both included and extended into the `PostController` (which means that all uri helpers are available as both class methods and instance methods in the controller). Each method as an __uri_ version and an __path_ version.
 
-| Method                                | Returned string with no query_params (id may vary) | 
-| -------------------------------------- | -------------------------------------------------- |
-| `posts_uri(**query_params)`            | /posts                                             |
-| `post_uri(post, **query_params)`       | /posts/5                                           |
-| `new_post_uri(**query_params)`         | /posts/form                                        |
-| `edit_post_uri(post, **query_params)`  | /posts/5/edit                                      |
+| Method                                  | Returned string with no query_params (id may vary) | 
+| --------------------------------------- | -------------------------------------------------- |
+| `posts_uri(**query_params)`             | http://localhost/posts                             |
+| `post_uri(post, **query_params)`        | http://localhost/posts/5                           |
+| `new_post_uri(**query_params)`          | http://localhost/posts/form                        |
+| `edit_post_uri(post, **query_params)`   | http://localhost/posts/5/edit                      |
+| `posts_path(**query_params)`            | /posts                                             |
+| `post_path(post, **query_params)`       | /posts/5                                           |
+| `new_post_path(**query_params)`         | /posts/form                                        |
+| `edit_post_path(post, **query_params)`  | /posts/5/edit                                      |
 
-Methods taking an argument (`post_uri` and `edit_post_uri`) may be called with either an integer or an object responding to `:id`. The keyword arguments `:base` and `:plural_name` is used to specify a path namespace (such as '/api') that will be prepended to the uri resp. the pluralization of the name (when excluded the plural name will be `name` + 's').  
+Methods taking an argument (`post_uri` and `edit_post_uri`) may be called with an object responding to `:id` or else `:to_s` will be called on it. The keyword arguments `:base` and `:plural_name` is used to specify a path namespace (such as '/api') that will be prepended to the uri resp. the pluralization of the name (when excluded the plural name will be `name` + 's').  
 
 The optional `query_params` takes any given keyword arguments and appends a query string with them.  
 ```sh
@@ -393,7 +394,19 @@ class PostController < BaseController
   register_uri :archive_post, '/posts/:id/archive'
 end
 ```
-Would add an `archive_post_uri(post, **query_params)` method to the `PostController` class as well as instances of `PostController`.  
+Would add an `archive_post_uri(post, **query_params)` method to the `PostController` class as well as instances of `PostController`. Each parameter in the uri template (section begining with ':', e.g. _:some_param_) will become a parameter in the helper method. The correponding argument will get sent the paramter name if it respond to it, else `to_s` will be sent with the argument as receiver. An example will make things more clear:
+```sh
+class FooController < BaseController
+  register_uri :foo_bar, '/:foo/hello/:bar/:baz'
+end
+
+obj1 = OpenStruct.new(foo: "FOOO")
+obj2 = OpenStruct.new(bar: 1337)
+obj3 = OpenStruct.new(baz: 'BAAAZA')
+Shaf::UriHelper.foo_bar_path(obj1, obj2, 'BAZZZZ') # => /FOOO/hello/1337/BAZZZZ
+Shaf::UriHelper.foo_bar_path('FOOZA', obj2, obj3) # => /FOOZA/hello/1337/BAAAZA
+```
+The helper above takes three arguments (since there's three sections begining with ':'). In the first call to `foo_bar_path` we pass in two objects responding to `:foo` resp. `:bar`, thus `obj1.foo` resp. `obj2.bar` is what ends up in the corresponding uri sections. The third argument does not respond to `:baz`, thus `to_s` is sent instead. The second call to `foo_bar_path` is just to clearify that we can call this helper in many ways.  
 Uri helpers added by `resource_uris_for` and `register_uri` gets added to the module `Shaf::UriHelper` as both module methods and instance methods. So to use them outside of Controllers, either call them directly on the module (e.g. `Shaf::UriHelper.my_foo_uri`) or include `Shaf::UriHelper` and get all helpers as instance methods.  
 
 To make it easier to see the connection between controller routes and uri helpers, Shaf makes it possible to specify routes with symbols. These symbols must be the same as the corresponding uri helper:
@@ -449,7 +462,8 @@ class PostController < BaseController
   end
 end
 ```
-Note: that the Policy instance method MUST end with a question mark '?' while the symbol given to `authorize!` may or may not end with a symbol.  
+After a policy class has been registered with `::authorize_with` then a call to `#authorize!` will create an instance of the policy with `current_user` and `resource` as arguments. Thus in the controller above, the when a `GET` request is made to `post_uri` then the policy instance will be created with `PostPolicy.new(current_user, nil). The `PUT` action will create the instance `PostPolicy.new(current_user, post)`. Then the first argument sent to `#authorize!` will be sent (with an appended question mark unless already present) to the policy instance. Like `policy.public_send(:show?)` resp. `policy.public_send(:edit?)`. So it's important to think about which policy rules should apply to a specific resource or should be a general rule (e.g. viewing a collection) where a specific resource is not present.
+Note: that the Policy instance methods must end with a question mark '?' while the symbol given to `authorize!` may or may not end with a question mark.  
 
 #### Rendering responses
 Shaf controllers includes two helper methods that simplifies rendering responses:
@@ -484,7 +498,7 @@ class User < Sequel::Model
   end
 end
 ```
-When serialized these forms contain an array of _fields_ that specifies all attributes that are accepted for create/update. Each field has a `name` property that MUST be used as key when constructing a payload to be submitted. Each field also has a type which declares the kind of value that are accepted (currently only string and integer are supported) and a label that may be used when rendering the form to a user. When submitting the form it MUST be sent to the url in _href_ with the HTTP method specified in _method_ with the Content-Type header set to the value of _type_. Here's the create form from the [Getting started](#getting-started) section.
+When serialized these forms contain an array of _fields_ that specifies all attributes that are accepted for create/update. Each field has a `name` property that MUST be used as key when constructing a payload to be submitted. Each field also has a type which declares the kind of value that are accepted (currently only string and integer are supported) and a label that may be used when rendering the form to a user. If a field has the attribute `required` set to `true`, then that field MUST be set when submitting the form. If a field includes a `value` attribute, then that value SHOULD be presented to the user and unless changed, the value MUST be included when the form is submitted. When submitting the form it MUST be sent to the url in _href_ with the HTTP method specified in _method_ with the Content-Type header set to the value of _type_. Here's the create form from the [Getting started](#getting-started) section.
 ```sh
     "create-form": {
       "method": "POST",
@@ -543,15 +557,17 @@ class PostPolicy < BasePolicy
   end
 end
 ```
-Here `resource` is the object being serialized (in our case the `post` object). Used together with a serializer that specifies links with rels _edit_, _edit-form_ and _delete_, those links will only be serialized when the block returns `true`.  
+Here `resource` is the object being serialized (in our case the `post` object). Used together with a serializer that specifies links with rels _edit_, _edit-form_ and _delete_, those links will only be serialized when the block returns `true`. The `resource` method is inherited and general for all policies. To make this a bit prettier it's recommended to create an alias for the name of the resource that the policy handles.
 Policies should also be used in Controllers (through the `authorize_with` class method). Since the links that should be serialized should coincide with which action should be allowed in the controller it makes sense to refactor this logic into a method.
 ```sh
+  alias post resource
+
   link :edit, :'edit-form', :delete do
     write?
   end
 
   def write?
-    current_user&.id == resource.author.id
+    current_user&.id == post.author.id
   end
 ```
 Then the controller can call `authorize! :write` in the actions for editing/deleting and fetching of edit-form. If the block returns true nothing happens. If the block returns false, then the server will respond with "403 Forbidden".
@@ -586,7 +602,7 @@ test:
   <<: *default
   port: 3030
 ```
-These settings can be read from your code with `Shaf::Settings.NAME_OF_SETTINGS`. So for example `Shaf::Settings.port` would return 443 in production environment and 300 in development.
+These settings can be read from your code with `Shaf::Settings.NAME_OF_SETTING`. So for example `Shaf::Settings.port` would return 443 in production environment and 300 in development.
 
 ## Database
 The database connection is configure in the ruby file `$PROJECT_ROOT/config/database.rb`. By default the test and development environments are running an sqlite3 DB.
@@ -745,6 +761,14 @@ end
 
 ## API Documentation
 Since API clients should basically only have to care about the payloads that are returned from the API, it makes sense to keep the API documentation in the serializer files. Each `attribute`, `link`, `curie` and `embed` should be preceeded with code comments that documents how client should interpret/use it. The comments should be in markdown format. This makes it possible to generate API documentation with `rake doc:generate`. This documentation can then be retrieved from a running server at `/doc/RESOURCE_NAME`, where `RESOURCE_NAME` is the name of the resource to fetch doc for, e.g `curl localhost:3000/doc/post`.
+
+## HTTP Caching
+REST is a very chatty architecture. Fortunately works very well with HTTP Caching. Resources that are unlikely to be changed often, such as the root resource, forms, documentation etc, will by default set the HTTP Header Cache-Control with a max-age (meant to be tweeked to a value that suites your api). Clients should respect this a and cache those resources accordingly.
+Each time a response is send from the api the Etag header is set (with a weak Etag). Clients should make use of this and be able to handle a '304 Not Modified' response.
+For more info check out [this page](https://developers.google.com/web/fundamentals/performance/optimizing-content-efficiency/http-caching) by Ilya Grigorik.
+
+## Pagination
+When serializing collections that are paginated using Kaminari or WillPaginate, Shaf will automatically add links with rel _prev_ and _next_. As well as add pagination query params to the _self_ link.
 
 ## Frontend
 To make it easy to explore the API in a brower, Shaf includes a some very basic html views. They are only meant to be a quick and easy way to view the api and to add/edit resources that does not require authentication. They are really ugly and you should not look at them if you are a frontend developer ;) (PRs are welcome!).
