@@ -1,3 +1,6 @@
+## 0.5.1
+ * Add `_path` methods for all uri helpers
+ * Loading base classes (e.g. base_policy) first
 ## 0.5.0
  * Add base_uri to all uris
  * Validate foreign key table
