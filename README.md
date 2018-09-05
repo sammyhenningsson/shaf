@@ -362,7 +362,7 @@ Controllers generated with `shaf generate` uses two extensions, `Shaf::ResourceU
 
 #### Shaf::ResourceUris
 This extension adds two class methods, `resource_uris_for` and `register_uri`. Both methods are used to create uri helpers.  
-`resource_uris_for(name, base: nil, plural_name: nil)` - creates four uri helpers and adds them as class methods and instance methods to the caller.
+`resource_uris_for(name, base: nil, plural_name: nil)` - creates four pairs of uri helpers and adds them as class methods and instance methods to the caller.
 ```sh
 class PostController < BaseController
   resource_uris_for :post

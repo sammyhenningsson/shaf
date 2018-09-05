@@ -3,6 +3,7 @@ require 'tmpdir'
 require 'fileutils'
 require 'net/http'
 require 'uri'
+require 'socket'
 
 module Shaf
   describe "Setting up a new project" do
@@ -21,16 +22,24 @@ module Shaf
       FileUtils.remove_dir(tmp_dir)
     end
 
-    def with_server(port: 3030)
+    def with_server(port: nil)
+      port ||= get_server_port
       pid = nil
       Dir.chdir(project_path) do
         pid = Test.spawn("bundle exec shaf server -p #{port}", out: File::NULL, err: [:child, :out])
-        sleep 1
-        yield
+        sleep 2
+        yield port
       end
     ensure
       Process.kill("TERM", pid)
       Process.waitpid2(pid)
+    end
+
+    def get_server_port
+      server = TCPServer.new('127.0.0.1', 0)
+      port = server.addr[1]
+      server.close
+      port
     end
 
     def get(uri)
@@ -70,8 +79,8 @@ module Shaf
     end
 
     it "starts the server" do
-      with_server do
-        get_root
+      with_server do |port|
+        get_root(port: port)
         get_link('self')
       end
     end
@@ -81,8 +90,8 @@ module Shaf
         assert Test.system("bundle exec shaf generate scaffold post message:string:Meddelande author:integer:Författare")
         assert Test.system("bundle exec rake db:migrate")
 
-        with_server do
-          get_root
+        with_server do |port|
+          get_root(port: port)
           get_link('posts')
         end
       end
