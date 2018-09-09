@@ -115,7 +115,7 @@ Added:      api/controllers/posts_controller.rb
 Added:      spec/integration/posts_controller_spec.rb
 Modified:   api/serializers/root_serializer.rb
 ```
-As shown in the output, that command created, a model, a controller, a serializer and a policy. It will also generate a DB migration file, some specs and add a link to the new `post` collection in the root resource. So let's check this out by migrating the DB and restarting the server. Close any running instance with `Ctrl + C` and then:
+As shown in the output, that command created, a model, a controller, a serializer and a policy. It also generated a DB migration file, some specs and a link to the new `post` collection was added the root resource. So let's check this out by migrating the DB and restarting the server. Close any running instance with `Ctrl + C` and then:
 ```sh
 rake db:migrate
 shaf server
@@ -421,7 +421,7 @@ end
 ```
 
 #### Shaf::Authorize
-This module adds an `authorize_with(policy)` class method and an `authorize!(action, resource = nil)` instance method. The class method is used to register a Policy class. The instance method is used to ensure that a certain action is authorized. The following policy class requires makes sure that a user is logged in to be able to see posts and that users may only edit their own posts. See [Policies](#policies) for more info.
+This module adds an `authorize_with(policy)` class method and an `authorize!(action, resource = nil)` instance method. The class method is used to register a Policy class. The instance method is used to ensure that a certain action is authorized. The following policy class makes sure that a user is logged in to be able to see posts and that users may only edit their own posts. See [Policies](#policies) for more info.
 ```sh
 class PostPolicy
   include HALPresenter::Policy::DSL
@@ -462,7 +462,7 @@ class PostController < BaseController
   end
 end
 ```
-After a policy class has been registered with `::authorize_with` then a call to `#authorize!` will create an instance of the policy with `current_user` and `resource` as arguments. Thus in the controller above, the when a `GET` request is made to `post_uri` then the policy instance will be created with `PostPolicy.new(current_user, nil). The `PUT` action will create the instance `PostPolicy.new(current_user, post)`. Then the first argument sent to `#authorize!` will be sent (with an appended question mark unless already present) to the policy instance. Like `policy.public_send(:show?)` resp. `policy.public_send(:edit?)`. So it's important to think about which policy rules should apply to a specific resource or should be a general rule (e.g. viewing a collection) where a specific resource is not present.
+After a policy class has been registered with `::authorize_with` then a call to `#authorize!` will create an instance of the policy with `current_user` and `resource` as arguments. Thus in the controller above, when a `GET` request is made to `post_uri` then the policy instance will be created with `PostPolicy.new(current_user, nil)`. The `PUT` action will create the instance `PostPolicy.new(current_user, post)`. Then the first argument sent to `#authorize!` will be sent (with an appended question mark unless already present) to the policy instance. Like `policy.public_send(:show?)` resp. `policy.public_send(:edit?)`. So it's important to think about which policy rules should apply to a specific resource or should be a general rule (e.g. viewing a collection) where a specific resource is not present.
 Note: that the Policy instance methods must end with a question mark '?' while the symbol given to `authorize!` may or may not end with a question mark.  
 
 #### Rendering responses
@@ -763,7 +763,7 @@ end
 Since API clients should basically only have to care about the payloads that are returned from the API, it makes sense to keep the API documentation in the serializer files. Each `attribute`, `link`, `curie` and `embed` should be preceeded with code comments that documents how client should interpret/use it. The comments should be in markdown format. This makes it possible to generate API documentation with `rake doc:generate`. This documentation can then be retrieved from a running server at `/doc/RESOURCE_NAME`, where `RESOURCE_NAME` is the name of the resource to fetch doc for, e.g `curl localhost:3000/doc/post`.
 
 ## HTTP Caching
-REST is a very chatty architecture. Fortunately works very well with HTTP Caching. Resources that are unlikely to be changed often, such as the root resource, forms, documentation etc, will by default set the HTTP Header Cache-Control with a max-age (meant to be tweeked to a value that suites your api). Clients should respect this a and cache those resources accordingly.
+REST is a very chatty architecture. Fortunately it works very well with HTTP Caching. Resources that are unlikely to be changed often, such as the root resource, forms, documentation etc, will by default set the HTTP Header Cache-Control with a max-age (meant to be tweeked to a value that suites your api) to one day. Clients should respect this and cache those resources accordingly.
 Each time a response is send from the api the Etag header is set (with a weak Etag). Clients should make use of this and be able to handle a '304 Not Modified' response.
 For more info check out [this page](https://developers.google.com/web/fundamentals/performance/optimizing-content-efficiency/http-caching) by Ilya Grigorik.
 
