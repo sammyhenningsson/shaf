@@ -144,7 +144,7 @@ module Shaf
         link(
           rel: "doc:create-form",
           desc: "Link to a form used to create new #{name} resources",
-          uri: "new_#{name}_uri",
+          uri: "/#{plural_name}/form",
           uri_helper: "new_#{name}_uri"
         )
       end
@@ -185,12 +185,12 @@ module Shaf
       def collection_with_doc
         <<~EOS.split("\n")
           collection of: '#{plural_name}' do
+            curie(:doc) { doc_curie_uri('#{name}') }
+
             link :self, #{plural_name}_uri
             link :up, root_uri
 
             #{create_link.join("\n  ")}
-            link :'doc:create-form', new_#{name}_uri
-            curie(:doc) { doc_curie_uri('#{name}') }
           end
         EOS
       end
