@@ -70,7 +70,7 @@ module Shaf
         hash.to_yaml
       end
 
-      def to_markdown
+      def to_html
         # For some reason redcarpet don't like to surround my markdown code blocks
         # with <pre> tags, so let's fix that here.
         options = {autolink: true, fenced_code_blocks: true}
@@ -84,7 +84,7 @@ module Shaf
       def write_html(output)
         FileUtils.mkdir_p(output) unless Dir.exist? output
         File.open(File.join(output, "#{model.downcase}.html"), "w") do |file|
-          file.write(to_markdown)
+          file.write(to_html)
         end
       end
 
