@@ -91,6 +91,8 @@ module Shaf
       http_cache = kwargs.fetch(:http_cache, Settings.http_cache)
       add_cache_headers(serialized) if http_cache
 
+      log.info "#{request.request_method} #{request.path_info} => #{status}"
+
       if preferred_response == mime_type(:html)
         respond_with_html(resource, serialized)
       else
