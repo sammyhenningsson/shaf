@@ -263,7 +263,7 @@ module Shaf
       uri, alt_uri = @uri, @alt_uri
 
       if alt_uri.nil?
-        -> { uri.freeze }
+        ->(_ = nil) { uri.freeze }
       else
         ->(collection = false) { collection ? alt_uri : uri }
       end
