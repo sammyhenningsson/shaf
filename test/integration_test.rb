@@ -99,7 +99,7 @@ module Shaf
 
     it "passes specs" do
       Dir.chdir(project_path) do
-        assert Test.system("bundle exec shaf generate scaffold --specs post message:string:Meddelande author:integer:Författare")
+        assert Test.system("bundle exec shaf generate scaffold post message:string:Meddelande author:integer:Författare")
         assert Test.system("bundle exec rake db:migrate")
         assert Test.system("bundle exec rake test")
       end

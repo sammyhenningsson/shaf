@@ -98,9 +98,9 @@ module Shaf
       def assert_has_link(rel)
         assert last_payload.key?(:_links), "Response does not have any links: #{last_payload}"
         assert last_payload[:_links][rel.to_sym],
-          "Response does not contain link with rel '#{rel}': #{last_payload}"
+          "Response does not contain link with rel '#{rel}'!\nResponse: #{last_payload}"
         assert last_payload[:_links][rel.to_sym][:href],
-          "link with rel '#{rel}' in ressponse does not have a href: #{last_payload}"
+          "link with rel '#{rel}' in response does not have a href!\nResponse: #{last_payload}"
       end
 
       def refute_has_link(rel)

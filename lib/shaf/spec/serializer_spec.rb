@@ -6,6 +6,10 @@ module Shaf
         next unless args && args.is_a?(Hash)
         args[:type]&.to_s == 'serializer'
       end
+
+      def serialize(resource, current_user:)
+        set_payload HALPresenter.to_hal(resource, current_user: current_user)
+      end
     end
   end
 end
