@@ -54,7 +54,7 @@ class <%= controller_class_name %> < BaseController
   end
 
   def <%= name %>
-    <%= model_class_name %>[params['id']].tap do |<%= name %>|
+    @<%= name %> ||= <%= model_class_name %>[params['id']].tap do |<%= name %>|
       raise NotFoundError.new(clazz: <%= model_class_name %>, id: params['id']) unless <%= name %>
     end
   end

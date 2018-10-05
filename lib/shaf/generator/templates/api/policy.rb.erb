@@ -14,10 +14,6 @@ class <%= policy_class_name %> < BasePolicy
     write?
   end
 
-  embed :'create-form', :'edit-form' do
-    write?
-  end
-
   def read?
     # FIXME!!
     true
