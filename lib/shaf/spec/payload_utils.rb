@@ -18,7 +18,7 @@ module Shaf
       end
 
       def links
-        last_payload[:_links] || []
+        last_payload[:_links] || {}
       end
 
       def link_rels
