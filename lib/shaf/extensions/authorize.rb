@@ -1,10 +1,10 @@
 require 'sinatra/base'
 
 module Shaf
-
   module Authorize
-    class NoPolicyError < StandardError; end
-    class PolicyViolationError < StandardError; end
+    class NoPolicyError < Error; end
+    class PolicyViolationError < Error; end
+    class MissingPolicyAction < Error; end
 
     attr_reader :policy_class
 
@@ -20,7 +20,10 @@ module Shaf
   module Helpers
     def authorize(action, resource = nil)
       policy(resource) or raise Authorize::NoPolicyError
-      @policy.public_send method_for(action)
+      method = __method_for(action)
+      return @policy.public_send(method) if @policy.respond_to? method
+      raise Authorize::MissingPolicyAction,
+        "#{@policy.class} does not implement method #{method}"
     end
 
     def authorize!(action, resource = nil)
@@ -35,7 +38,7 @@ module Shaf
       @policy = self.class.policy_class&.new(user, resource)
     end
 
-    def method_for(action)
+    def __method_for(action)
       return action if action.to_s.end_with? '?'
       "#{action}?".to_sym
     end
