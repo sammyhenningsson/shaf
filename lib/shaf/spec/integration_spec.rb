@@ -19,7 +19,7 @@ module Shaf
         return nil if body.empty?
         JSON.parse(body, symbolize_names: true)
       rescue JSON::ParserError => e
-        assert e.nil?, "Could not parse reponse as json"
+        assert e.nil?, "Could not parse reponse as json (#{body[0..40]})"
       end
 
       def app
@@ -43,19 +43,6 @@ module Shaf
       def clear_auth_token
         @__integration_test_auth_token = nil
       end
-
-#       def login(email, pass)
-#         params = {email: email, password: pass}
-#         header 'Content-Type', 'application/json'
-#         post Shaf::UriHelper.session_uri, JSON.generate(params)
-#         @__integration_test_auth_token = attribute[:auth_token]
-#       end
-# 
-#       def logout
-#         delete Shaf::UriHelper.session_uri
-#         @__integration_test_auth_token = nil
-#       end
-
     end
   end
 end

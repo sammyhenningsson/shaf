@@ -1,5 +1,6 @@
 require 'open3'
 require 'shaf'
+require 'shaf/spec/fixture'
 require 'sequel'
 require 'bundler'
 require 'minitest/autorun'

@@ -1,32 +1,102 @@
 module Shaf
   module Spec
-
-    class FixtureNotFound < StandardError; end
-
     module Fixtures
-      def self.load
-        fixture_files.map { |file| require file }
+      class FixtureNotFound < StandardError
+        def initialize(name, key = nil)
+          msg =
+            if key
+              "Instance '#{key}' is not found in fixture '#{name}'! " \
+                "Either it does not exist in the fixture definition or " \
+                "there is a circular dependency with your fixtures."
+            else
+              "No such fixture: #{name}"
+            end
+
+          super(msg)
+        end
       end
 
-      def self.fixture_files
-        dir = Shaf::Settings.fixtures_dir || 'spec/fixtures'
-        Dir[File.join(dir, '**', '*.rb')]
+      class << self
+        def load(reload: false)
+          clear if reload
+          require_fixture_files
+          init_fixtures
+        end
+
+        def clear
+          fixtures.each { |name, _| Accessors.clear(name) }
+          @initialized_fixtures = []
+        end
+
+        def init_fixtures
+          fixtures.each { |name, fixture| init_fixture(name, fixture) }
+        end
+
+        def init_fixture(name, fixture = nil)
+          fixture ||= fixtures[name]
+          raise FixtureNotFound, name unless fixture
+          return if initialized? name
+
+          initialized_fixtures << name
+          fixture.init
+        end
+
+        def fixture_defined(fixture)
+          fixtures[fixture.name] = fixture
+          Accessors.add(fixture.name)
+        end
+
+        def fixtures
+          @fixtures ||= {}
+        end
+
+        def initialized_fixtures
+          @initialized_fixtures ||= []
+        end
+
+        def require_fixture_files
+          fixture_files.each { |file| require(file) }
+        end
+
+        def fixture_files
+          @fixture_files ||= Dir[File.join(fixture_dir, '**', '*.rb')]
+        end
+
+        def fixture_dir
+          Shaf::Settings.fixtures_dir || 'spec/fixtures'
+        end
+
+        def initialized?(name)
+          initialized_fixtures.include? name
+        end
       end
 
-      def self.add_collection(collection_name)
-        @collections ||= {}
-        collection_name = collection_name.to_sym unless collection_name.is_a? Symbol
-        return if @collections.key? collection_name
+      module Accessors
+        class << self
+          def collection(name)
+            @collections ||= {}
+            @collections[name] ||= {}
+          end
 
-        @collections[collection_name] = {}
-        collection = @collections[collection_name]
-        create_accessor(collection, collection_name)
-        collection
-      end
+          def clear(name)
+            collection(name).clear
+          end
 
-      def self.create_accessor(collection, collection_name)
-        define_method(collection_name) do |name|
-          collection[name.to_sym] or raise FixtureNotFound
+          def add(name)
+            collection = collection(name)
+            return if instance_methods.include? name
+
+            define_method(name) do |arg = nil|
+              Fixtures.init_fixture(name) unless Fixtures.initialized? name
+              if arg.nil?
+                collection
+              elsif collection.key? arg
+                collection[arg]
+              else
+                raise FixtureNotFound.new(name, arg)
+              end
+            end
+          end
         end
       end
     end

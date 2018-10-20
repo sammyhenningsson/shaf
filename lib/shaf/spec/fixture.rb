@@ -4,58 +4,50 @@ require 'shaf/utils'
 module Shaf
   module Spec
     class Fixture
-      include Fixtures
 
-      def self.define(collection_name, &block)
+      include Fixtures::Accessors
+
+      attr_reader :name
+
+      def self.define(name, &block)
         return unless block_given?
-        collection = Fixtures.add_collection(collection_name)
-        new(collection_name, collection, block).run
+        Fixtures.fixture_defined new(name.to_sym, block)
       end
 
-      def initialize(collection_name, collection, block)
-        @collection_name = collection_name
-        @collection = collection
+      def initialize(name, block)
+        @name = name
         @block = block
       end
 
-      def run
+      def init
         instance_exec(&@block)
+        self
       end
 
-      def resource(name, resrc = nil, &block)
-        @collection[name.to_sym] = resrc || instance_exec(&block)
+      def add_entry(entry_name, resrc = nil, &block)
+        value = block ? instance_exec(&block) : resrc
+        fixtures = send(name)
+        fixtures[entry_name] = value
       end
 
       private
 
       def method_missing(method, *args, &block)
-        if load_fixture_if_missing_method_is_fixture?(method, args.size)
-          send(method, args.first)
-        elsif resource_name?(args.size, block_given?)
-          resource(method, args.first, &block)
-        else
-          super
-        end
+        return super unless resource_name?(args.size, block_given?)
+        add_entry(method, args.first, &block)
       end
 
-      def load_fixture_if_missing_method_is_fixture?(method, arg_count)
-        return false if arg_count > 1 # Fixtures should only be called with one argument
+      def respond_to_missing?(*)
+        true
+      end
 
-        fixture_files = Fixtures.fixture_files
-        fixtures = fixture_files.map { |f| File.basename(f, ".rb") }
-        i = fixtures.index(method.to_s)
-        return false unless i
-
-        require fixture_files[i]
-        respond_to? method
+      def nested_fixture?(*args)
+        args.size == 1 && args.first.is_a?(Symbol)
       end
 
       def resource_name?(arg_count, block_given)
-        if block_given
-          arg_count == 0
-        else
-          arg_count == 1
-        end
+        arg_count += 1 if block_given
+        arg_count == 1
       end
     end
   end
