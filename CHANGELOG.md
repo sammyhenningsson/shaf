@@ -1,3 +1,13 @@
+## 0.5.2
+ * Run framework specs with random listen port
+ * Remove duplicate link to create form
+ * Add logging of response status code
+ * Add spec helper to serialize test payload
+ * Raise exception when policy does not support action
+ * Support symbol routes with same singular/plural name
+ * No embedded forms for generated policies
+ * Memoize resource lookup in controllers
+ * Bug fixes for spec fixtures
 ## 0.5.1
  * Add `_path` methods for all uri helpers
  * Loading base classes (e.g. base_policy) first
