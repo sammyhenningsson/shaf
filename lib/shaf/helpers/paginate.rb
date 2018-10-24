@@ -8,7 +8,7 @@ module Shaf
 
     def paginate!(collection, per_page = PAGINATION_PER_PAGE)
       unless collection.respond_to? :paginate
-        log.warning "Trying to paginate a collection that doesn't " \
+        log.warn "Trying to paginate a collection that doesn't " \
                     "support pagination: #{collection}"
         return
       end
