@@ -99,14 +99,13 @@ module Shaf
         end
 
         def regexp_db_format_string(type)
-          COMPLEX_DB_TYPES.each do |complex_type|
+          COMPLEX_DB_TYPES.find do |complex_type|
             match = complex_type[:pattern].match(type) or next
             validator = complex_type[:validator]
             errors = validator&.call(type, match)
-            if errors.nil? || errors.empty?
-              return complex_type[:strings].map { |s| replace_backreferences(match, s) }
-            end
-            raise "Failed to process '#{type}': #{errors.join(', ')}"
+            raise "Failed to process '#{type}': #{errors&.join(', ')}" unless Array(errors).empty?
+
+            break complex_type[:strings].map { |s| replace_backreferences(match, s) }
           end
         end
 
@@ -118,13 +117,13 @@ module Shaf
         end
 
         def render
-          <<~EOS
+          <<~RUBY
             Sequel.migration do
               change do
                 #{@changes.flatten.join("\n    ")}
               end
             end
-          EOS
+          RUBY
         end
       end
 
