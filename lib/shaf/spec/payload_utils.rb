@@ -55,6 +55,8 @@ module Shaf
                     field[:name].size
                   when 'string'
                     "value for #{field[:name]}"
+                  when 'boolean'
+                    true
                   else
                     "type not supported"
                   end
