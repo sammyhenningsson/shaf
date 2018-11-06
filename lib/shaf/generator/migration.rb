@@ -6,7 +6,7 @@ module Shaf
         extend RegistrableFactory
       end
 
-      class Generator < Generator::Base
+      class Generator < Shaf::Generator::Base
         identifier :migration
         usage { Factory.usage }
 
