@@ -3,71 +3,58 @@ require 'shaf/formable/form'
 module Shaf
   module Formable
     class Builder
-      def self.call(block)
-        [
-          new(block, create: true).call,
-          new(block, edit: true).call
-        ]
+      DELEGATES = %i[title name action method type fields].freeze
+
+      attr_reader :forms
+
+      def initialize(&block)
+        @forms = []
+        @instance_accessors = []
+
+        exec_with_form(block)
       end
 
-      attr_reader :block
-
-      def initialize(block, create: false, edit: false)
-        @block = block
-        @create = create
-        @edit = edit
-        @form = nil
-        @default_method = @create ? :post : :put
+      def instance_accessor_for?(form)
+        @instance_accessors.include? form
       end
 
-      def call
+      private
+
+      attr_reader :form
+
+      def exec_with_form(block, action: nil)
+        current, @form = form, new_form
+        form.action = action if action
         instance_exec(&block)
-        @form
+      ensure
+        @form = current
       end
 
-      def form
-        @form ||= Formable::Form.new(method: @default_method)
+      def new_form
+        (form&.dup || Formable::Form.new).tap { |f| @forms << f }
       end
 
-      def name(name)
-        form.name = name
+      def instance_accessor
+        @instance_accessors << form
       end
 
-      def title(title)
-        form.title = title
-      end
-
-      def method(method)
-        form.method = method
-      end
-
-      def type(type)
-        form.type = type
-      end
-
-      def fields(fields)
-        form.fields = fields
+      DELEGATES.each do |name|
+        define_method(name) do |arg|
+          form.send("#{name}=".to_sym, arg)
+        end
       end
 
       def field(name, opts = {})
         form.add_field(name, opts)
       end
 
-      def create(&block)
-        return unless @create
-        call_nested_block(block)
+      def method_missing(method, *args, &block)
+        return super unless args.empty? && block
+        exec_with_form(block, action: method)
       end
 
-      def edit(&block)
-        return unless @edit
-        call_nested_block(block)
-      end
-
-      def call_nested_block(block)
-        old, @block = @block, block
-        call
-      ensure
-        @block = old
+      def respond_to_missing?(*)
+        true
       end
     end
   end

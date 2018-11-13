@@ -1,7 +1,11 @@
+require 'shaf/immutable_attr'
+
 module Shaf
   module Formable
     class Field
-      attr_reader :name, :type, :value, :label, :required
+      extend Shaf::ImmutableAttr
+
+      immutable_reader :name, :type, :value, :label, :required
 
       HTML_TYPE_MAPPINGS = {
         'string' => 'text',

@@ -6,20 +6,20 @@ module Shaf
       base.extend(ClassMethods)
     end
 
-    def edit_form
-      form = self.class.edit_form
-      return unless form
-
-      form.tap do |f|
-        f.resource = self
-      end
-    end
-
     module ClassMethods
-      attr_reader :create_form, :edit_form
-
       def form(&block)
-        @create_form, @edit_form = Formable::Builder.call(block)
+        builder = Formable::Builder.new(&block)
+        builder.forms.each do |f|
+          next unless f.action
+          getter = "#{f.action}_form"
+
+          define_singleton_method(getter) { f }
+          next unless builder.instance_accessor_for? f
+
+          define_method(getter) do
+            f.dup.tap { |fm| fm.resource = self }
+          end
+        end
       end
     end
   end

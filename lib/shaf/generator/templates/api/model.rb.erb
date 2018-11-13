@@ -13,6 +13,7 @@ class <%= class_name %> < Sequel::Model
     edit do
       title 'Update <%= class_name %>'
       name  'update-<%= model_name %>'
+      instance_accessor
     end
   end
 <% end %>
