@@ -1,3 +1,7 @@
+## 0.6.0
+ * Fix warning/warn logging typo
+ * Refactor Formable module (now uses extend)
+ * Improvements for upgrades
 ## 0.5.2
  * Run framework specs with random listen port
  * Remove duplicate link to create form
