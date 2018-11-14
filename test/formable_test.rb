@@ -3,7 +3,7 @@ require 'test_helper'
 describe Shaf::Formable do
   let(:clazz) do
     Class.new do
-      include Shaf::Formable
+      extend Shaf::Formable
     end
   end
 

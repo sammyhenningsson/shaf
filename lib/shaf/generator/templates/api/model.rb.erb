@@ -1,5 +1,5 @@
 class <%= class_name %> < Sequel::Model
-  include Shaf::Formable
+  extend Shaf::Formable
 
 <% if form_fields.any? %>
   form do
@@ -11,9 +11,9 @@ class <%= class_name %> < Sequel::Model
     end
 
     edit do
+      instance_accessor
       title 'Update <%= class_name %>'
       name  'update-<%= model_name %>'
-      instance_accessor
     end
   end
 <% end %>
