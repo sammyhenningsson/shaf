@@ -4,6 +4,8 @@ require 'set'
 require 'digest'
 require 'open3'
 require 'fileutils'
+require 'tempfile'
+require 'yaml'
 
 module Shaf
   module Upgrade
@@ -15,7 +17,6 @@ module Shaf
       class VersionConflictError < UpgradeError; end
       class ManifestNotFoundError < UpgradeError; end
       class MissingFileError < UpgradeError; end
-      class FileNotInManifestError < UpgradeError; end
       class BadChecksumError < UpgradeError; end
 
       UPGRADE_FILES_PATH = File.join(Utils.gem_root, 'upgrades').freeze
@@ -78,6 +79,7 @@ module Shaf
         apply_patches(dir)
         apply_additions
         apply_drops(dir)
+        apply_substitutes(dir)
       end
 
       def to_s
@@ -111,7 +113,8 @@ module Shaf
           target_version: hash["target_version"],
           patches: hash["patches"],
           add: hash["add"],
-          drop: hash["drop"]
+          drop: hash["drop"],
+          substitutes: hash["substitutes"]
         )
       end
 
@@ -124,11 +127,8 @@ module Shaf
         manifest_patches = @manifest.files[:patch].keys.to_set
         raise MissingFileError if from_file < manifest_patches
 
-
         to_add = @manifest.files[:add].keys.to_set
         raise MissingFileError if from_file < to_add
-
-        raise FileNotInManifestError if (manifest_patches + to_add) < from_file
 
         @files.each do |md5, content|
           raise BadChecksumError unless Digest::MD5.hexdigest(content) == md5
@@ -144,10 +144,10 @@ module Shaf
 
       def apply_patches(dir = nil)
         files_in(dir).all? do |file|
-          name = @manifest.patch_for(file) # returns nil when file
-          next true unless name            # shouldn't be patched
-          patch = @files[name]
-          apply_patch(file, patch)
+          @manifest.patch_for(file).all? do |name|
+            patch = @files[name]
+            apply_patch(file, patch)
+          end
         end
       end
 
@@ -176,6 +176,32 @@ module Shaf
         files_in(dir).map do |file|
           File.unlink(file) if @manifest.drop?(file)
         end
+      end
+
+      def apply_substitutes(dir = nil)
+        files_in(dir).all? do |file|
+          @manifest.regexp_for(file).all? do |name|
+            params = symbolize_keys(YAML.safe_load(@files[name]))
+            apply_substitute(file, params)
+          end
+        end
+      end
+
+      def apply_substitute(file, params)
+        pattern = params[:pattern] or return
+        replacement = params[:replace] or return
+        tmp = Tempfile.open do |new_file|
+          File.readlines(file).each do |line|
+            new_file << line.sub(Regexp.new(pattern), replacement)
+          end
+          new_file
+        end
+        FileUtils.mv(tmp.path, file)
+      end
+
+      # Refactor this when support for ruby < 2.5 is dropped
+      def symbolize_keys(hash)
+        hash.each_with_object({}) { |(k, v), h| h[k.to_sym] = v }
       end
     end
   end

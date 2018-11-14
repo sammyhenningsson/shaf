@@ -5,17 +5,21 @@ module Shaf
     class Manifest
       attr_reader :target_version, :files
 
-      def initialize(target_version:, patches: nil, add: nil, drop: nil)
-        @target_version = target_version
+      def initialize(**params)
+        @target_version = params[:target_version]
         @files = {}
-        @files[:patch] = build_patterns(patches)
-        @files[:add] = add || {}
-        @files[:drop] = (drop || []).map { |d| Regexp.new(d) }
+        @files[:patch] = build_patterns(params[:patches])
+        @files[:add] = params[:add] || {}
+        @files[:drop] = (params[:drop] || []).map { |d| Regexp.new(d) }
+        @files[:regexp] = build_patterns(params[:substitutes])
       end
 
       def patch_for(file)
-        first_match = files[:patch].find { |_, pattern| file =~ pattern }
-        (first_match || []).first
+        files[:patch].select { |_, pattern| file =~ pattern }.keys
+      end
+
+      def regexp_for(file)
+        files[:regexp].select { |_, pattern| file =~ pattern }.keys
       end
 
       def drop?(file)
@@ -25,7 +29,8 @@ module Shaf
       def stats
         "Add: #{files[:add].size}, " \
           "Del: #{files[:drop].size}, " \
-          "Patch: #{files[:patch].size}"
+          "Patch: #{files[:patch].size}, " \
+          "Regexp: #{files[:regexp].size}"
       end
 
       private
@@ -50,3 +55,5 @@ end
 #   8ece24b8c440675bd3d188155909431c: api/policies/base_policy.rb
 # drop:
 # - api/policies/base_policy.rb
+# substitutes:
+#   d3b07384d113edec49eaa6238ad5ff00: api/models/.*.rb

@@ -15,23 +15,35 @@ module Shaf
         "drop/some/file2.rb"
       ]
     end
+    let(:substitutes) do
+      {
+        "sub1" => "some/file.rb",
+        "sub2" => "ome/f....rb",
+      }
+    end
     let(:manifest) do
       Upgrade::Manifest.new(
         target_version: "0.0.1",
         patches: patches,
+        substitutes: substitutes,
         add: add,
         drop: drop
       )
     end
 
-    it "returns checksum for mathching files" do
-      assert_equal "change", manifest.patch_for("/home/dev/some/file.rb")
-      assert_nil manifest.patch_for("/home/dev/some/other/file.rb")
+    it "returns checksums for mathching patch files" do
+      assert_equal ["change"], manifest.patch_for("/home/dev/some/file.rb")
+      assert_empty manifest.patch_for("/home/dev/some/other/file.rb")
+    end
+
+    it 'returns checksums for mathching regexp files' do
+      assert_equal %w[sub1 sub2], manifest.regexp_for('/home/dev/some/file.rb')
+      assert_empty manifest.regexp_for('/home/dev/some/other/file.rb')
     end
 
     it "#files return all file" do 
       assert_equal(
-        %i(patch add drop),
+        %i(patch add drop regexp),
         manifest.files.keys
       )
     end

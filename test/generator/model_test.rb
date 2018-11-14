@@ -40,8 +40,8 @@ module Shaf
           assert_includes output.keys, "api/policies/blog_policy.rb"
         end
 
-        it "includes Formable" do
-          assert_match %r(^\s*include Shaf::Formable$), output["api/models/blog.rb"]
+        it "extends Formable" do
+          assert_match %r(^\s*extend Shaf::Formable$), output["api/models/blog.rb"]
         end
 
         it "inherits Sequel::Model" do
