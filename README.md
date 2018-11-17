@@ -291,8 +291,8 @@ Response:
 ```
 
 
-## Upgrading a project created with shaf version < 0.5.0
-Shaf version 0.5.0 introduced a few changes that are not backward compatible with previous versions. This means that if you created your Shaf project with an older version of this gem and then upgrade this gem to v0.5.0, your project will not function. To remedy this you will need to execute (from inside your project directory):
+## Upgrading a project created with shaf version < 0.6.0
+Shaf version 0.6.0 introduced a few changes that are not backward compatible with previous versions. This means that if you created your Shaf project with an older version of this gem and then upgrade this gem to v0.6.0, your project will not function. To remedy this you will need to execute (from inside your project directory):
 ```sh
 cd /path/to/my_project
 shaf upgrade
@@ -474,10 +474,10 @@ Given that you have a Serializer that is registered to process instances of `Pos
 
 
 ## Models
-Models generated with `shaf generate` inherit from `Sequel::Model` (see [Sequel docs](http://sequel.jeremyevans.net/documentation.html) for more info) and they include `Shaf::Formable`. The Formable module adds the class method `form` which Shaf models use to associate two forms with the model. One for creating a new resource and one for editing an existing resource. As an example, the following model will add a create form with fields `foo` and `bar` and an edit form with fields `foo` and `baz`.
+Models generated with `shaf generate` inherit from `Sequel::Model` (see [Sequel docs](http://sequel.jeremyevans.net/documentation.html) for more info) and they extend `Shaf::Formable`. The Formable module adds the class method `form` which Shaf models use to associate two forms with the model. One for creating a new resource and one for editing an existing resource. As an example, the following model will add a create form with fields `foo` and `bar` and an edit form with fields `foo` and `baz`.
 ```sh
 class User < Sequel::Model
-  include Shaf::Formable
+  extend Shaf::Formable
 
   form do
     field :foo, type: "string" # common field
@@ -490,6 +490,8 @@ class User < Sequel::Model
     end
 
     edit do
+      instance_accessor
+
       # These properties are only for the edit form
       title 'Update User'
       name  'update-user'
@@ -498,6 +500,7 @@ class User < Sequel::Model
   end
 end
 ```
+This will create two instances of `Shaf::Formable::Form` which will be accessible from the `User` class, e.g `User.create_form` resp. `User.edit_form`. Forms with `instance_accessor` will also be retrievable from instances, e.g. `User[1].edit_form`.  
 When serialized these forms contain an array of _fields_ that specifies all attributes that are accepted for create/update. Each field has a `name` property that MUST be used as key when constructing a payload to be submitted. Each field also has a type which declares the kind of value that are accepted (currently only string and integer are supported) and a label that may be used when rendering the form to a user. If a field has the attribute `required` set to `true`, then that field MUST be set when submitting the form. If a field includes a `value` attribute, then that value SHOULD be presented to the user and unless changed, the value MUST be included when the form is submitted. When submitting the form it MUST be sent to the url in _href_ with the HTTP method specified in _method_ with the Content-Type header set to the value of _type_. Here's the create form from the [Getting started](#getting-started) section.
 ```sh
     "create-form": {
