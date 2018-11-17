@@ -69,7 +69,7 @@ module Shaf
       private
 
       def name_from(action)
-        :"#{action}-form" if action
+        :"#{action.to_s.tr('_', '-')}-form" if action
       end
 
       def http_method_from(action)

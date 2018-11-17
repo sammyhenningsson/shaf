@@ -8,13 +8,13 @@ module Shaf
       immutable_reader :name, :type, :value, :label, :required
 
       HTML_TYPE_MAPPINGS = {
-        'string' => 'text',
-        'boolean' => 'checkbox',
+        string: 'text',
+        boolean: 'checkbox'
       }.freeze
 
       def initialize(name, params = {})
         @name = name
-        @type = params[:type]
+        @type = params[:type]&.to_sym
         @label = params[:label]
         @has_value = params.key? :value
         @value = params[:value]
