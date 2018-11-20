@@ -2,14 +2,25 @@ require 'sinatra/base'
 
 module Shaf
   module ResourceUris
+    class UriHelperMethodAlreadyExistError < Error
+      def initialize(resource_name, method_name)
+        super(
+          "resource uri #{resource_name} can't be registered. " \
+          "Method :#{method_name} already exist!"
+        )
+      end
+    end
+
     def resource_uris_for(*args)
-      CreateUriMethods.new(*args).call
+      result = CreateUriMethods.new(*args).call
+      UriHelperMethods.add_path_helpers(self, result)
 
       include UriHelper unless self < UriHelper
     end
 
     def register_uri(name, uri)
-      MethodBuilder.new(name, uri).call
+      result = MethodBuilder.new(name, uri).call
+      UriHelperMethods.add_path_helpers(self, result)
 
       include UriHelper unless self < UriHelper
     end
@@ -18,12 +29,38 @@ module Shaf
   Sinatra.register ResourceUris
 
   module UriHelperMethods
-    def self.register(name, &block)
-      define_method(name, &block)
+    class << self
+      def register(name, &block)
+        define_method(name, &block)
+      end
+
+      def eval_method(str)
+        class_eval str
+      end
+
+      def add_path_helpers(clazz, methods)
+        @path_helpers ||= {}
+        @path_helpers[clazz] ||= []
+        @path_helpers[clazz].concat Array(methods)
+      end
+
+      def path_helpers_for(clazz)
+        @path_helpers ||= {}
+        return [] if methods.nil? && !@path_helpers.key?(clazz)
+        @path_helpers[clazz] ||= []
+      end
+
+      # For cleaning up after tests
+      def remove_all
+        helpers = instance_methods - [:path_helpers]
+        remove_method(*helpers)
+        @path_helpers = {}
+      end
     end
 
-    def self.eval_method(str)
-      class_eval str
+    def path_helpers
+      clazz = is_a?(Class) ? self : self.class
+      UriHelperMethods.path_helpers_for clazz
     end
   end
 
@@ -61,6 +98,7 @@ module Shaf
       @name = name.to_s
       @base = base&.sub(%r(/\Z), '') || ''
       @plural_name = plural_name&.to_s || Utils::pluralize(name.to_s)
+      @added_path_methods = []
     end
 
     def call
@@ -72,6 +110,7 @@ module Shaf
       end
       register_new_resource_uri
       register_edit_resource_uri
+      @added_path_methods
     end
 
     private
@@ -95,7 +134,8 @@ module Shaf
       resource_template_uri =   "#{base}/#{plural_name}/:id"
       collection_template_uri = "#{base}/#{plural_name}"
 
-      MethodBuilder.new(name, resource_template_uri, alt_uri: collection_template_uri).call
+      builder = MethodBuilder.new(name, resource_template_uri, alt_uri: collection_template_uri)
+      @added_path_methods << builder.call
     end
 
     def register_new_resource_uri
@@ -109,7 +149,8 @@ module Shaf
     end
 
     def register(name, template_uri)
-      MethodBuilder.new(name, template_uri).call
+      builder = MethodBuilder.new(name, template_uri)
+      @added_path_methods << builder.call
     end
   end
 
@@ -127,8 +168,7 @@ module Shaf
 
     def call
       if UriHelper.respond_to? uri_method_name
-        raise "resource uri #{@name} can't be registered. " \
-          "Method :#{uri_method_name} already exist!"
+        raise UriHelperMethodAlreadyExistError, @name, uri_method_name
       end
 
       if @alt_uri.nil?
@@ -144,12 +184,14 @@ module Shaf
       UriHelperMethods.eval_method uri_method_string
       UriHelperMethods.eval_method path_method_string
       UriHelperMethods.register(template_method_name, &template_proc)
+      path_method_name.to_sym
     end
 
     def build_methods_with_optional_arg
       UriHelperMethods.eval_method uri_method_with_optional_arg_string
       UriHelperMethods.eval_method path_method_with_optional_arg_string
       UriHelperMethods.register(template_method_name, &template_proc)
+      path_method_name.to_sym
     end
 
     def uri_method_name
