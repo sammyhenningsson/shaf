@@ -185,6 +185,7 @@ module Shaf
       UriHelperMethods.eval_method uri_method_string
       UriHelperMethods.eval_method path_method_string
       UriHelperMethods.register(template_method_name, &template_proc)
+      UriHelperMethods.register(legacy_template_method_name, &template_proc)
       UriHelperMethods.register(path_matcher_name, &path_matcher_proc)
       path_method_name.to_sym
     end
@@ -193,6 +194,7 @@ module Shaf
       UriHelperMethods.eval_method uri_method_with_optional_arg_string
       UriHelperMethods.eval_method path_method_with_optional_arg_string
       UriHelperMethods.register(template_method_name, &template_proc)
+      UriHelperMethods.register(legacy_template_method_name, &template_proc)
       UriHelperMethods.register(path_matcher_name, &path_matcher_proc)
       path_method_name.to_sym
     end
@@ -210,6 +212,10 @@ module Shaf
     end
 
     def template_method_name
+      "#{path_method_name}_template".freeze
+    end
+
+    def legacy_template_method_name
       "#{uri_method_name}_template".freeze
     end
 
