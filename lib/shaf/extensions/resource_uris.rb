@@ -168,7 +168,8 @@ module Shaf
 
     def call
       if UriHelper.respond_to? uri_method_name
-        raise UriHelperMethodAlreadyExistError, @name, uri_method_name
+        exception = ResourceUris::UriHelperMethodAlreadyExistError
+        raise exception.new(@name, uri_method_name)
       end
 
       if @alt_uri.nil?

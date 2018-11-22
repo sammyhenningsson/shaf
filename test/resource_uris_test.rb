@@ -14,9 +14,15 @@ module Shaf
       end
     end
 
+    after do
+      UriHelperMethods.remove_all
+    end
+
     describe "uri methods" do
 
-      CreateUriMethods.new(:foo).call
+      before do
+        CreateUriMethods.new(:foo).call
+      end
 
       it "adds foos_uri method to Shaf::UriHelper" do
         assert_methods_registered :foos_uri, :foos_path
@@ -53,7 +59,9 @@ module Shaf
 
     describe "uri methods with a prefix" do
 
-      CreateUriMethods.new(:bar, base: '/api').call
+      before do
+        CreateUriMethods.new(:bar, base: '/api').call
+      end
 
       it "adds prefix to return value of bars_uri method" do
         assert_methods_registered :bars_uri, :bars_path
@@ -90,7 +98,9 @@ module Shaf
 
     describe "nested resource uris" do
 
-      CreateUriMethods.new(:comment, base: '/users/:foo').call
+      before do
+        CreateUriMethods.new(:comment, base: '/users/:foo').call
+      end
 
       it "adds a nested comments_uri method" do
         assert_methods_registered :comments_uri
@@ -135,7 +145,9 @@ module Shaf
 
     describe "uri methods with specified plural name" do
 
-      CreateUriMethods.new(:baz, plural_name: 'baz').call
+      before do
+        CreateUriMethods.new(:baz, plural_name: 'baz').call
+      end
 
       it "adds baz_uri method to Shaf::UriHelper" do
         assert_methods_registered :baz_uri, :baz_path
