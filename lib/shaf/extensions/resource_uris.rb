@@ -44,9 +44,10 @@ module Shaf
         @path_helpers[clazz].concat Array(methods)
       end
 
-      def path_helpers_for(clazz)
+      def path_helpers_for(clazz = nil)
         @path_helpers ||= {}
-        return [] if methods.nil? && !@path_helpers.key?(clazz)
+        return @path_helpers unless clazz
+        return [] unless @path_helpers.key?(clazz)
         @path_helpers[clazz] ||= []
       end
 
