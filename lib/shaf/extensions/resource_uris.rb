@@ -83,13 +83,13 @@ module Shaf
   # This class register uri helper methods like:
   # books_uri             => /books
   # book_uri(book)        => /books/5
-  # new_book_uri          => /books/form
+  # new_book_uri          => /book/form
   # edit_book_uri(book)   => /books/5/edit
   #
   # And uri template methods:
   # books_uri_template             => /books
   # book_uri_template              => /books/:id
-  # new_book_uri_template          => /books/form
+  # new_book_uri_template          => /book/form
   # edit_book_uri_template         => /books/:id/edit
   #
   class CreateUriMethods
@@ -139,7 +139,7 @@ module Shaf
     end
 
     def register_new_resource_uri
-      template_uri = "#{base}/#{plural_name}/form".freeze
+      template_uri = "#{base}/#{name}/form".freeze
       register("new_#{name}", template_uri)
     end
 

@@ -42,10 +42,10 @@ module Shaf
 
       it "adds new_foo_uri method to Shaf::UriHelper" do
         assert_methods_registered :new_foo_uri, :new_foo_path
-        assert_equal "#{base_uri}/foos/form", Shaf::UriHelper.new_foo_uri
-        assert_equal "/foos/form", Shaf::UriHelper.new_foo_path
-        assert_equal '/foos/form', Shaf::UriHelper.new_foo_uri_template
-        assert_equal "#{base_uri}/foos/form?bar=5&baz=fem", Shaf::UriHelper.new_foo_uri(bar: 5, baz: "fem")
+        assert_equal "#{base_uri}/foo/form", Shaf::UriHelper.new_foo_uri
+        assert_equal "/foo/form", Shaf::UriHelper.new_foo_path
+        assert_equal '/foo/form', Shaf::UriHelper.new_foo_uri_template
+        assert_equal "#{base_uri}/foo/form?bar=5&baz=fem", Shaf::UriHelper.new_foo_uri(bar: 5, baz: "fem")
       end
 
       it "adds edit_foo_uri method to Shaf::UriHelper" do
@@ -81,10 +81,10 @@ module Shaf
 
       it "adds prefix to return value of new_bar_uri method" do
         assert_methods_registered :new_bar_uri, :new_bar_path
-        assert_equal "#{base_uri}/api/bars/form", Shaf::UriHelper.new_bar_uri
-        assert_equal "/api/bars/form", Shaf::UriHelper.new_bar_path
-        assert_equal '/api/bars/form', Shaf::UriHelper.new_bar_uri_template
-        assert_equal "#{base_uri}/api/bars/form?bar=5&baz=fem", Shaf::UriHelper.new_bar_uri(bar: 5, baz: "fem")
+        assert_equal "#{base_uri}/api/bar/form", Shaf::UriHelper.new_bar_uri
+        assert_equal "/api/bar/form", Shaf::UriHelper.new_bar_path
+        assert_equal '/api/bar/form', Shaf::UriHelper.new_bar_uri_template
+        assert_equal "#{base_uri}/api/bar/form?bar=5&baz=fem", Shaf::UriHelper.new_bar_uri(bar: 5, baz: "fem")
       end
 
       it "adds prefix to return value of edit_bar_uri method" do
@@ -124,12 +124,12 @@ module Shaf
 
       it "adds a nested new_comment_uri method" do
         assert_methods_registered :new_comment_uri
-        assert_equal "#{base_uri}/users/3/comments/form", Shaf::UriHelper.new_comment_uri(3)
-        assert_equal "#{base_uri}/users/4/comments/form", Shaf::UriHelper.new_comment_uri(OpenStruct.new(foo: 4))
-        assert_equal "/users/3/comments/form", Shaf::UriHelper.new_comment_path(3)
-        assert_equal "/users/4/comments/form", Shaf::UriHelper.new_comment_path(OpenStruct.new(foo: 4))
-        assert_equal '/users/:foo/comments/form', Shaf::UriHelper.new_comment_uri_template
-        assert_equal "#{base_uri}/users/3/comments/form?bar=5&baz=fem", Shaf::UriHelper.new_comment_uri(3, bar: 5, baz: "fem")
+        assert_equal "#{base_uri}/users/3/comment/form", Shaf::UriHelper.new_comment_uri(3)
+        assert_equal "#{base_uri}/users/4/comment/form", Shaf::UriHelper.new_comment_uri(OpenStruct.new(foo: 4))
+        assert_equal "/users/3/comment/form", Shaf::UriHelper.new_comment_path(3)
+        assert_equal "/users/4/comment/form", Shaf::UriHelper.new_comment_path(OpenStruct.new(foo: 4))
+        assert_equal '/users/:foo/comment/form', Shaf::UriHelper.new_comment_uri_template
+        assert_equal "#{base_uri}/users/3/comment/form?bar=5&baz=fem", Shaf::UriHelper.new_comment_uri(3, bar: 5, baz: "fem")
       end
 
       it "adds a nested edit_comment_uri method" do
