@@ -185,6 +185,7 @@ module Shaf
       UriHelperMethods.eval_method uri_method_string
       UriHelperMethods.eval_method path_method_string
       UriHelperMethods.register(template_method_name, &template_proc)
+      UriHelperMethods.register(path_matcher_name, &path_matcher_proc)
       path_method_name.to_sym
     end
 
@@ -192,6 +193,7 @@ module Shaf
       UriHelperMethods.eval_method uri_method_with_optional_arg_string
       UriHelperMethods.eval_method path_method_with_optional_arg_string
       UriHelperMethods.register(template_method_name, &template_proc)
+      UriHelperMethods.register(path_matcher_name, &path_matcher_proc)
       path_method_name.to_sym
     end
 
@@ -201,6 +203,10 @@ module Shaf
 
     def path_method_name
       "#{@name}_path".freeze
+    end
+
+    def path_matcher_name
+      :"#{path_method_name}?"
     end
 
     def template_method_name
@@ -309,6 +315,33 @@ module Shaf
         ->(_ = nil) { uri.freeze }
       else
         ->(collection = false) { collection ? alt_uri : uri }
+      end
+    end
+
+    def path_mather_patterns
+      [
+        @uri.gsub(%r{:[^/]*}, '\w+'),
+        @alt_uri&.gsub(%r{:[^/]*}, '\w+')
+      ].compact.map { |str| Regexp.new("\\A#{str}\\Z") }
+    end
+
+    def path_matcher_proc
+      patterns = path_mather_patterns
+
+      lambda do |path = nil, collection: false|
+        unless path
+          r = request if respond_to? :request
+          path = r.path_info if r&.respond_to? :path_info
+
+          unless path
+            raise(
+              ArgumentError,
+              "Uri must be given (or #{self} should respond to :request)"
+            )
+          end
+        end
+        pattern = collection ? patterns.last : patterns.first
+        !!(pattern =~ path)
       end
     end
   end

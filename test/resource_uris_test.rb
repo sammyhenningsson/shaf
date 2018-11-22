@@ -19,7 +19,6 @@ module Shaf
     end
 
     describe "uri methods" do
-
       before do
         CreateUriMethods.new(:foo).call
       end
@@ -54,6 +53,20 @@ module Shaf
         assert_equal "/foos/5/edit", Shaf::UriHelper.edit_foo_path(resrc)
         assert_equal '/foos/:id/edit', Shaf::UriHelper.edit_foo_uri_template
         assert_equal "#{base_uri}/foos/5/edit?bar=5&baz=fem", Shaf::UriHelper.edit_foo_uri(resrc, bar: 5, baz: "fem")
+      end
+
+      it "adds path matcher methods" do
+        assert_methods_registered *%i[foos_path? foo_path? new_foo_path? edit_foo_path?]
+
+        assert Shaf::UriHelper.foos_path? '/foos'
+        assert Shaf::UriHelper.foo_path? '/foos/5'
+        assert Shaf::UriHelper.new_foo_path? '/foo/form'
+        assert Shaf::UriHelper.edit_foo_path? '/foos/5/edit'
+
+        refute Shaf::UriHelper.foos_path? '/nested/foos'
+        refute Shaf::UriHelper.foos_path? '/foos/5'
+        refute Shaf::UriHelper.new_foo_path? '/foos/5'
+        refute Shaf::UriHelper.foo_path? '/foo/form'
       end
     end
 
@@ -144,7 +157,6 @@ module Shaf
     end
 
     describe "uri methods with specified plural name" do
-
       before do
         CreateUriMethods.new(:baz, plural_name: 'baz').call
       end
@@ -180,10 +192,23 @@ module Shaf
         assert_equal '/baz/:id/edit', Shaf::UriHelper.edit_baz_uri_template
         assert_equal "#{base_uri}/baz/5/edit?bar=5&baz=fem", Shaf::UriHelper.edit_baz_uri(resrc, bar: 5, baz: "fem")
       end
+
+      it "adds path matcher methods" do
+        assert_methods_registered *%i[baz_path? new_baz_path? edit_baz_path?]
+
+        assert Shaf::UriHelper.baz_path? '/baz', collection: true
+        assert Shaf::UriHelper.baz_path? '/baz/5'
+        assert Shaf::UriHelper.new_baz_path? '/baz/form'
+        assert Shaf::UriHelper.edit_baz_path? '/baz/5/edit'
+
+        refute Shaf::UriHelper.baz_path? '/nested/baz', collection: true
+        refute Shaf::UriHelper.baz_path? '/nested/bazs', collection: true
+        refute Shaf::UriHelper.baz_path? '/baz/5', collection: true
+        refute Shaf::UriHelper.baz_path? '/baz', collection: false
+      end
     end
 
     describe MethodBuilder do
-
       let(:builder) { MethodBuilder.new("hide_book", "/my/books/:id/archive") }
 
       it "#uri_method_name" do
