@@ -30,7 +30,7 @@ describe <%= model_class_name %>, type: :integration do
 <% end -%>
     end
   end
-
+<% if params.size > 0 %>
   it "can create <%= plural_name %>" do
     get <%= plural_name %>_uri
 
@@ -88,6 +88,7 @@ describe <%= model_class_name %>, type: :integration do
     status.must_equal 200
     link_rels.must_include(:self)
   end
+<% end -%>
 
   it "<%= plural_name %> can be deleted" do
     <%= name %> = <%= model_class_name %>.create
