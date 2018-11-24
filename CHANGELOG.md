@@ -1,3 +1,12 @@
+## 0.7.0
+ * Skip generating failing integration spec 
+ * Add Rake task to list routes
+ * Routes should now be specified with `_path`
+ * Add helper for checking current path
+ * changed path to create forms
+ * Add support for before-/after actions
+ * Refactored Forms
+ * Updated dependencies
 ## 0.6.0
  * Fix warning/warn logging typo
  * Refactor Formable module (now uses extend)
