@@ -2,43 +2,47 @@ require 'digest'
 
 module Shaf
   module CurrentUser
-    def self.registered(app)
-      return unless app.respond_to?(:current_user) && app.current_user
+    def self.registered(settings)
+      return unless settings.respond_to?(:current_user) && settings.current_user
 
-      app.log.info 'Using Shaf::CurrentUser'
-      app.helpers Helpers
+      settings.log.info 'Using Shaf::CurrentUser'
+      settings.helpers Helpers
     end
 
-    def lookup_user_with(&block)
-      unless block_given? && block.respond_to?(:call)
-        raise ArgumentError, '::lookup_user_with requires a block argument'
-      end
-      log.info 'Using custom current_user lookup'
-      Helpers.lookup_proc = block
+    def self.digest(token)
+      Digest::SHA256.hexdigest(token) if token
     end
   end
 
   module Helpers
-    class << self
-      attr_accessor :lookup_proc
+    ERR_MSG = 'The default Shaf implementation of #current_user requires a ' \
+      'User model with a column auth_token_digest'.freeze
 
-      def user_lookup(request, token)
-        return lookup_proc.call(token, request) if lookup_proc
-        return unless token
-        digest = Digest::SHA256.hexdigest(token)
-        User.where(auth_token_digest: digest).first
-      end
+    def auth_token
+      header = settings.auth_token_header
+      request.env[header]
     end
 
     def current_user
       return @current_user if defined?(@current_user)
-      header = settings.auth_token_header
-      token = request.env[header]
-      @current_user = Helpers.user_lookup(request, token)
+
+      return unless check_user_model
+      digest = Shaf::CurrentUser.digest(auth_token) || return
+      @current_user = User.where(auth_token_digest: digest).first
     end
 
     def authenticated?
       !current_user.nil?
+    end
+
+    def authenticate!
+      current_user || raise(Shaf::Errors::UnauthorizedError)
+    end
+
+    def check_user_model
+      return true if defined?(User) && User.columns.include?(:auth_token_digest)
+      log.warn ERR_MSG
+      false
     end
   end
 end
