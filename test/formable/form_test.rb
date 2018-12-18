@@ -1,4 +1,5 @@
 require 'test_helper'
+require 'ostruct'
 
 module Shaf
   module Formable
@@ -7,10 +8,10 @@ module Shaf
         Form.new(
           title: 'title',
           action: 'action',
-          name: 'name',
+          name: :name,
           method: 'POST',
           type: 'type',
-          fields: {field_name: {type: 'string'}}
+          fields: {field1: {type: 'string'}}
         )
       end
 
@@ -18,14 +19,14 @@ module Shaf
         form2 = form1.dup
         form1.title = 'title1'
         form1.action = 'action1'
-        form1.name = 'name1'
+        form1.name = :name1
         form1.method = 'method1'
         form1.type = 'type1'
         form1.add_field('new_field', {})
 
         assert_equal 'title', form2.title
         assert_equal 'action', form2.action
-        assert_equal 'name', form2.name
+        assert_equal :name, form2.name
         assert_equal 'POST', form2.method
         assert_equal 'type', form2.type
         assert_equal 1, form2.fields.size
@@ -50,6 +51,19 @@ module Shaf
         assert_equal 'POST', form2.method
         assert_nil form3.method
         assert_equal 'PUT', form4.method
+      end
+
+      it 'can fill values from resource' do
+        form1.add_field(:field2, type: 'string', accessor_name: :model_method)
+        resource = OpenStruct.new(field1: 'foo', model_method: 'bar')
+        form1.fill!(from: resource)
+        fields = form1.fields
+        field1 = fields.find { |f| f.name == :field1 }
+        field1.must_be :has_value?
+        field1.value.must_equal 'foo'
+        field2 = fields.find { |f| f.name == :field2 }
+        field2.must_be :has_value?
+        field2.value.must_equal 'bar'
       end
     end
   end

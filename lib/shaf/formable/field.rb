@@ -5,7 +5,7 @@ module Shaf
     class Field
       extend Shaf::ImmutableAttr
 
-      immutable_reader :name, :type, :value, :label, :required
+      immutable_reader :name, :type, :value, :label, :required, :accessor_name
 
       HTML_TYPE_MAPPINGS = {
         string: 'text',
@@ -19,10 +19,16 @@ module Shaf
         @has_value = params.key? :value
         @value = params[:value]
         @required = params[:required] || false
+        @accessor_name = (params[:accessor_name] || name).to_sym
       end
 
       def has_value?
         @has_value
+      end
+
+      def value=(v)
+        @value = v
+        @has_value = true
       end
 
       def to_html

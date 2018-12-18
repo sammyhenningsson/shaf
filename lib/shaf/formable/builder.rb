@@ -3,19 +3,20 @@ require 'shaf/formable/form'
 module Shaf
   module Formable
     class Builder
+      InstanceAccessorType = Struct.new(:prefill?)
       DELEGATES = %i[title name action method type fields].freeze
 
       attr_reader :forms
 
       def initialize(&block)
         @forms = []
-        @instance_accessors = []
+        @instance_accessors = {}
 
         exec_with_form(block)
       end
 
-      def instance_accessor_for?(form)
-        @instance_accessors.include? form
+      def instance_accessor_for(form)
+        @instance_accessors[form.action]
       end
 
       private
@@ -34,8 +35,9 @@ module Shaf
         (form&.dup || Formable::Form.new).tap { |f| @forms << f }
       end
 
-      def instance_accessor
-        @instance_accessors << form
+      def instance_accessor(prefill: true)
+        acc = InstanceAccessorType.new(prefill)
+        @instance_accessors[form.action] = acc
       end
 
       DELEGATES.each do |name|

@@ -9,10 +9,13 @@ module Shaf
         getter = "#{f.action}_form"
 
         define_singleton_method(getter) { f }
-        next unless builder.instance_accessor_for? f
+        next unless instance_accessor = builder.instance_accessor_for(f)
 
         define_method(getter) do
-          f.dup.tap { |fm| fm.resource = self }
+          f.dup.tap do |fm|
+            fm.resource = self
+            fm.fill! if instance_accessor.prefill?
+          end
         end
       end
     end

@@ -6,6 +6,8 @@ module Shaf
     class Form
       extend Shaf::ImmutableAttr
 
+      class FormHasNoResourceError < Shaf::Error; end
+
       DEFAULT_TYPE = 'application/json'.freeze
 
       attr_accessor :resource
@@ -15,7 +17,7 @@ module Shaf
       def initialize(params = {})
         @title = params[:title]
         @action = params[:action]
-        @name = params[:name] || name_from(@action)
+        @name = params[:name]&.to_sym || name_from(@action)
         @method = params[:method] ||= http_method_from(@action)
         @type = params[:type] || DEFAULT_TYPE
         @fields = (params[:fields] || {}).map do |name, args|
@@ -54,6 +56,19 @@ module Shaf
 
       def clone
         dup.tap { |obj| obj.freeze if frozen? }
+      end
+
+      def fill!(from: nil)
+        resrc = from || resource
+        raise FormHasNoResourceError, <<~MSG unless resrc
+          Trying to fill form with values from resource, but form '#{name}' has no resource!
+        MSG
+
+        fields.each do |field|
+          accessor_name = field.accessor_name
+          next unless resrc.respond_to? accessor_name
+          field.value = resrc.send(accessor_name)
+        end
       end
 
       def to_html
