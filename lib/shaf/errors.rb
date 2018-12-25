@@ -64,6 +64,17 @@ module Shaf
       end
     end
 
+    class ConflictError
+      def http_status
+        409
+      end
+
+      def initialize(msg = nil)
+        msg ||= "The request conflicts with another resource"
+        super(msg, code: "CONFLICT", title: "Conflicting resource")
+      end
+    end
+
     class UnsupportedMediaTypeError < ServerError
       def http_status
         415
@@ -73,6 +84,17 @@ module Shaf
         content_type = request&.env["CONTENT_TYPE"]
         msg = "Unsupported Media Type#{content_type ? ": #{content_type}" : ""}"
         super(msg, code: "UNSUPPORTED_MEDIA_TYPE", title: "Unsupported media type")
+      end
+    end
+
+    class UnprocessableEntityError
+      def http_status
+        422
+      end
+
+      def initialize(msg = nil)
+        msg ||= "The server can not process this request"
+        super(msg, code: "UNPROCESSABLE_ENTITY", title: "Request can not be processed")
       end
     end
   end
