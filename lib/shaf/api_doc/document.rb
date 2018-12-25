@@ -122,7 +122,7 @@ module Shaf
         else
           sub_title << ": " unless sub_title.empty?
           list.each do |name, comment|
-            @md[:doc] << "#######{sub_title}#{name.gsub('_', '-')}\n#{comment.to_s}\n"
+            @md[:doc] << "#######{sub_title}#{name.tr('_', '-')}\n#{comment.to_s}\n"
             @md[key][name] = comment.to_s.chomp
           end
         end
