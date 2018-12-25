@@ -5,14 +5,14 @@ module Shaf
       identifier :scaffold
       usage 'generate scaffold RESOURCE_NAME [attribute:type] [..]'
 
-      def call(options = {})
+      def call
         if name.empty?
           raise "Please provide a resource name when using the scaffold generator!"
         end
 
         options[:specs] = true if options[:specs].nil? 
-        Generator::Factory.create('model', *args).call(options)
-        Generator::Factory.create('controller', *controller_args).call(options)
+        Generator::Factory.create('model', *args, **options).call
+        Generator::Factory.create('controller', *controller_args, **options).call
       end
 
       def name

@@ -4,10 +4,10 @@ module Shaf
       identifier :serializer
       usage 'generate serializer MODEL_NAME [attribute] [..]'
 
-      def call(options = {})
+      def call
         create_serializer
         create_serializer_spec if options[:specs]
-        create_policy(options)
+        create_policy
       end
 
       def name
@@ -211,9 +211,9 @@ module Shaf
         }
       end
 
-      def create_policy(options)
+      def create_policy
         policy_args = ["policy", name, *args[1..-1]]
-        Generator::Factory.create(*policy_args).call(options)
+        Generator::Factory.create(*policy_args, **options).call
       end
     end
   end

@@ -5,7 +5,7 @@ module Shaf
       identifier :controller
       usage 'generate controller RESOURCE_NAME [attribute:type] [..]'
 
-      def call(options = {})
+      def call
         create_controller
         create_integration_spec if options[:specs]
         add_link_to_root

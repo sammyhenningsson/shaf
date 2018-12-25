@@ -5,7 +5,7 @@ require 'ostruct'
 module Shaf
   module Generator
     class Base
-      attr_reader :args
+      attr_reader :args, :options
 
       class << self
         def inherited(child)
@@ -23,11 +23,12 @@ module Shaf
         def options(option_parser, options); end
       end
 
-      def initialize(*args)
-        @args = args.dup
+      def initialize(*args, **options)
+        @args = args
+        @options = options
       end
 
-      def call(options = {}); end
+      def call; end
 
       def template_dir
         File.expand_path('../templates', __FILE__)
