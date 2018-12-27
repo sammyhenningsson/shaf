@@ -10,7 +10,7 @@ class <%= policy_class_name %> < BasePolicy
 
   link :up
 
-  link :edit, :'create-form', :'edit-form', :delete do
+  link :'create-form', :'edit-form', :delete do
     write?
   end
 
