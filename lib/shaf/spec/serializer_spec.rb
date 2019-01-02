@@ -1,6 +1,10 @@
+# frozen_string_literal: true
+
 module Shaf
   module Spec
     class SerializerSpec < Base
+      include PayloadUtils
+
       register_spec_type self do |desc, args|
         next true if desc.to_s =~ /Serializer$/
         next unless args && args.is_a?(Hash)

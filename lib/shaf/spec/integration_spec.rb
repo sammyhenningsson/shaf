@@ -1,8 +1,10 @@
+# frozen_string_literal: true
+
 module Shaf
   module Spec
     class IntegrationSpec < Base
+      include PayloadUtils
       include HttpUtils
-      include UriHelper
 
       register_spec_type self do |desc, args|
         next unless args && args.is_a?(Hash)

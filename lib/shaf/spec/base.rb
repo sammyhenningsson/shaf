@@ -2,8 +2,8 @@ module Shaf
   module Spec
     class Base < Minitest::Spec
       include Minitest::Hooks
-      include PayloadUtils
       include Fixtures::Accessors
+      include UriHelper
 
       TRANSACTION_OPTIONS = {
         rollback: :always,
