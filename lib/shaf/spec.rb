@@ -1,6 +1,7 @@
 require 'shaf/spec/http_method_utils'
 require 'shaf/spec/payload_utils'
 require 'shaf/spec/fixture'
+require 'shaf/spec/let_bang'
 require 'shaf/spec/base'
 require 'shaf/spec/integration_spec'
 require 'shaf/spec/serializer_spec'

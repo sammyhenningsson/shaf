@@ -4,6 +4,7 @@ module Shaf
       include Minitest::Hooks
       include Fixtures::Accessors
       include UriHelper
+      include LetBang
 
       TRANSACTION_OPTIONS = {
         rollback: :always,
@@ -29,6 +30,8 @@ module Shaf
           # #{self.class.superclass.name} - #{name}
           ##########################################################################
         LOG
+
+        let_bangs.each { |name| send(name) }
       end
     end
   end
