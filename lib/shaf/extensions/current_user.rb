@@ -36,7 +36,7 @@ module Shaf
     end
 
     def authenticate!
-      current_user || raise(Shaf::Errors::UnauthorizedError)
+      authenticated? || raise(Shaf::Errors::UnauthorizedError)
     end
 
     def check_user_model
