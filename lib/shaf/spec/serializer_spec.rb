@@ -12,7 +12,18 @@ module Shaf
       end
 
       def serialize(resource, current_user:)
-        set_payload HALPresenter.to_hal(resource, current_user: current_user)
+        serializer = __serializer || HALPresenter
+        set_payload serializer.to_hal(resource, current_user: current_user)
+      end
+
+      private
+
+      def __serializer
+        serializer = self.class.ancestors.find do |klass|
+          desc = klass.desc if klass.respond_to? :desc
+          break desc if desc&.to_s&.end_with? "Serializer"
+        end
+        Class === serializer ? serializer : Kernel.const_get(serializer.to_s)
       end
     end
   end
