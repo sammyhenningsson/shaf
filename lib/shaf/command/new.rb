@@ -35,8 +35,12 @@ module Shaf
       def create_gemfile
         template_file = File.expand_path('../templates/Gemfile.erb', __FILE__)
         content = File.read(template_file)
-        File.write "Gemfile",
-          ERB.new(content, 0, '%-<>').result
+        File.write "Gemfile", erb(content)
+      end
+
+      def erb(content)
+        return ERB.new(content, 0, '%-<>').result if RUBY_VERSION < "2.6.0"
+        ERB.new(content, 0, trim_mode: '%-<>').result
       end
 
       def copy_templates
