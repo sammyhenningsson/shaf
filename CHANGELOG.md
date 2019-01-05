@@ -1,3 +1,11 @@
+## 0.7.1
+ * support let! in specs
+ * system spec type
+ * Error classes for 409 and 422
+ * Fill edit forms with values
+ * Add `#authenticate!` helper
+ * Drop `#lookup_user_with` helper
+ * Fix bug generating migrations, Issue #2
 ## 0.7.0
  * Skip generating failing integration spec 
  * Add Rake task to list routes
