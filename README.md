@@ -465,9 +465,7 @@ These methods either take a symbol to an instance methods as first argument or a
 #### Shaf::Authorize
 This extension adds an `authorize_with(policy)` class method and an `authorize!(action, resource = nil)` instance method. The class method is used to register a Policy class. The instance method is used to ensure that a certain action is authorized. The following policy class makes sure that a user is logged in to be able to see posts and that users may only edit their own posts. See [Policies](#policies) for more info.
 ```sh
-class PostPolicy
-  include HALPresenter::Policy::DSL
-
+class PostPolicy < BasePolicy
   alias post resource
 
   def show?
@@ -655,7 +653,10 @@ These settings can be read from your code with `Shaf::Settings.NAME_OF_SETTING`.
 The database connection is configure in the ruby file `$PROJECT_ROOT/config/database.rb`. By default the test and development environments are running an sqlite3 DB.
 
 ## Testing
-Shaf helps you create `MiniTest::Spec`s for serializers and integration.
+Shaf helps you create `MiniTest::Spec`s for serializers and integration. Specs inheriting from `Shaf::Spec::Base` has a few helper methods, e.g. `::let!`, and are always executed inside a transaction that gets rolled back after each test. System, Integration and Serializer specs inherits `Shaf::Spec::Base`.
+
+#### System specs
+System specs are created by passing keyword argument `type: :system` to `describe`, such as `describe "Posts", type: :system do; end`.
 
 #### Serializer specs
 The description for a Serializer spec MUST end with 'Serializer', such as `describe PostSerializer do; end`. This will make the spec include `Shaf::Spec::PayloadUtils`, which adds some utility methods. The method `set_payload(payload)` may be used for specifying a payload that should be tested. After setting a payload, it is possible to use the following methods that will extract values from the payload passed to `set_payload`:
@@ -746,7 +747,7 @@ end
 ```
 
 #### Integration specs
-Integration specs must pass in `{type: :integration}` as extra arguments to `describe`, such as `describe "Posts", type: :integration do; end`. This will include `Rack::Test::Methods`, `Shaf::UriHelper` and `Shaf::Spec::PayloadUtils`. The combination of the methods added by these modules gives integration specs a kind of [Capybara](https://github.com/teamcapybara/capybara) touch. Example:
+Integration specs are created by passing keyword argument `type: :integration` to `describe`, such as `describe "Posts", type: :integration do; end`. This will include `Rack::Test::Methods`, `Shaf::UriHelper` and `Shaf::Spec::PayloadUtils`. The combination of the methods added by these modules gives integration specs a kind of [Capybara](https://github.com/teamcapybara/capybara) touch. Example:
 ```sh
 require 'spec_helper'
 
@@ -805,6 +806,9 @@ Shaf::Spec::Fixture.define :posts do
 end
 ```
 (Which would of course be retrieved via `posts(:by_alice1)` and `posts(:by_alice2)`)
+
+#### `::let!`
+Specs inheriting from `Shaf::Spec::Base` (E.g. Serializer, Integration and System specs) adds a `::let!` method similar to rspec.
 
 ## API Documentation
 Since API clients should basically only have to care about the payloads that are returned from the API, it makes sense to keep the API documentation in the serializer files. Each `attribute`, `link`, `curie` and `embed` should be preceeded with code comments that documents how client should interpret/use it. The comments should be in markdown format. This makes it possible to generate API documentation with `rake doc:generate`. This documentation can then be retrieved from a running server at `/doc/RESOURCE_NAME`, where `RESOURCE_NAME` is the name of the resource to fetch doc for, e.g `curl localhost:3000/doc/post`.
