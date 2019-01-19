@@ -40,7 +40,7 @@ module Shaf
 
       def erb(content)
         return ERB.new(content, 0, '%-<>').result if RUBY_VERSION < "2.6.0"
-        ERB.new(content, 0, trim_mode: '%-<>').result
+        ERB.new(content, trim_mode: '-<>').result
       end
 
       def copy_templates
