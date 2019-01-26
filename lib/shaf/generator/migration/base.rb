@@ -1,37 +1,10 @@
 require 'date'
+require 'shaf/generator/migration/types'
 
 module Shaf
   module Generator
     module Migration
       class Base
-        DB_COL_FORMAT_STRINGS = {
-          integer:    ['Integer :%s',             'add_column :%s, Integer'],
-          varchar:    ['String %s',               'add_column :%s, String'],
-          string:     ['String :%s',              'add_column :%s, String'],
-          text:       ['String :%s, text: true',  'add_column :%s, String, text: true'],
-          blob:       ['File :%s',                'add_column :%s, File'],
-          bigint:     ['Bignum :%s',              'add_column :%s, Bignum'],
-          double:     ['Float :%s',               'add_column :%s, Float'],
-          numeric:    ['BigDecimal :%s',          'add_column :%s, BigDecimal'],
-          date:       ['Date :%s',                'add_column :%s, Date'],
-          timestamp:  ['DateTime :%s',            'add_column :%s, DateTime'],
-          time:       ['Time :%s',                'add_column :%s, Time'],
-          bool:       ['TrueClass :%s',           'add_column :%s, TrueClass'],
-          boolean:    ['TrueClass :%s',           'add_column :%s, TrueClass'],
-          index:      ['index :%s, unique: true', 'add_index :%s'],
-        }
-
-        COMPLEX_DB_TYPES = [
-          {
-            pattern: /\Aforeign_key\((\w+)\)/,
-            strings: ['foreign_key :%s, :\1',     'add_foreign_key :%s, :\1'],
-            validator: ->(type, match) {
-              break if ::DB.table_exists?(match[1])
-              ["Foreign key table '#{match[1]}' does not exist!"]
-            }
-          }
-        ]
-
         attr_reader :args, :options
 
         class << self
@@ -68,9 +41,10 @@ module Shaf
         end
 
         def column_def(str, create: true)
-          name, type = str.split(':')
-          format_string = db_format_string(type, create ? 0 : 1)
-          format format_string, name.downcase
+          _, col_type = str.split(':')
+          type = Type.find(col_type)
+          raise "No supported DB column types for: #{col_type}" unless type
+          type.build(str, create: create, alter: !create)
         end
 
         def target(name)
@@ -88,32 +62,6 @@ module Shaf
           if File.exist? 'config/initializers/sequel.rb'
             require 'config/initializers/sequel'
             Sequel::Model.plugins.include? Sequel::Plugins::Timestamps
-          end
-        end
-
-        def db_format_string(type, range = 0..1)
-          type ||= :string
-          result = DB_COL_FORMAT_STRINGS[type.to_sym]
-          result ||= regexp_db_format_string(type)
-          raise "Column type '#{type}' not supported" unless result
-          result[range]
-        end
-
-        def regexp_db_format_string(type)
-          COMPLEX_DB_TYPES.find do |complex_type|
-            match = complex_type[:pattern].match(type) or next
-            validator = complex_type[:validator]
-            errors = validator&.call(type, match)
-            raise "Failed to process '#{type}': #{errors&.join(', ')}" unless Array(errors).empty?
-
-            break complex_type[:strings].map { |s| replace_backreferences(match, s) }
-          end
-        end
-
-        def replace_backreferences(match, str)
-          groups = match.size
-          (1...groups).inject(str) do |s, i|
-            s.gsub("\\#{i}", match[i])
           end
         end
 

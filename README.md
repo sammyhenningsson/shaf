@@ -358,6 +358,28 @@ Shaf currently supports 5 db migrations to be generated plus the possibility to 
   generate migration drop column TABLE_NAME COLUMN_NAME
   generate migration rename column TABLE_NAME OLD_NAME NEW_NAME
 ```
+The `field` parameter is the name of the column (to be added resp. altered). The `type` parameter specifies the type that the column should have. The following types are supported:
+ - `integer`        => `Integer`
+ - `varchar`        => `String`
+ - `string`         => `String`
+ - `text`           => `String (`text: true`)
+ - `blob`           => `File`
+ - `bigint`         => `Bignum`
+ - `double`         => `Float`
+ - `numeric`        => `BigDecimal`
+ - `date`           => `Date`
+ - `timestamp`      => `DateTime`
+ - `time`           => `Time`
+ - `bool`           => `TrueClass`
+ - `boolean`        => `TrueClass`
+ - `index`          => `index` (`unique: true`)
+ - `foreign_key`    => `Integer`
+
+The foreign_key type requires that the referenced table is given. This is done by adding a comma, `,` and the table name. Like:
+```
+shaf generate scaffold post user_id:foreign_key,users
+```
+
 See [the Sequel migrations documentation](http://sequel.jeremyevans.net/rdoc/files/doc/migration_rdoc.html) for more info.
 Note: You can also add custom migrations, see [Customizations](#Customizations)
 

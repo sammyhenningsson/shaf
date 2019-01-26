@@ -33,7 +33,7 @@ module Shaf
               'blogs',
               'message:string',
               'word_count:integer',
-              'user_id:foreign_key(users)',
+              'user_id:foreign_key,users',
               'message:index'
             )
           end
@@ -82,7 +82,7 @@ module Shaf
         describe "add a foreign_key" do
           let(:table_name) { "blogs" }
           let(:generator) do
-            Generator.new(*%w(add column blogs user_id:foreign_key(users)))
+            Generator.new(*%w(add column blogs user_id:foreign_key,users))
           end
 
           it "names the migration file correctly" do
