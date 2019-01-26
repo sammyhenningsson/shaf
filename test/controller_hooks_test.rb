@@ -56,7 +56,7 @@ module Shaf
       end
     end
 
-    it 'regesters all uri_methods' do
+    it 'registers all uri_methods' do
       controller.stub :before, before_stub do
         controller.before_action(:callback)
         before_args.size.must_equal(

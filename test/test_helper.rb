@@ -7,6 +7,18 @@ require 'minitest/autorun'
 
 DB = Sequel.connect('mock://test', database: 'test')
 
+module Minitest
+  module Assertions
+    def assert_matched_arrays(exp, act)
+      exp_ary = exp.to_ary
+      act_ary = act.to_ary
+      assert_kind_of Array, exp_ary
+      assert_kind_of Array, act_ary
+      assert_equal exp_ary.sort, act_ary.sort
+    end
+  end
+end
+
 module Shaf
   module Mutable
     def self.suppress_output
@@ -54,7 +66,6 @@ module Shaf
           end
         end
       end
-
 
       def spawn(*args)
         return if args.size.zero?

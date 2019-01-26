@@ -11,8 +11,8 @@ module Shaf
       end
     end
 
-    def resource_uris_for(*args)
-      result = CreateUriMethods.new(*args).call
+    def resource_uris_for(name, **kwargs)
+      result = CreateUriMethods.new(name, **kwargs).call
       UriHelperMethods.add_path_helpers(self, result)
 
       include UriHelper unless self < UriHelper
@@ -94,36 +94,41 @@ module Shaf
   # edit_book_uri_template         => /books/:id/edit
   #
   class CreateUriMethods
-
-    def initialize(name, base: nil, plural_name: nil)
+    def initialize(name, base: nil, plural_name: nil, only: nil, except: nil)
       @name = name.to_s
       @base = base&.sub(%r(/\Z), '') || ''
       @plural_name = plural_name&.to_s || Utils::pluralize(name.to_s)
+      @only = only
+      @except = except
       @added_path_methods = []
     end
 
     def call
       if plural_name == name
-        register_resource_uri_by_arg
+        register_resource_helper_by_arg
       else
-        register_resources_uri
-        register_resource_uri
+        register_collection_helper
+        register_resource_helper
       end
-      register_new_resource_uri
-      register_edit_resource_uri
+      register_new_resource_helper
+      register_edit_resource_helper
       @added_path_methods
     end
 
     private
 
-    attr_reader :name, :base, :plural_name
+    attr_reader :name, :base, :plural_name, :only, :except
 
-    def register_resources_uri
+    def register_collection_helper
+      return if skip? :collection
+
       template_uri = "#{base}/#{plural_name}".freeze
       register(plural_name, template_uri)
     end
 
-    def register_resource_uri
+    def register_resource_helper
+      return if skip? :resource
+
       template_uri = "#{base}/#{plural_name}/:id".freeze
       register(name, template_uri)
     end
@@ -131,7 +136,10 @@ module Shaf
     # If a resource has the same singular and plural names, then this method
     # should be used. It will return the resource uri when a resource is given
     # as argument and the resources uri when no arguments are provided.
-    def register_resource_uri_by_arg
+    def register_resource_helper_by_arg
+      return register_resource_helper if skip? :collection
+      return register_collection_helper if skip? :new
+
       resource_template_uri =   "#{base}/#{plural_name}/:id"
       collection_template_uri = "#{base}/#{plural_name}"
 
@@ -139,12 +147,16 @@ module Shaf
       @added_path_methods << builder.call
     end
 
-    def register_new_resource_uri
+    def register_new_resource_helper
+      return if skip? :new
+
       template_uri = "#{base}/#{name}/form".freeze
       register("new_#{name}", template_uri)
     end
 
-    def register_edit_resource_uri
+    def register_edit_resource_helper
+      return if skip? :edit
+
       template_uri = "#{base}/#{plural_name}/:id/edit".freeze
       register("edit_#{name}", template_uri)
     end
@@ -152,6 +164,16 @@ module Shaf
     def register(name, template_uri)
       builder = MethodBuilder.new(name, template_uri)
       @added_path_methods << builder.call
+    end
+
+    def skip? name
+      if only
+        !Array(only).include? name
+      elsif except
+        Array(except).include? name
+      else
+        false
+      end
     end
   end
 

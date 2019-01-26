@@ -209,6 +209,41 @@ module Shaf
       end
     end
 
+    describe 'skipping some routes' do
+      let(:controller) do
+        Class.new do
+          extend ResourceUris
+        end
+      end
+
+      it 'only registers the resource helper' do
+        controller.resource_uris_for :post, only: :resource
+        assert_equal [:post_path], controller.path_helpers
+      end
+
+      it 'only registers the resource and new uris' do
+        controller.resource_uris_for :post, only: [:resource, :edit]
+        assert_matched_arrays [:post_path, :edit_post_path], controller.path_helpers
+      end
+
+      it 'registers all but the edit uri' do
+        controller.resource_uris_for :post, except: [:edit]
+        assert_matched_arrays [:post_path, :posts_path, :new_post_path], controller.path_helpers
+      end
+
+      it 'does not register helper with optional parameters when collection is skipped' do
+        controller.resource_uris_for :baz, plural_name: :baz, except: [:collection]
+        assert_equal(-2, controller.method(:baz_path).arity)
+        assert_matched_arrays [:baz_path, :new_baz_path, :edit_baz_path], controller.path_helpers
+      end
+
+      it 'does not register helper with optional parameters when resource is skipped' do
+        controller.resource_uris_for :baz, plural_name: :baz, only: :collection
+        assert_equal(-1, controller.method(:baz_path).arity)
+        assert_equal [:baz_path], controller.path_helpers
+      end
+    end
+
     describe MethodBuilder do
       let(:builder) { MethodBuilder.new("hide_book", "/my/books/:id/archive") }
 

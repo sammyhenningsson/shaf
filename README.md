@@ -434,6 +434,20 @@ class PostController < BaseController
   …
 end
 ```
+If all four paths are not needed, some of them can (and should) be excluded using the keyword arguments `:only` or `:except`. The values passed to them must be a symbol or an Array of symbols from `[:new, :edit, :resource, :collection]`. Example:
+```sh
+class PostController < BaseController
+  resource_uris_for :post, only: :resource
+end
+
+PostController.path_helpers     # => [:post_path]
+
+class BookController < BaseController
+  resource_uris_for :book, except: [:edit, :collection]
+end
+
+BookController.path_helpers     # => [:book_path, :new_book_path]
+```
 
 `register_uri` is used to create a single uri helper that does not follow the "normal" conventions of `resource_uris_for`.
 ```sh
