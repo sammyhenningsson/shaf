@@ -12,7 +12,8 @@ module Shaf
           extend Shaf::Utils
           bootstrap
 
-          UriHelperMethods.path_helpers_for.each do |controller, methods|
+          helpers = UriHelperMethods.path_helpers_for.sort { |a, b| a[0].to_s <=> b[0].to_s }
+          helpers.each do |controller, methods|
             puts "\n#{controller}:"
             methods.each do |method|
               template_method = "#{method}_template".to_sym
