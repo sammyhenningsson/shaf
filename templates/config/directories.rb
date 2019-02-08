@@ -1,7 +1,5 @@
 require 'config/constants'
 
-$:.unshift APP_DIR
-
 def sort_files(files)
   files.sort_by do |file|
     directory_priority(file) + file_priority(file)
@@ -27,7 +25,6 @@ def directory_priority(file)
   end
 end
 
-
 def file_priority(file)
   case File.basename(file)
   when /\Abase[\._]/
@@ -46,15 +43,11 @@ def require_ruby_files
   end
 end
 
-if Dir.exist? SRC_DIR
-  $:.unshift SRC_DIR
+[LIB_DIR, SRC_DIR, APP_DIR].each do |dir|
+  next unless Dir.exist? dir
+  $LOAD_PATH.unshift dir
 
-  Dir.chdir(SRC_DIR) do
+  Dir.chdir(dir) do
     require_ruby_files
   end
 end
-
-Dir.chdir(APP_DIR) do
-  require_ruby_files
-end
-
