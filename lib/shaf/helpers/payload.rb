@@ -86,9 +86,9 @@ module Shaf
       status(status)
 
       preferred_response = preferred_response_type(resource)
-      serialized = serialize(resource, serializer, collection)
+      http_cache = kwargs.delete(:http_cache) { Settings.http_cache }
 
-      http_cache = kwargs.fetch(:http_cache, Settings.http_cache)
+      serialized = serialize(resource, serializer, collection, **kwargs)
       add_cache_headers(serialized) if http_cache
 
       log.info "#{request.request_method} #{request.path_info} => #{status}"
@@ -100,12 +100,12 @@ module Shaf
       end
     end
 
-    def serialize(resource, serializer, collection)
+    def serialize(resource, serializer, collection, **options)
       serializer ||= HALPresenter
       if collection
-        serializer.to_collection(resource, current_user: current_user)
+        serializer.to_collection(resource, current_user: current_user, **options)
       else
-        serializer.to_hal(resource, current_user: current_user)
+        serializer.to_hal(resource, current_user: current_user, **options)
       end
     end
 
