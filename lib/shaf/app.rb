@@ -4,14 +4,14 @@ module Shaf
   class App
     class << self
       def instance
-        create_instance unless defined?(@instance)
-        @instance
+        @instance ||= create_instance
       end
 
       def create_instance
-        @instance = Sinatra.new
-        @instance.set :port, Settings.port || 3000
-        @instance.use Shaf::Middleware::RequestId
+        Sinatra.new.tap do |instance|
+          instance.set :port, Settings.port || 3000
+          instance.use Shaf::Middleware::RequestId
+        end
       end
 
       def use(middleware)
