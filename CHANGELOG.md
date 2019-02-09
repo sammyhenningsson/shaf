@@ -1,3 +1,9 @@
+## 0.8.0
+ * Add submit label to forms
+ * Pass options from respond_with to presenter
+ * Add only/except options for path helpers
+ * Changed foreign_key syntax
+ * Fix ERB trim_mode warnings in ruby2.6
 ## 0.7.1
  * support let! in specs
  * system spec type

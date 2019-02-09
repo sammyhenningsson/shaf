@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    shaf (0.7.1)
+    shaf (0.8.0)
 
 GEM
   remote: https://rubygems.org/

@@ -134,7 +134,7 @@ Which should now return the following payload.
   }
 }
 ```
-The root payload now contains a link with _rel_ 'posts'. Lets follow that link..
+The root payload now contains a link with rel _posts_. Lets follow that link..
 ```sh
 curl localhost:3000/posts | jq
 ```
