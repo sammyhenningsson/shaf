@@ -4,7 +4,7 @@ module Shaf
   module Formable
     class Builder
       InstanceAccessorType = Struct.new(:prefill?)
-      DELEGATES = %i[title name action method type fields].freeze
+      DELEGATES = %i[title name action method type submit fields].freeze
 
       attr_reader :forms
 
@@ -42,7 +42,7 @@ module Shaf
 
       DELEGATES.each do |name|
         define_method(name) do |arg|
-          form.send("#{name}=".to_sym, arg)
+          form.send(:"#{name}=", arg)
         end
       end
 

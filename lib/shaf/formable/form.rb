@@ -9,9 +9,10 @@ module Shaf
       class FormHasNoResourceError < Shaf::Error; end
 
       DEFAULT_TYPE = 'application/json'.freeze
+      DEFAULT_SUBMIT = 'save'.freeze
 
       attr_accessor :resource
-      immutable_accessor :title, :name, :href, :type, :self_link
+      immutable_accessor :title, :name, :href, :type, :submit, :self_link
       immutable_reader :fields, :action
 
       def initialize(params = {})
@@ -20,6 +21,7 @@ module Shaf
         @name = params[:name]&.to_sym || name_from(@action)
         @method = params[:method] ||= http_method_from(@action)
         @type = params[:type] || DEFAULT_TYPE
+        @submit = params[:submit] || DEFAULT_SUBMIT
         @fields = (params[:fields] || {}).map do |name, args|
           Field.new(name, args)
         end

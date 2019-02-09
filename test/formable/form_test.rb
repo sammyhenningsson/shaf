@@ -11,6 +11,7 @@ module Shaf
           name: :name,
           method: 'POST',
           type: 'type',
+          submit: 'submit',
           fields: {field1: {type: 'string'}}
         )
       end
@@ -29,6 +30,7 @@ module Shaf
         assert_equal :name, form2.name
         assert_equal 'POST', form2.method
         assert_equal 'type', form2.type
+        assert_equal 'submit', form2.submit
         assert_equal 1, form2.fields.size
       end
 

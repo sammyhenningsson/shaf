@@ -56,6 +56,17 @@ describe Shaf::Formable do
     assert_equal :'foo-form', clazz.create_form.name
   end
 
+  it 'is possible to set submit' do
+    clazz.form do
+      title 'Create Form'
+      action :create
+      submit :spara
+    end
+
+    assert_instance_of(Shaf::Formable::Form, clazz.create_form)
+    assert_equal :spara, clazz.create_form.submit
+  end
+
   it 'creates an edit form' do
     clazz.form do
       edit do
