@@ -9,20 +9,10 @@ class FormSerializer < BaseSerializer
     (options[:method] || resource&.method || 'POST').to_s.upcase
   end
 
-  attribute :name do
-    options[:name] || resource&.name
-  end
-
-  attribute :title do
-    options[:title] || resource&.title
-  end
-
-  attribute :href do
-    options[:href] || resource&.href
-  end
-
-  attribute :type do
-    options[:type] || resource&.type
+  %i[name title href type submit].each do |sym|
+    attribute sym do
+      options[sym] || resource&.public_send(sym)
+    end
   end
 
   link :self do
