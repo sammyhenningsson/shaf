@@ -35,9 +35,9 @@ class FormSerializer < BaseSerializer
     hash[:fields] = fields.map do |field|
       {
         name: field.name,
-        type: field.type,
-        label: field.label,
+        type: field.type
       }.tap do |f|
+        f[:label] = field.label if field.label
         f[:value] = field.value if field.has_value?
         f[:required] = true if field.required
       end
