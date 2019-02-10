@@ -64,7 +64,7 @@ module Shaf
       end
     end
 
-    class ConflictError
+    class ConflictError < ServerError
       def http_status
         409
       end
@@ -87,7 +87,7 @@ module Shaf
       end
     end
 
-    class UnprocessableEntityError
+    class UnprocessableEntityError < ServerError
       def http_status
         422
       end
