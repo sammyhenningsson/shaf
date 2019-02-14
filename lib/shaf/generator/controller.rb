@@ -16,22 +16,22 @@ module Shaf
       end
 
       def name
-        n = args.first || ""
+        n = args.first || ''
         return n unless n.empty?
         raise Command::ArgumentError,
-          "Please provide a controller name when using the controller generator!"
+          'Please provide a controller name when using the controller generator!'
       end
 
       def model_class_name
-        Utils::model_name(name)
+        Utils.model_name(name)
       end
 
       def plural_name
-        Utils::pluralize(name)
+        Utils.pluralize(name)
       end
 
       def pluralized_model_name
-        Utils::pluralize(model_class_name)
+        Utils.pluralize(model_class_name)
       end
 
       def template
@@ -74,16 +74,16 @@ module Shaf
       end
 
       def add_link_to_root
-        file = "api/serializers/root_serializer.rb"
+        file = 'api/serializers/root_serializer.rb'
         unless File.exist? file
           puts "Warning: file '#{file}' does not exist. "\
             "Skip adding link to the #{plural_name} collection"
         end
         added = false
         content = []
-        File.readlines(file).reverse.each do |line|
+        File.readlines(file).reverse_each do |line|
           if match = !added && line.match(/^(\s*)link /)
-            content.unshift link_content("#{match[1]}")
+            content.unshift link_content(match[1].to_s)
             added = true
           end
           content.unshift(line)
@@ -92,8 +92,8 @@ module Shaf
         puts "Modified:   #{file}"
       end
 
-      def link_content(indentation = "")
-        <<~EOS.split("\n").map { |line| "#{indentation}#{line}" }
+      def link_content(indentation = '')
+        <<~DOC.split("\n").map { |line| "#{indentation}#{line}" }
 
           # Auto generated doc:  
           # Link to the collection of #{plural_name}.  
@@ -105,7 +105,7 @@ module Shaf
           #      /#{plural_name}
           #```
           link :#{plural_name}, #{plural_name}_uri
-        EOS
+        DOC
       end
     end
   end
