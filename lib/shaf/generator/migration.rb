@@ -11,7 +11,12 @@ module Shaf
         usage { Factory.usage }
 
         def call
-          generator = args.empty? ? Empty.new(**options) : Factory.create(*args, **options)
+          generator = 
+            if Factory.lookup(*args)
+              Factory.create(*args, **options)
+            else
+              Empty.new(*args, **options)
+            end
           (target, content) = generator.call
           write_output(target, content)
         rescue StandardError => e

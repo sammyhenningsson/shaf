@@ -4,12 +4,12 @@ module Shaf
       class Empty < Base
 
         identifier %r(\A\Z)
-        usage 'generate migration'
+        usage 'generate migration [name]'
 
         def validate_args; end
 
         def compile_migration_name
-          "empty"
+          args.first || "empty"
         end
 
         def compile_changes
