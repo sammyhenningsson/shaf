@@ -42,7 +42,7 @@ class BaseController < Sinatra::Base
   error StandardError do
     err = env['sinatra.error']
     log.error err.message
-    err.backtrace.each(&log.method(:error))
+    Array(err.backtrace).each(&log.method(:error))
 
     api_error = to_api_error(err)
 
