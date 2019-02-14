@@ -7,7 +7,7 @@ module Shaf
       include HttpUtils
 
       register_spec_type self do |desc, args|
-        next unless args && args.is_a?(Hash)
+        next unless args&.is_a?(Hash)
         args[:type]&.to_s == 'integration'
       end
 

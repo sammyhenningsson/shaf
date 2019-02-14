@@ -3,10 +3,18 @@ module Shaf
     module HttpUtils
       include ::Rack::Test::Methods
 
-      [:get, :put, :patch, :post, :delete, :options, :head, :link, :unlink].each do |m|
-        define_method m do |*args|
+      %i[get put patch post delete options head link unlink].each do |m|
+        define_method m do |uri, payload = nil, options = {}|
           set_headers
-          super(*args)
+
+          if payload
+            payload = JSON.generate(payload) if payload.respond_to? :to_h
+            options['CONTENT_TYPE'] ||= 'application/json'
+            super(uri, payload, options)
+          else
+            super(uri, options)
+          end
+
           set_payload parse_response(last_response.body)
         end
       end

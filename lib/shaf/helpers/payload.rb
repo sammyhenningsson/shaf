@@ -1,3 +1,7 @@
+# frozen_string_literal: true
+
+require 'set'
+
 module Shaf
   module Payload
     EXCLUDED_FORM_PARAMS = ['captures', 'splat'].freeze
@@ -58,12 +62,14 @@ module Shaf
 
     def safe_params(*fields)
       return {} unless payload
-      field_strings = fields.map { |f| f.to_s.downcase }
-      field_strings << 'id' unless field_strings.include? 'id'
+
+      field_strings = fields.map { |f| f.downcase.to_sym }.to_set
+      field_strings << :id
 
       {}.tap do |allowed|
         field_strings.each do |f|
-          allowed[f.to_sym] = payload[f] if payload[f]
+          allowed[f.to_sym] = payload[f] if payload.key? f
+          allowed[f.to_sym] ||= payload[f.to_s] if payload.key? f.to_s
         end
       end
     end
