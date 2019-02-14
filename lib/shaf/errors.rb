@@ -97,5 +97,19 @@ module Shaf
         super(msg, code: "UNPROCESSABLE_ENTITY", title: "Request can not be processed")
       end
     end
+
+    class ValidationError < ServerError
+      attr_reader :fields
+
+      def http_status
+        422
+      end
+
+      def initialize(msg, fields)
+        msg ||= "The entity being created/updated is invalid"
+        super(msg, code: "VALIDATION_ERROR", title: "Invalid entity")
+        @fields = fields
+      end
+    end
   end
 end
