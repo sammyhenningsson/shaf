@@ -54,10 +54,10 @@ module Shaf
       if request.env['CONTENT_TYPE'] =~ %r(\Aapplication/(hal\+)?json)
         JSON.parse(input, symbolize_names: true)
       else
-        raise ::UnsupportedMediaTypeError.new(request: request)
+        raise Errors::UnsupportedMediaTypeError.new(request: request)
       end
     rescue StandardError
-      raise ::BadRequestError.new
+      raise Errors::BadRequestError.new
     end
 
     def safe_params(*fields)
