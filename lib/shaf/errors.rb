@@ -101,6 +101,12 @@ module Shaf
     class ValidationError < ServerError
       attr_reader :fields
 
+      def self.from_sequel(validation_failed)
+        new(validation_failed.message, validation_failed.errors).tap do |err|
+          err.set_backtrace(validation_failed.backtrace)
+        end
+      end
+
       def http_status
         422
       end
