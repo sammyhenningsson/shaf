@@ -1,5 +1,6 @@
-require 'yaml'
+# frozen_string_literal: true
 
+require 'yaml'
 
 module Shaf
   class Settings
@@ -7,8 +8,12 @@ module Shaf
 
     class << self
       def load
-        @settings = File.exist?(SETTINGS_FILE) ?
-          YAML.load(File.read(SETTINGS_FILE)) : {}
+        @settings =
+          if File.exist?(SETTINGS_FILE)
+            YAML.safe_load(File.read(SETTINGS_FILE))
+          else
+            {}
+          end
       end
 
       def env
@@ -18,7 +23,7 @@ module Shaf
       def method_missing(method, *args)
         load unless defined? @settings
 
-        if method.to_s.end_with? "="
+        if method.to_s.end_with? '='
           define_setter(method)
           public_send(method, args.first)
         else
@@ -27,8 +32,8 @@ module Shaf
         end
       end
 
-      def respond_to_missing?(method, include_private = false)
-        return true
+      def respond_to_missing?(_method, _include_private = false)
+        true
       end
 
       def define_getter(method)
