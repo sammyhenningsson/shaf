@@ -5,16 +5,14 @@ class <%= class_name %> < BaseSerializer
 
   model <%= model_class_name %>
   policy <%= policy_class_name %>
-  <% attributes_with_doc.each do |attr| %>
-  <%= attr.join("\n  ") %>
-  <% end %>
-  <% curies_with_doc.each do |curie| %>
-  <%= curie.join("\n  ") %>
-  <% end %>
-  <% links_with_doc.each do |link| %>
-  <%= link.join("\n  ") %>
-  <% end %>
-  <% if collection_with_doc %>
-  <%= collection_with_doc.join("\n  ") %>
-  <% end %>
+
+  <%= print_nested(attributes_with_doc) %>
+
+  <%= print_nested(curies_with_doc) %>
+
+  <%= print_nested(links_with_doc) %>
+
+  <%- if collection_with_doc %>
+  <%= print(collection_with_doc) %>
+  <%- end -%>
 end

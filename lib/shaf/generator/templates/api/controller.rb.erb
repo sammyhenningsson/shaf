@@ -21,7 +21,7 @@ class <%= controller_class_name %> < BaseController
   post :<%= plural_name %>_path do
     authorize! :write
     <%= name %> = <%= model_class_name %>.create(<%= name %>_params)
-    headers({ "Location" => <%= name %>_uri(<%= name %>) })
+    headers('Location' => <%= name %>_uri(<%= name %>))
     respond_with <%= name %>, status: 201
   end
 
@@ -31,7 +31,7 @@ class <%= controller_class_name %> < BaseController
   end
 
   get :edit_<%= name %>_path do
-    authorize! :read
+    authorize! :write
     cache_control(:private, http_cache_max_age: :short)
     respond_with edit_form
   end
@@ -49,7 +49,8 @@ class <%= controller_class_name %> < BaseController
   end
 
   def <%= name %>_params
-    # Generated method - TODO: Remove any params that should not be allowed!
+    # Generated method
+    # TODO: Remove any params that should not be allowed for mass update/create!
     safe_params(<%= params.map { |p| ":#{p[0]}" }.join(', ') %>)
   end
 
