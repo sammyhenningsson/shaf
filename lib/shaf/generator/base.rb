@@ -1,6 +1,6 @@
 require 'fileutils'
 require 'erb'
-require 'ostruct'
+require 'shaf/generator/helper'
 
 module Shaf
   module Generator
@@ -44,7 +44,7 @@ module Shaf
       def render(template, locals = {})
         str = read_template(template)
         locals[:changes] ||= []
-        b = OpenStruct.new(locals).instance_eval { binding }
+        b = Helper.new(locals).binding
 
         return ERB.new(str, 0, '%-<>').result(b) if RUBY_VERSION < "2.6.0"
         ERB.new(str,trim_mode: '-<>').result(b)
