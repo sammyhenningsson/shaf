@@ -1,38 +1,48 @@
+# frozen_string_literal: true
+
+require 'forwardable'
 require 'shaf/version'
 
 module Shaf
   module Utils
+    extend Forwardable
+
     class ProjectRootNotFound < StandardError; end
 
     SHAF_VERSION_FILE = '.shaf'.freeze
 
-    # FIXME!!!
-    def self.pluralize(noun)
-      noun + 's' # FIXME!!
+    class << self
+      def model_name(name)
+        name.capitalize.gsub(/[_-](\w)/) { $1.upcase }
+      end
+
+      def gem_root
+        File.expand_path('../..', __dir__)
+      end
+
+      # FIXME!!!
+      def pluralize(noun)
+        return pluralize(noun.to_s).to_sym if noun.is_a? Symbol
+        noun + 's'
+      end
+
+      # FIXME!!!
+      def singularize(noun)
+        return singularize(noun.to_s).to_sym if noun.is_a? Symbol
+        return noun unless noun.end_with? 's'
+        noun[0..-2]
+      end
+
+      def symbolize(str)
+        :"#{str}"
+      end
+
+      def symbol_string(str)
+        symbolize(str).inspect
+      end
     end
 
-    def self.model_name(name)
-      name.capitalize.gsub(/[_-](\w)/) { $1.upcase }
-    end
-
-    def self.gem_root
-      File.expand_path('../../..', __FILE__)
-    end
-
-    # FIXME!!!
-    def self.singularize(noun)
-      return singularize(noun.to_s).to_sym if noun.is_a? Symbol
-      return noun unless noun.end_with? 's'
-      noun[0..-2]
-    end
-
-    def pluralize(noun)
-      Utils::pluralize(noun)
-    end
-
-    def gem_root
-      self.class.gem_root
-    end
+    def_delegators Utils, :pluralize, :singularize, :symbolize, :symbol_string, :gem_root
 
     def project_root
       return @project_root if defined? @project_root

@@ -22,7 +22,7 @@ module Shaf
       end
 
       def model_class_name
-        Utils::model_name(name)
+        Utils.model_name(name)
       end
 
       def policy_class_name
@@ -155,7 +155,7 @@ module Shaf
           # #{desc}.  
           # Method: #{method}  
           #{example(method, uri)}
-          link :'#{rel}' do
+          link #{Utils.symbol_string(rel)} do
             #{uri_helper}
           end
         EOS
@@ -207,7 +207,7 @@ module Shaf
           attributes_with_doc: attributes_with_doc,
           curies_with_doc: curies_with_doc,
           links_with_doc: links_with_doc,
-          collection_with_doc: collection_with_doc,
+          collection_with_doc: collection_with_doc
         }
       end
 
