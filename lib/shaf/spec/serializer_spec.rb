@@ -11,7 +11,7 @@ module Shaf
         args[:type]&.to_s == 'serializer'
       end
 
-      def serialize(resource, current_user:)
+      def serialize(resource, current_user: nil)
         serializer = __serializer || HALPresenter
         set_payload serializer.to_hal(resource, current_user: current_user)
       end

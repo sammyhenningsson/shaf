@@ -1,4 +1,5 @@
 require 'spec_helper'
+require 'ostruct'
 
 describe <%= class_name %> do
 
@@ -6,10 +7,11 @@ describe <%= class_name %> do
     <%= model_class_name %>.new.
       tap { |<%= name %>| <%= name %>.id = 5 }
   end
+  let(:user) { OpenStruct.new(id: 5, name: 'Bengt') }
 
   describe "when current_user is nil" do
     before do
-      set_payload HALPresenter.to_hal(resource)
+      serialize resource
     end
 
     it "serializes attributes" do
@@ -27,7 +29,7 @@ describe <%= class_name %> do
 
   describe "when current_user is present" do
     before do
-      set_payload HALPresenter.to_hal(resource, current_user: "Bengt")
+      serialize resource, current_user: user
     end
 
     it "serializes attributes" do
