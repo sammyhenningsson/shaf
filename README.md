@@ -36,7 +36,6 @@ Your newly created project should contain the following files:
 │       └── root_serializer.rb
 ├── config
 │   ├── bootstrap.rb
-│   ├── constants.rb
 │   ├── customize.rb
 │   ├── database.rb
 │   ├── directories.rb
@@ -47,6 +46,7 @@ Your newly created project should contain the following files:
 │   │   ├── logging.rb
 │   │   └── sequel.rb
 │   ├── initializers.rb
+│   ├── paths.rb
 │   └── settings.yml
 ├── config.ru
 ├── frontend

@@ -22,10 +22,10 @@ end
 Shaf::DbTask.new(:migrate, description: "Run migrations", args: [:version]) do |t, args|
   if args[:version]
     puts "Migrating to version #{args[:version]}"
-    Sequel::Migrator.run(DB, MIGRATIONS_DIR, target: args[:version].to_i)
+    Sequel::Migrator.run(DB, Shaf::Settings.migrations_dir, target: args[:version].to_i)
   else
     puts "Migrating to latest"
-    Sequel::Migrator.run(DB, MIGRATIONS_DIR)
+    Sequel::Migrator.run(DB, Shaf::Settings.migrations_dir)
   end
 end
 
@@ -46,7 +46,7 @@ Shaf::DbTask.new(
     puts "This would migrate the Database to version: #{version}. Continue [N/y]?"
     next unless /\Ay/i =~ STDIN.gets.chomp&.downcase
   end
-  Sequel::Migrator.run(DB, MIGRATIONS_DIR, target: version.to_i)
+  Sequel::Migrator.run(DB, Shaf::Settings.migrations_dir, target: version.to_i)
 end
 
 Rake::Task["db:migrate"].enhance do
@@ -59,8 +59,8 @@ end
 
 Shaf::DbTask.new(:reset, description: "Reset the database by deleting all rows in all columns") do
   version = 0
-  Sequel::Migrator.run(DB, MIGRATIONS_DIR, target: version)
-  Sequel::Migrator.run(DB, MIGRATIONS_DIR)
+  Sequel::Migrator.run(DB, Shaf::Settings.migrations_dir, target: version)
+  Sequel::Migrator.run(DB, Shaf::Settings.migrations_dir)
 end
 
 Shaf::DbTask.new(:seed, description: "Seed the Database") do

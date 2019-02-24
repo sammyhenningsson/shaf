@@ -16,17 +16,23 @@ module Shaf
       check_customizations
       return show_help if show_help?
       Command::Factory.create(*ARGV).call
-    rescue RegistrableFactory::NotFoundError, Command::ArgumentError => e
-      STDERR.puts e.message, "\n"
+    rescue RegistrableFactory::NotFoundError, Command::ArgumentError => err
+      STDERR.puts err.message, "\n"
+      show_backtrace(err)
       show_help
       exit 1
     rescue Utils::ProjectRootNotFound
       STDERR.puts "This command can only be executed inside a Shaf project directory. " \
         "Please change directory and try again!"
       exit 2
-    rescue Command::CommandError => e
-      STDERR.puts "Command failed: #{e.message}\n"
+    rescue Command::CommandError => err
+      STDERR.puts "Command failed: #{err.message}\n"
+      show_backtrace(err)
       exit 3
+    rescue StandardError => err
+      STDERR.puts err.message, "\n"
+      show_backtrace(err, force: true)
+      exit 4
     end
 
     def show_help
@@ -43,6 +49,15 @@ module Shaf
 
     def show_help?
       ARGV.first =~ /-h/ 
+    end
+
+    def show_backtrace(err, force: false)
+      if force || ARGV.include?('--trace')
+        err = err.cause while err.cause
+        STDERR.puts err.backtrace
+      else
+        STDERR.puts 'run the command with "--trace" to see a stack trace'
+      end
     end
 
     def check_customizations

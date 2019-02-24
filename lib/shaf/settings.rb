@@ -5,19 +5,28 @@ require 'yaml'
 module Shaf
   class Settings
     SETTINGS_FILE = 'config/settings.yml'
+    DEFAULTS = {
+      public_folder: 'frontend/assets',
+      views_folder: 'frontend/views',
+      documents_dir: 'doc/api',
+      migrations_dir: 'db/migrations',
+      fixtures_dir: 'spec/fixtures',
+      auth_token_header: 'X-Auth-Token',
+      paginate_per_page: 25
+    }.freeze
 
     class << self
       def load
-        @settings =
-          if File.exist?(SETTINGS_FILE)
-            YAML.safe_load(File.read(SETTINGS_FILE))
-          else
-            {}
-          end
+        @settings = DEFAULTS.dup
+        return unless File.exist?(SETTINGS_FILE)
+
+        yaml = File.read(SETTINGS_FILE)
+        config = YAML.safe_load(yaml, aliases: true, symbolize_names: true)
+        @settings.merge! config[env]
       end
 
       def env
-        @env ||= (ENV['APP_ENV'] || ENV['RACK_ENV'] || :development).to_sym
+        (ENV['APP_ENV'] || ENV['RACK_ENV'] || 'development').to_sym
       end
 
       def method_missing(method, *args)
@@ -38,15 +47,14 @@ module Shaf
 
       def define_getter(method)
         define_singleton_method(method) do
-          @settings.dig(env.to_s, method.to_s)
+          @settings[method]
         end
       end
 
       def define_setter(method)
+        key = method[0..-2].to_sym
         define_singleton_method(method) do |arg|
-          key = method[0..-2]
-          @settings[env.to_s] ||= {}
-          @settings[env.to_s][key] = arg
+          @settings[key] = arg
         end
       end
     end

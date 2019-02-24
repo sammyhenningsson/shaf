@@ -2,11 +2,18 @@ require 'sequel'
 require 'config/database'
 
 Sequel.extension :migration
-Dir[File.join(MIGRATIONS_DIR, "*")]
 
-def is_current?
-  return true unless Dir[File.join(MIGRATIONS_DIR, "*")].any?
-  Sequel::Migrator.is_current?(DB, MIGRATIONS_DIR)
+def current?
+  return true unless Dir[migrations_dir_glob].any?
+  Sequel::Migrator.is_current?(DB, migrations_dir)
+end
+
+def migrations_dir
+  File.join(Shaf::Settings.app_root, Shaf::Settings.migrations_dir)
+end
+
+def migrations_dir_glob
+  File.join(migrations_dir, '*')
 end
 
 def environment
@@ -14,18 +21,17 @@ def environment
 end
 
 def init
-  return if is_current?
+  return if current?
 
   if environment == 'test'
     $logger.info "Running migrations in 'test' environment.."
-    Sequel::Migrator.run(DB, "#{APP_ROOT}/db/migrations")
+    Sequel::Migrator.run(DB, migrations_dir)
   else
     msg = "Database for environment '#{environment}' is not " \
-      "updated to the latest migration"
+      'updated to the latest migration'
     STDERR.puts msg
     $logger&.warn msg
   end
 end
 
 init
-

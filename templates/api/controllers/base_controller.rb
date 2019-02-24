@@ -7,13 +7,13 @@ class BaseController < Sinatra::Base
     enable :logging
     enable :method_override
     mime_type :hal, 'application/hal+json'
-    set :views, VIEWS_DIR
+    set :views, Shaf::Settings.views_folder
     set :static, !production?
-    set :public_folder, ASSETS_DIR
+    set :public_folder, Shaf::Settings.public_folder
     disable :dump_errors
     set :show_exceptions, :after_handler
     enable :current_user
-    set :auth_token_header, AUTH_TOKEN_HEADER
+    set :auth_token_header, Shaf::Settings.auth_token_header
   end
 
   use Rack::Deflater

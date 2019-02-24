@@ -1,6 +1,7 @@
+# frozen_string_literal: true
+
 require 'sinatra/base'
 require 'sequel'
-require 'config/constants'
 require 'fileutils'
 
 config = {
@@ -15,16 +16,15 @@ config = {
 
   development: {
     adapter: 'sqlite',
-    database: File.join(APP_ROOT, 'db', 'development.sqlite3'),
+    database: 'db/development.sqlite3'
   }.freeze,
 
   test: {
     adapter: 'sqlite',
-    database: File.join(APP_ROOT, 'db', 'test.sqlite3'),
+    database: 'db/test.sqlite3'
   }.freeze
 
 }.freeze
-
 
 env = Sinatra::Application.settings.environment
 
@@ -33,8 +33,7 @@ unless config[env]
   exit 1
 end
 
-MIGRATIONS_DIR = File.join(APP_ROOT, Shaf::Settings.migrations_dir)
-FileUtils.mkdir_p(MIGRATIONS_DIR) unless Dir.exist?(MIGRATIONS_DIR)
+migrations_dir = 'db/migrations'
+FileUtils.mkdir_p(migrations_dir) unless Dir.exist?(migrations_dir)
 
 DB = Sequel.connect(config[env])
-

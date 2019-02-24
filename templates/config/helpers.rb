@@ -1,4 +1,4 @@
-dir = File.join(APP_DIR, 'helpers')
+dir = File.join(Shaf::Settings.app_dir, 'helpers')
 if Dir.exist? dir
   Dir.chdir(dir) do
     modules = []

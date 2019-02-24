@@ -1,3 +1,5 @@
+require 'shaf/settings'
+
 module Shaf
   module Paginate
 
@@ -6,7 +8,7 @@ module Shaf
       page == 0 ? 1 : page
     end
 
-    def paginate!(collection, per_page = PAGINATION_PER_PAGE)
+    def paginate!(collection, per_page = Shaf::Settings.paginate_per_page)
       unless collection.respond_to? :paginate
         log.warn "Trying to paginate a collection that doesn't " \
                     "support pagination: #{collection}"
@@ -17,7 +19,7 @@ module Shaf
       collection.paginate(current_page, per_page)
     end
 
-    def paginate(collection, per_page = PAGINATION_PER_PAGE)
+    def paginate(collection, per_page = Shaf::Settings.paginate_per_page)
       paginate!(collection.dup, per_page)
     end
   end

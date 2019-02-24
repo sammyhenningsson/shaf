@@ -6,14 +6,14 @@ module Shaf
       include PayloadUtils
       include HttpUtils
 
-      register_spec_type self do |desc, args|
+      register_spec_type self do |_desc, args|
         next unless args&.is_a?(Hash)
         args[:type]&.to_s == 'integration'
       end
 
       def set_headers
         if defined?(@__integration_test_auth_token) && @__integration_test_auth_token
-          header 'X-AUTH-TOKEN', @__integration_test_auth_token
+          header Settings.auth_token_header, @__integration_test_auth_token
         end
       end
 

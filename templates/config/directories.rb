@@ -1,4 +1,4 @@
-require 'config/constants'
+require 'shaf/settings'
 
 def sort_files(files)
   files.sort_by do |file|
@@ -43,7 +43,8 @@ def require_ruby_files
   end
 end
 
-[LIB_DIR, SRC_DIR, APP_DIR].each do |dir|
+%i[lib_dir src_dir app_dir].each do |cfg|
+  dir = Shaf::Settings.send cfg
   next unless Dir.exist? dir
   $LOAD_PATH.unshift dir
 
