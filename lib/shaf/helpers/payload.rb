@@ -63,13 +63,13 @@ module Shaf
     def safe_params(*fields)
       return {} unless payload
 
-      field_strings = fields.map { |f| f.downcase.to_sym }.to_set
-      field_strings << :id
+      fields = fields.map { |f| f.to_sym.downcase }.to_set
+      fields << :id
 
       {}.tap do |allowed|
-        field_strings.each do |f|
-          allowed[f.to_sym] = payload[f] if payload.key? f
-          allowed[f.to_sym] ||= payload[f.to_s] if payload.key? f.to_s
+        fields.each do |f|
+          allowed[f] = payload[f] if payload.key? f
+          allowed[f] ||= payload[f.to_s] if payload.key? f.to_s
         end
       end
     end
