@@ -5,7 +5,9 @@ module Shaf
     class Field
       extend Shaf::ImmutableAttr
 
-      immutable_reader :name, :type, :value, :label, :required, :accessor_name
+      immutable_reader :name, :type, :value, :title, :required, :hidden, :accessor_name
+
+      alias label title
 
       HTML_TYPE_MAPPINGS = {
         string: 'text',
@@ -15,7 +17,8 @@ module Shaf
       def initialize(name, params = {})
         @name = name
         @type = params[:type]&.to_sym
-        @label = params[:label]
+        @title = params[:title] || params[:label]
+        @hidden = params[:hidden]
         @has_value = params.key? :value
         @value = params[:value]
         @required = params[:required] || false
@@ -43,15 +46,16 @@ module Shaf
       private
 
       def label_element
-        str = (label || name || "").to_s
+        str = (title || name || "").to_s
         %Q(<label for="#{name}" class="form--label">#{str}</label>)
       end
 
       def input_element
         _value = value ? %Q(value="#{value.to_s}") : nil
         _required = required ? "required" : nil
+        _type = hidden ? "hidden" : HTML_TYPE_MAPPINGS.fetch(type.to_s, 'text')
         attributes = [
-          %Q(type="#{HTML_TYPE_MAPPINGS[type.to_s]}"),
+          %Q(type="#{_type}"),
           'class="form--input"',
           %Q(id="#{name.to_s}"),
           %Q(name="#{name.to_s}"),
