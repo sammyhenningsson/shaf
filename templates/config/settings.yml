@@ -13,6 +13,8 @@ default: &default
   protocol: http
   port: 3000
   auth_token_header: X-Auth-Token
+  form_profile_name: shaf-form
+  form_profile_uri: https://gist.github.com/sammyhenningsson/39c8aafeaf60192b082762cbf3e08d57
 
 production:
   <<: *default

@@ -19,6 +19,10 @@ class FormSerializer < BaseSerializer
     options[:self_link] || resource&.self_link
   end
 
+  link :profile do
+    Shaf::Settings.form_profile_uri
+  end
+
   post_serialize do |hash|
     fields = resource&.fields
     break if fields.nil? || fields.empty?
@@ -27,7 +31,7 @@ class FormSerializer < BaseSerializer
         name: field.name,
         type: field.type
       }.tap do |f|
-        f[:label] = field.label if field.label
+        f[:title] = field.title if field.title
         f[:value] = field.value if field.has_value?
         f[:required] = true if field.required
       end

@@ -78,6 +78,11 @@ module Shaf
       return name == '_method'
     end
 
+    def profile(value = nil)
+      return @profile unless value
+      @profile = value
+    end
+
     def respond_with_collection(resource, status: 200, serializer: nil, **kwargs)
       respond_with(
         resource,
@@ -117,7 +122,11 @@ module Shaf
 
     def respond_with_hal(resource, serialized)
       log.debug "Response payload (#{resource.class}): #{serialized}"
-      content_type :hal
+      if resource.is_a? Formable::Form
+        profile ||= Shaf::Settings.form_profile_name
+      end
+      content_type_params = profile ? {profile: profile} : {}
+      content_type :hal, content_type_params
       body serialized
     end
 
