@@ -188,7 +188,7 @@ module Shaf
             curie(:doc) { doc_curie_uri('#{name}') }
 
             link :self, #{plural_name}_uri
-            link :up, root_uri
+            link :'doc:up', root_uri
 
             #{create_link.join("\n  ")}
           end
