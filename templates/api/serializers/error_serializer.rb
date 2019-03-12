@@ -8,4 +8,7 @@ class ErrorSerializer < BaseSerializer
   attribute :code
   attribute :message
 
+  link :profile do
+    Shaf::Settings.error_profile_uri
+  end
 end

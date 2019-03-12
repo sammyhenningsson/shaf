@@ -122,11 +122,7 @@ module Shaf
 
     def respond_with_hal(resource, serialized)
       log.debug "Response payload (#{resource.class}): #{serialized}"
-      if resource.is_a? Formable::Form
-        profile ||= Shaf::Settings.form_profile_name
-      end
-      content_type_params = profile ? {profile: profile} : {}
-      content_type :hal, content_type_params
+      content_type :hal, content_type_params(resource)
       body serialized
     end
 
@@ -146,6 +142,20 @@ module Shaf
 
       sha1 = Digest::SHA1.hexdigest payload
       etag sha1, :weak # Weak or Strong??
+    end
+
+    def content_type_params(resource)
+      return {profile: profile} if profile
+
+      name =
+        case resource
+        when Formable::Form
+          Shaf::Settings.form_profile_name
+        when Errors::ServerError
+          Shaf::Settings.error_profile_name
+        end
+
+      {profile: name}.compact
     end
   end
 end
