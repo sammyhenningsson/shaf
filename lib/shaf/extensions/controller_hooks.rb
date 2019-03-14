@@ -15,6 +15,7 @@ module Shaf
     def __action_hook(hook, method_name, block, **options)
       only = Array(options[:only]) if options.key? :only
       except = Array(options[:except]) if options.key? :except
+      validate_symbols(hook: hook, only: only, except: except)
 
       path_helpers.each do |helper|
         next if only && !only.include?(helper)
@@ -40,6 +41,19 @@ module Shaf
       template = send template_method
       str = template.gsub(%r{:[^/]*}, '\w+')
       Regexp.new("#{str}/?")
+    end
+
+    def validate_symbols(hook:, only: [], except: [])
+      s = "\n\n\"%s\" given as :%s keyword arg to %s hook. Must be a symbol!\n"
+      Array(only).each do |value|
+        next if value.is_a? Symbol
+        log.warn format(s, value, 'only', hook)
+      end
+
+      Array(except).each do |value|
+        next if value.is_a? Symbol
+        log.warn format(s, value, 'except', hook)
+      end
     end
   end
 

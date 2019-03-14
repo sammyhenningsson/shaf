@@ -3,19 +3,16 @@ require 'shaf/middleware'
 module Shaf
   class App
     class << self
-      def instance
-        @instance ||= create_instance
+      def run!
+        app.run!
       end
 
-      def create_instance
-        Sinatra.new.tap do |instance|
-          instance.set :port, Settings.port || 3000
-          instance.use Shaf::Middleware::RequestId
+      def app
+        Sinatra.new.tap do |app|
+          app.set :port, Settings.port || 3000
+          app.use Middleware::RequestId
+          app.use Router
         end
-      end
-
-      def use(middleware)
-        instance.use middleware
       end
     end
   end

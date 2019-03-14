@@ -25,7 +25,7 @@ module Shaf
       end
 
       def app
-        App.instance
+        App.app
       end
 
       def follow_rel(rel, method: nil)

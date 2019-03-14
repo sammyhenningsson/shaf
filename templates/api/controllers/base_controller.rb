@@ -18,9 +18,11 @@ class BaseController < Sinatra::Base
 
   use Rack::Deflater
 
+  Shaf::Router.mount(self, default: true)
+
   def self.inherited(controller)
     super
-    Shaf::App.use controller
+    Shaf::Router.mount controller
   end
 
   def self.log
@@ -39,6 +41,11 @@ class BaseController < Sinatra::Base
     log.debug "Payload: #{payload || 'empty'}"
   end
 
+  not_found do
+    err = NotFoundError.new "Resource \"#{request.path_info}\" does not exist"
+    respond_with(err, status: err.http_status)
+  end
+
   error StandardError do
     err = env['sinatra.error']
     log.error err.message
@@ -46,9 +53,7 @@ class BaseController < Sinatra::Base
 
     api_error = to_api_error(err)
 
-    respond_with api_error,
-      status: api_error.http_status,
-      serializer: ErrorSerializer
+    respond_with(api_error, status: api_error.http_status)
   end
 
   def to_api_error(err)

@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 module Shaf
   module Command
     class Server < Base
@@ -6,7 +8,7 @@ module Shaf
       usage 'server'
 
       def self.options(parser, options)
-        parser.on("-p", "--port PORT", Integer, "Listen port") do |p|
+        parser.on('-p', '--port PORT', Integer, 'Listen port') do |p|
           options[:port] = p
         end
       end
@@ -14,7 +16,7 @@ module Shaf
       def call
         Settings.port = options[:port] if options[:port]
         bootstrap
-        App.instance.run!
+        App.run!
       end
     end
   end

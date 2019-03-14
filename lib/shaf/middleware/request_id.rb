@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require 'securerandom'
 
 module Shaf
@@ -8,7 +10,7 @@ module Shaf
       end
 
       def call(env)
-        env["REQUEST_ID"] = SecureRandom.uuid
+        env['REQUEST_ID'] = SecureRandom.uuid
         @app.call(env)
       end
     end
