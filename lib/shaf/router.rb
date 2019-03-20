@@ -1,12 +1,13 @@
 # frozen_string_literal: true
 
 require 'shaf/middleware'
+require 'set'
 
 module Shaf
   class Router
     class << self
       def mount(controller, default: false)
-        @default = controller if default
+        @default_controller = controller if default
         @controllers ||= []
         @controllers << controller
       end
@@ -19,7 +20,7 @@ module Shaf
       # This controller will be used when no other can handle the request
       # (E.g. returning 404 Not Found)
       def default_controller
-        @default || raise('No default controller')
+        @default_controller ||= nil
       end
 
       private
@@ -39,14 +40,21 @@ module Shaf
       end
     end
 
-    # We don't care about the sinatra app created in Shaf::App::app
-    # We just want it to start the server and handle middleware.
-    # After that Shaf::Router will handle the rest.
-    def initialize(_app); end
+    def initialize(app)
+      @app = app
+    end
 
     def call(env)
-      method, path = http_details(env)
-      controller_for(method, path).call(env)
+      http_method, path = http_details(env)
+
+      result = nil
+
+      controllers_for(http_method, path) do |controller|
+        result = controller.call(env)
+        break unless cascade? result
+      end
+
+      result
     end
 
     private
@@ -55,21 +63,71 @@ module Shaf
       [env['REQUEST_METHOD'], env['PATH_INFO']]
     end
 
-    def controller_for(http_method, path)
-      #cached = find_cached(http_method, path)
-      lookup(http_method, path) || default_controller
-    end
+    def controllers_for(http_method, path)
+      find_cached(http_method, path).each { |ctrlr| yield ctrlr }
 
-    def lookup(http_method, path)
-      self.class.routes[http_method].find do |controller, patterns|
-        next unless patterns.any? { |pattern| pattern.match(path) }
-        #add_cache(controller, http_method, path)
-        break controller
+      if controller = find(http_method, path)
+        yield controller
       end
+
+      find_all(http_method, path).each do |ctrlr|
+        yield ctrlr unless ctrlr == controller
+      end
+
+      yield default_controller
     end
 
     def default_controller
-      self.class.default_controller
+      self.class.default_controller || @app || raise('No default controller')
+    end
+
+    def routes
+      self.class.routes
+    end
+
+    def find(http_method, path)
+      routes[http_method].each do |controller, patterns|
+        next unless patterns.any? { |pattern| pattern.match(path) }
+        add_cache(controller, http_method, path)
+        return controller
+      end
+
+      nil
+    end
+
+    def find_all(http_method, path)
+      Set.new.tap do |controllers|
+        routes[http_method].each do |ctrlr, patterns|
+          next unless patterns.any? { |pattern| pattern.match(path) }
+          add_cache(ctrlr, http_method, path)
+          controllers << ctrlr
+        end
+      end
+    end
+
+    def cascade?(result)
+      result.dig(1, 'X-Cascade') == 'pass'
+    end
+
+    def cache
+      @cache ||= Hash.new { |hash, key| hash[key] = Set.new }
+    end
+
+    def add_cache(controller, http_method, path)
+      key = cache_key(http_method, path)
+      cache[key] << controller
+    end
+
+    def find_cached(http_method, path)
+      key = cache_key(http_method, path)
+      cache[key]
+    end
+
+    def cache_key(http_method, path)
+      path[1..-1].split('/').inject("#{http_method}_") do |key, segment|
+        segment = ':id' if segment =~ /\A\d+\z/
+        "#{key}/#{segment}"
+      end
     end
   end
 end

@@ -27,4 +27,5 @@ Gem::Specification.new do |gem|
   gem.add_development_dependency "sequel", '~> 5'
   gem.add_development_dependency "minitest", '~> 5', '>= 5.10'
   gem.add_development_dependency "sqlite3", '~> 1.3'
+  gem.add_development_dependency "rack-test", '~> 1.0'
 end
