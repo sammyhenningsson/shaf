@@ -1,3 +1,23 @@
+## 1.0.0
+ * Min required ruby version 2.4
+ * Continue upgrading when patch is rejected
+ * Add a router to select the right controller
+ * Add a serializer for validation errors
+ * Set curie for _up_ links
+ * Add support for media profiles
+ * Add helper to read HTTP Headers
+ * Move global constants into settings
+ * Method to convert Sequel::ValidationFailed error
+ * Moved test tasks into Rakefile
+ * Add optional name to empty migration generator
+ * Add an error class for validation errors
+ * Fix bug with lookup of error classes
+ * Symbolize keys in request payload
+ * Set Content-Type to application/json in integration specs
+ * Add #blank? to all objects (Sequel extension)
+ * Fix problem with hostname in `Settings`
+ * Add submit attribute to FormSerializer
+ * Only serialize form labels when present
 ## 0.8.0
  * Add submit label to forms
  * Pass options from respond_with to presenter
