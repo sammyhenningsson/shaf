@@ -188,14 +188,18 @@ module Shaf
       end
 
       def apply_substitute(file, params)
-        pattern = params[:pattern] or return
-        replacement = params[:replace] or return
+        return unless params[:pattern] && params[:replace]
+
+        pattern = Regexp.new(params[:pattern])
+        replacement = params[:replace]
+
         tmp = Tempfile.open do |new_file|
           File.readlines(file).each do |line|
-            new_file << line.sub(Regexp.new(pattern), replacement)
+            new_file << line.gsub(pattern, replacement)
           end
           new_file
         end
+
         FileUtils.mv(tmp.path, file)
       end
 
