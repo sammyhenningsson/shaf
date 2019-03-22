@@ -77,15 +77,15 @@ module Shaf
 
       def apply(dir = nil)
         apply_patches(dir)
-        apply_additions
         apply_drops(dir)
+        apply_additions
         apply_substitutes(dir)
       end
 
       def to_s
         str = "Shaf::Upgrade::Package for version #{@version}"
         return str if @manifest.nil?
-        "#{str} (#{@manifest.stats})"
+        "#{str} (#{@manifest.stats_str})"
       end
 
       private
@@ -143,8 +143,8 @@ module Shaf
       end
 
       def apply_patches(dir = nil)
-        files_in(dir).all? do |file|
-          @manifest.patch_for(file).all? do |name|
+        files_in(dir).each do |file|
+          @manifest.patches_for(file).each do |name|
             patch = @files[name]
             apply_patch(file, patch)
           end
@@ -152,35 +152,40 @@ module Shaf
       end
 
       def apply_patch(file, patch)
-        success = nil
-        Open3.popen3('patch', file, '-r', '-') do |i, o, e, t|
+        Open3.popen3('patch', file) do |i, o, e, t|
           i.write patch
           i.close
           puts o.read
           err = e.read
           puts err unless err.empty?
-          success = t.value.success?
+          next if t.value.success?
+          STDERR.puts "Failed to apply patch for: #{file}\n"
         end
-        success
       end
 
       def apply_additions
-        @manifest.files[:add].each do |chksum, filename|
+        puts '' unless @manifest.additions.empty?
+        @manifest.additions.each do |chksum, filename|
           content = @files[chksum]
           FileUtils.mkdir_p File.dirname(filename)
+          puts "adding file: #{filename}"
           File.open(filename, 'w') { |file| file.write(content) }
         end
       end
 
       def apply_drops(dir = nil)
+        puts '' unless @manifest.removals.empty?
         files_in(dir).map do |file|
-          File.unlink(file) if @manifest.drop?(file)
+          next unless @manifest.drop?(file)
+          puts "removing file: #{file}"
+          File.unlink(file)
         end
       end
 
       def apply_substitutes(dir = nil)
+        puts '' unless @manifest.regexps.empty?
         files_in(dir).all? do |file|
-          @manifest.regexp_for(file).all? do |name|
+          @manifest.regexps_for(file).all? do |name|
             params = symbolize_keys(YAML.safe_load(@files[name]))
             apply_substitute(file, params)
           end

@@ -14,23 +14,48 @@ module Shaf
         @files[:regexp] = build_patterns(params[:substitutes])
       end
 
-      def patch_for(file)
-        files[:patch].select { |_, pattern| file =~ pattern }.keys
+      def patches
+        files[:patch]
       end
 
-      def regexp_for(file)
-        files[:regexp].select { |_, pattern| file =~ pattern }.keys
+      def additions
+        files[:add]
+      end
+
+      def removals
+        files[:drop]
+      end
+
+      def regexps
+        files[:regexp]
+      end
+
+      def patches_for(file)
+        patches.select { |_, pattern| file =~ pattern }.keys
+      end
+
+      def regexps_for(file)
+        regexps.select { |_, pattern| file =~ pattern }.keys
       end
 
       def drop?(file)
-        files[:drop].any? { |pattern| file =~ pattern }
+        removals.any? { |pattern| file =~ pattern }
       end
 
       def stats
-        "Add: #{files[:add].size}, " \
-          "Del: #{files[:drop].size}, " \
-          "Patch: #{files[:patch].size}, " \
-          "Regexp: #{files[:regexp].size}"
+        {
+          additions: additions.size,
+          removals: removals.size,
+          patches: patches.size,
+          regexps: regexps.size
+        }
+      end
+
+      def stats_str
+        "Add: #{additions.size}, " \
+          "Del: #{removals.size}, " \
+          "Patch: #{patches.size}, " \
+          "Regexp: #{regexps.size}"
       end
 
       private

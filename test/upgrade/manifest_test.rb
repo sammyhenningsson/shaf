@@ -32,13 +32,13 @@ module Shaf
     end
 
     it "returns checksums for mathching patch files" do
-      assert_equal ["change"], manifest.patch_for("/home/dev/some/file.rb")
-      assert_empty manifest.patch_for("/home/dev/some/other/file.rb")
+      assert_equal ["change"], manifest.patches_for("/home/dev/some/file.rb")
+      assert_empty manifest.patches_for("/home/dev/some/other/file.rb")
     end
 
     it 'returns checksums for mathching regexp files' do
-      assert_equal %w[sub1 sub2], manifest.regexp_for('/home/dev/some/file.rb')
-      assert_empty manifest.regexp_for('/home/dev/some/other/file.rb')
+      assert_equal %w[sub1 sub2], manifest.regexps_for('/home/dev/some/file.rb')
+      assert_empty manifest.regexps_for('/home/dev/some/other/file.rb')
     end
 
     it "#files return all file" do 

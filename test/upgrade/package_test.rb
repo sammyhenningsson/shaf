@@ -115,9 +115,11 @@ module Shaf
       manifest = Upgrade::Manifest.new(target_version: '2.0.0', add: to_add)
       package = Upgrade::Package.new('2.0.0', manifest, {'0123456789abcdef' => 'some_added_data'})
 
-      FileUtils.stub :mkdir_p, true do
-        File.stub :open, file_open_stub do
-          package.apply
+      Mutable.suppress_output do
+        FileUtils.stub :mkdir_p, true do
+          File.stub :open, file_open_stub do
+            package.apply
+          end
         end
       end
 
@@ -131,9 +133,11 @@ module Shaf
       manifest = Upgrade::Manifest.new(target_version: '2.0.0', drop: to_drop)
       package = Upgrade::Package.new('2.0.0', manifest)
 
-      package.stub :files_in, project_files do
-        File.stub :unlink, unlink_stub do
-          package.apply
+      Mutable.suppress_output do
+        package.stub :files_in, project_files do
+          File.stub :unlink, unlink_stub do
+            package.apply
+          end
         end
       end
 
@@ -150,10 +154,12 @@ module Shaf
       )
       package = Upgrade::Package.new('2.0.0', manifest)
 
-      package.stub :files_in, project_files do
-        package.stub :apply_substitute, apply_substitute_stub do
-          YAML.stub :safe_load, pattern: :foo, replace: :bar do
-            package.apply
+      Mutable.suppress_output do
+        package.stub :files_in, project_files do
+          package.stub :apply_substitute, apply_substitute_stub do
+            YAML.stub :safe_load, pattern: :foo, replace: :bar do
+              package.apply
+            end
           end
         end
       end
