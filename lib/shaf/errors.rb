@@ -114,7 +114,7 @@ module Shaf
       def initialize(msg, fields)
         msg ||= "The entity being created/updated is invalid"
         super(msg, code: "VALIDATION_ERROR", title: "Invalid entity")
-        @fields = fields
+        @fields = fields || {}
       end
     end
   end

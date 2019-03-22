@@ -1,7 +1,6 @@
 require 'serializers/base_serializer'
 
 class ErrorSerializer < BaseSerializer
-
   model Shaf::Errors::ServerError
 
   attribute :title
