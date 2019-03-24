@@ -18,11 +18,23 @@ module Shaf
     class << self
       def load
         @settings = DEFAULTS.dup
-        return unless File.exist?(SETTINGS_FILE)
+        config = read_config(SETTINGS_FILE)
+        @settings.merge! config.fetch(env, {})
+      end
 
-        yaml = File.read(SETTINGS_FILE)
-        config = YAML.safe_load(yaml, aliases: true, symbolize_names: true)
-        @settings.merge! config[env]
+      def read_config(file)
+        return {} unless File.exist? file
+
+        yaml = File.read(file)
+        if RUBY_VERSION < '2.5.0'
+          YAML.safe_load(yaml, [], [], true).each_with_object({}) do |(k, v), hash|
+            hash[k.to_sym] = v
+          end
+        elsif RUBY_VERSION < '2.6.0'
+          YAML.safe_load(yaml, [], [], true).transform_keys(&:to_sym)
+        else
+          YAML.safe_load(yaml, aliases: true, symbolize_names: true)
+        end
       end
 
       def env
