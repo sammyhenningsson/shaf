@@ -14,13 +14,13 @@ GEM
     rack-test (1.1.0)
       rack (>= 1.0, < 3)
     rake (12.3.2)
-    sequel (5.16.0)
+    sequel (5.18.0)
     sinatra (2.0.5)
       mustermann (~> 1.0)
       rack (~> 2.0)
       rack-protection (= 2.0.5)
       tilt (~> 2.0)
-    sqlite3 (1.3.13)
+    sqlite3 (1.4.0)
     tilt (2.0.9)
 
 PLATFORMS
@@ -36,4 +36,4 @@ DEPENDENCIES
   sqlite3 (~> 1.3)
 
 BUNDLED WITH
-   1.17.2
+   1.17.3
