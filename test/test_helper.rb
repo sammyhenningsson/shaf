@@ -61,7 +61,12 @@ module Shaf
           Open3.popen3(env, cmd) do |std_in, std_out, std_err, wait_thr|
             std_in.write(stdin) && std_in.close unless stdin.nil?
             exit_status = wait_thr.value # Process::Status object returned.
-            yield [std_out, std_err].map { |s| s.read.chomp } if block_given?
+            if block_given?
+              yield [std_out, std_err].map { |s| s.read.chomp }
+            elsif ENV['VERBOSE'].to_i == 1
+              err = std_err.read.chomp
+              STDERR.puts "\n#{err}" unless err.empty?
+            end
             exit_status.success?
           end
         end
