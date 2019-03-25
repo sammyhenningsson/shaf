@@ -33,7 +33,8 @@ Your newly created project should contain the following files:
 │       ├── base_serializer.rb
 │       ├── error_serializer.rb
 │       ├── form_serializer.rb
-│       └── root_serializer.rb
+│       ├── root_serializer.rb
+│       └── validation_error_serializer.rb
 ├── config
 │   ├── bootstrap.rb
 │   ├── customize.rb
@@ -88,7 +89,7 @@ Which should return the following payload.
 _Hint_: The output will actually not have any newlines and will look a bit more dense. To make the output more readable pipe the
 curl command to `ruby -rjson -e "puts (JSON.pretty_generate JSON.parse(STDIN.read))"`. E.g.
 ```sh
-curl localhost:3000/ | ruby -rjson -e "puts (JSON.pretty_generate JSON.parse(STDIN.read))"
+curl localhost:3000/ | ruby -rjson -e "puts JSON.pretty_generate(JSON.parse(STDIN.read))"
 ```
 (Or better yet, use `jq` which is a great a tool for dealing with json strings)
 
@@ -145,11 +146,11 @@ The response looks like this
     "self": {
       "href": "http://localhost:3000/posts?page=1&per_page=25"
     },
-    "up": {
+    "doc:up": {
       "href": "http://localhost:3000/"
     },
     "doc:create-form": {
-      "href": "http://localhost:3000/posts/form"
+      "href": "http://localhost:3000/post/form"
     },
     "curies": [
       {
@@ -179,24 +180,25 @@ The response looks like this
   "_links": {
     "self": {
       "href": "http://localhost:3000/posts/form"
+    },
+    "profile": {
+      "href": "https://gist.githubusercontent.com/sammyhenningsson/39c8aafeaf60192b082762cbf3e08d57/raw/shaf-form.md"
     }
   },
   "fields": [
     {
       "name": "title",
       "type": "string",
-      "label": null
     },
     {
       "name": "message",
       "type": "string",
-      "label": null
     }
   ]
 }
 
 ```
-This form tell us how to how to create new post resources. This is done with the following request (see [Models](#models) for more info on forms)
+This form tell us how to how to create new post resources. This is done with the following request (see [Models](#models)  and [The shaf-form media type profile](https://gist.github.com/sammyhenningsson/39c8aafeaf60192b082762cbf3e08d57) for more info on forms)
 ```sh
 curl -H "Content-Type: application/json" \
      -d '{"title": "hello", "message": "lorem ipsum"}' \
@@ -230,7 +232,7 @@ The response shows us the new resource:
   }
 }
 ```
-This new resource is of course added to the collection of posts, which can now be retrieved by the link with rel _up_.
+This new resource is of course added to the collection of posts, which can now be retrieved by the link with rel _doc:up_.
 ```sh
 curl localhost:3000/posts | jq
 ```
@@ -241,7 +243,7 @@ Response:
     "self": {
       "href": "http://localhost:3000/posts?page=1&per_page=25"
     },
-    "up": {
+    "doc:up": {
       "href": "http://localhost:3000/"
     },
     "doc:create-form": {
@@ -273,13 +275,6 @@ Response:
           "doc:delete": {
             "href": "http://localhost:3000/posts/1"
           },
-          "curies": [
-            {
-              "name": "doc",
-              "href": "http://localhost:3000/doc/post/rels/{rel}",
-              "templated": true
-            }
-          ]
         }
       }
     ]
@@ -296,22 +291,26 @@ shaf generate scaffold post title:string message:string
 rake db:migrate
 ```
 
-## Upgrading a project created with shaf version < 0.6.0
-Shaf version 0.6.0 introduced a few changes that are not backward compatible with previous versions. This means that if you created your Shaf project with an older version of this gem and then upgrade this gem to v0.6.0, your project will not function. To remedy this you will need to execute (from inside your project directory):
+## Upgrading a project created with shaf version < 1.0.0
+Shaf version 1.0.0 introduced a few changes that are not backward compatible with previous versions. This means that if you created your Shaf project with an older version of this gem and then upgrade this gem to v1.0.0, your project will not function. To remedy this you will need to execute (from inside your project directory):
 ```sh
 cd /path/to/my_project
 shaf upgrade
 ```
+Note: The upgrade command will try to apply patches to extisting files. Firstly, this requires the `patch` command to be installed (shouldn't be a problem for most distros). More importantly, if a patch does not succeed, then some manual process is needed. When a patch is rejected the `.orig` and `.rej` files contains the file content before applying the patch resp. the patches that failed to be applied. Please apply all patches in the `.rej` files manually then delete the all `.orig` and `.rej` files. (Sometimes a patch success, but with a different line offset than expected, then a `.orig` file is created but no `.rej` file. This is normally fine and it should be save to just remove the `.orig` file.)  
+Important: Always perform upgrades on a clean slate (e.g. run `git stash|commit`) before you start an upgrade.
 
 ## HAL
 The [HAL](http://stateless.co/hal_specification.html) mediatype is very simple and looks like your ordinary JSON objects, except for two reserved keys __links_ and __embedded_. __links_ displays possible actions that may be taken. __embedded_ contains nested resources. A HAL payload may contain a special link with rel _curies_, which is similar to namespaces in XML. Shaf uses a curie called _doc_ and makes it possible to fetch documentation for any link or embedded resources with a rel begining with 'doc:'. The href for curies are always templated, meaning that a part of the href (in our case '{rel}') must be replaced with a value. In the payload above the href of the doc curie is 'http://localhost:3000/doc/post/rels/{rel}' and there is one embedded resource prefixed with 'doc:', namely 'doc:create-form'. So this means that if we would like to find out information about what this embedded resource is and how it relates to the posts collection we replace '{rel}' with 'create-form' and perform a GET request to this url.
 ```sh
 curl http://localhost:3000/doc/post/rels/create-form
 ```
-This documentation is written as code comments in the corresponding serializer. See [Serializers](#Serializers) for more info. Before this documentation can be fetched, a rake task to extract the comments needs to be executed, see [API Documentation](#api-documentation) for more info.   
+This documentation is written as code comments in the corresponding serializer. See [Serializers](#Serializers) for more info. Before this documentation can be fetched, a rake task to extract the comments needs to be executed, see [API Documentation](#api-documentation) for more info.  
+HAL supports profiles describing the semantic meaning if of keys/values. Shaf takes advantage of this and uses two profiles. One for describing generic error messages (see [The shaf-error media type profile](https://gist.github.com/sammyhenningsson/049d10e2b8978059cde104fc5d6c2d52)) and another for describing forms (see [The shaf-form media type profile](https://gist.github.com/sammyhenningsson/39c8aafeaf60192b082762cbf3e08d57)).  
 
 ## Generators
-Shaf supports a few different generators to make it easy to create new files. Each generator has an _identifier_ and they are called with `shaf generate IDENTIFIER` plus zero or more arguments.
+Shaf supports a few different generators to make it easy to create new files. Each generator has an _identifier_ and they are called with `shaf generate IDENTIFIER` plus zero or more arguments.  
+Important: Always run `git stash|commit` before you generate new files. Generators may create/modify files and then delegate further work to another generator that happens to fail. In that case the generation is only partly performed and the project is in an unknown state. In such case, you would like to be able to easily restore the previous state (e.g `git checkout -- .`).
 
 #### Scaffold
 When adding a new resource its recommended to use the scaffold generator. It accepts a resource name and an arbitrary number of attribute:type arguments.
@@ -351,7 +350,7 @@ This will add a new policy.
 #### Migration
 Shaf currently supports 5 db migrations to be generated plus the possibility to generate an empty migration. These are:
 ```sh
-  generate migration
+  generate migration [name]
   generate migration add column TABLE_NAME field:type
   generate migration add index TABLE_NAME COLUMN_NAME
   generate migration create table TABLE_NAME [field:type] [..]
@@ -550,7 +549,7 @@ Given that you have a Serializer that is registered to process instances of `Pos
 
 
 ## Models
-Models generated with `shaf generate` inherit from `Sequel::Model` (see [Sequel docs](http://sequel.jeremyevans.net/documentation.html) for more info) and they extend `Shaf::Formable`. The Formable module adds the class method `form` which Shaf models use to associate two forms with the model. One for creating a new resource and one for editing an existing resource. As an example, the following model will add a create form with fields `foo` and `bar` and an edit form with fields `foo` and `baz`.
+Models generated with `shaf generate` inherit from `Sequel::Model` (see [Sequel docs](http://sequel.jeremyevans.net/documentation.html) for more info) and they extend `Shaf::Formable`. The Formable module adds the class method `form` which is used to associate two forms with the model. One for creating a new resource and one for editing an existing resource. As an example, the following model will add a create form with fields `foo` and `bar` and an edit form with fields `foo` and `baz`.
 ```sh
 class User < Sequel::Model
   extend Shaf::Formable
@@ -579,7 +578,13 @@ end
 This will create two instances of `Shaf::Formable::Form` which will be accessible from the `User` class, e.g `User.create_form` resp. `User.edit_form`. Forms with `instance_accessor` will also be retrievable from instances, e.g. `User[5].edit_form`.
 By default, forms retreived from instances will be prefilled with values from the instance (to change this, pass `prefill: false` to `instance_accessor`).  
 Fields are filled with values retreived by calling an instance method of the same name as the field name. If the name of the form field does not match the corresponding instance method on the model, then pass the name of the model instance method that should be called to the `accessor_name` keyword argument when declaring the field. In the example above, the edit form will have the `:foo` field prefilled with a value like `User[5].foo` and the `:baz` field will be prefilled with the return value of `User[5].instance_method_returning_baz`.  
-When serialized these forms contain an array of _fields_ that specifies all attributes that are accepted for create/update. Each field has a `name` property that MUST be used as key when constructing a payload to be submitted. Each field also has a type which declares the kind of value that are accepted (currently only string and integer are supported) and a label that may be used when rendering the form to a user. If a field has the attribute `required` set to `true`, then that field MUST be set when submitting the form. If a field includes a `value` attribute, then that value SHOULD be presented to the user and unless changed, the value MUST be included when the form is submitted. When submitting the form it MUST be sent to the url in _href_ with the HTTP method specified in _method_ with the Content-Type header set to the value of _type_. Here's the create form from the [Getting started](#getting-started) section.
+When serialized these forms contain an array of _fields_ that specifies all attributes that are accepted for create/update. Each field has a `name` property that MUST be used as key when constructing a payload to be submitted. Each field also has a type which declares the kind of value that are accepted (currently only string and integer are supported).
+Optionally each field may specify the following keyword_arguments:
+ - `title` - Meant to be displayed  in a UI)
+ - `value` - An initial value. Normally set peformed on an instance (e.g. `some_form[:field_with_value].value = "some_value"`)
+ - `required` - Let clients know that this field must be submitted.
+ - `hidden` - Let clients know that this field should not shown in a UI.  
+Clients submitting the form  MUST sent it to the url in _href_ with the HTTP method specified in _method_ with the Content-Type header set to the value of _type_. Here's the create form from the [Getting started](#getting-started) section.
 ```sh
     "create-form": {
       "method": "POST",
@@ -596,12 +601,10 @@ When serialized these forms contain an array of _fields_ that specifies all attr
         {
           "name": "title",
           "type": "string",
-          "label": null
         },
         {
           "name": "message",
           "type": "string",
-          "label": null
         }
       ]
     },
