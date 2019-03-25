@@ -297,7 +297,7 @@ Shaf version 1.0.0 introduced a few changes that are not backward compatible wit
 cd /path/to/my_project
 shaf upgrade
 ```
-Note: The upgrade command will try to apply patches to extisting files. Firstly, this requires the `patch` command to be installed (shouldn't be a problem for most distros). More importantly, if a patch does not succeed, then some manual process is needed. When a patch is rejected the `.orig` and `.rej` files contains the file content before applying the patch resp. the patches that failed to be applied. Please apply all patches in the `.rej` files manually then delete the all `.orig` and `.rej` files. (Sometimes a patch success, but with a different line offset than expected, then a `.orig` file is created but no `.rej` file. This is normally fine and it should be save to just remove the `.orig` file.)  
+Note: The upgrade command will try to apply patches to extisting files. Firstly, this requires the `patch` command to be installed (shouldn't be a problem for most distros). More importantly, if a patch does not succeed, then some manual processing is needed. When a patch is rejected the `.orig` and `.rej` files contains the file content before applying the patch resp. the patches that failed to be applied. Please apply all patches in the `.rej` files manually then delete the all `.orig` and `.rej` files. (Sometimes a patch success, but with a different line offset than expected, then a `.orig` file is created but no `.rej` file. This is normally fine and it should be safe to just remove the `.orig` file.)  
 Important: Always perform upgrades on a clean slate (e.g. run `git stash|commit`) before you start an upgrade.
 
 ## HAL
@@ -384,12 +384,13 @@ Note: You can also add custom migrations, see [Customizations](#Customizations)
 
 ## Routing/Controllers
 As usual with Sinatra applications routes are declared together with the controller code rather than in a separate file (as with Rails). All controllers should be subclasses of `BaseController` found in `api/controllers/base_controller.rb` (which was created along with the project).  
-Controllers generated with `shaf generate` uses three extensions, `Shaf::ResourceUris`, `Shaf::ControllerHooks` and `Shaf::Authorize`.
+Controllers generated with `shaf generate` uses a few Sinatra extensions, where the most important are `Shaf::ResourceUris`, `Shaf::ControllerHooks` and `Shaf::Authorize`.
 
 #### Shaf::ResourceUris
 This extension is used to create _uri_-/_path_ helpers. When registered with Sinatra (which is done in the generated `BaseController`) it adds two class methods, `resource_uris_for` and `register_uri`. The former adds four conventional uris (basically the CRUD actions). The later adds a single helper, for more custom actions. Each helper (created by `resource_uris_for` or `register_uri`) will be added as an instance method and a module method to the module `Shaf::UriHelper`. This means that they can be accessed from any file in your API through the module. Or you can include/extend `Shaf::UriHelper` into a class.  
-When included the module is also extended so all _uri_-/_path_ helpers will be available in the class as well. Also, the class that calls `resource_uris_for` or `register_uri` will automatically include `Shaf::UriHelper`, i.e. controllers registering new helpers will have access to the helper methods form instances and the class.  
-`resource_uris_for(name, base: nil, plural_name: nil)` - creates four pairs of uri helpers and adds them as class methods and instance methods to the caller.
+When included the module is also extended so all _uri_-/_path_ helpers will be available in the class as well. Also, the class that calls `resource_uris_for` or `register_uri` will automatically include `Shaf::UriHelper`, i.e. controllers registering new helpers will have access to the helper methods from instances and the class.  
+##### `::resource_uris_for(name, base: nil, plural_name: nil)`
+This method creates four pairs of uri helpers and adds them as class methods and instance methods to the caller.
 The keyword argument `:base` is used to specify a path namespace (such as '/api') that will be prepended to the uri. This can also be used to nest resources (though this is in general considered bad), like `resource_uris_for :post, base: '/users/:id/'`.
 The keyword argument `:plural_name` sets the pluralization of the name (when excluded the plural name will be `name` + 's').  
 ```sh
@@ -413,7 +414,7 @@ This adds four helpers for the conventional four CRUD actions. Each one has a __
 Methods taking an argument (e.g. `post_uri` and `edit_post_uri`) may be called with an object responding to `:id` or else `:to_s` will be called on it. E.g `post_uri(Post[27])` or `post_uri(27)`.  
 The optional `query_params` takes any given keyword arguments and appends a query string with them.  
 ```sh
-  post_uri(post, foo: 'bar')    #  => /posts/5?foo=bar
+  post_path(post, foo: 'bar')    #  => /posts/5?foo=bar
 ```
 Each of the helper also has a __path?_ version that can be used to check if a path matches the one of the helper. If given an argument it is matched against the helpers path else the caller must respond to `request` (returning an object responding to `path_info`). Use cases
 ```sh
@@ -448,7 +449,8 @@ end
 BookController.path_helpers     # => [:book_path, :new_book_path]
 ```
 
-`register_uri` is used to create a single uri helper that does not follow the "normal" conventions of `resource_uris_for`.
+##### `::register_uri(name, uri)`
+This method is used to create a single uri helper that does not follow the "normal" conventions of `resource_uris_for`.
 ```sh
 class PostController < BaseController
   register_uri :archive_post, '/posts/:id/archive'
