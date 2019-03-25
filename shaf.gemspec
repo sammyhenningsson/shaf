@@ -1,5 +1,3 @@
-# frozen_string_literal: true
-
 require './lib/shaf/version'
 
 Gem::Specification.new do |gem|
