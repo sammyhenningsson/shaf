@@ -18,11 +18,11 @@ module Shaf
         @name = name
         @type = params[:type]&.to_sym
         @title = params[:title] || params[:label]
-        @hidden = params[:hidden]
+        @hidden = params.fetch(:hidden, false)
         @has_value = params.key? :value
         @value = params[:value]
-        @required = params[:required] || false
-        @accessor_name = (params[:accessor_name] || name).to_sym
+        @required = params.fetch(:required, false)
+        @accessor_name = params.fetch(:accessor_name, name).to_sym
       end
 
       def has_value?

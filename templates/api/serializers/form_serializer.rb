@@ -34,6 +34,7 @@ class FormSerializer < BaseSerializer
         f[:title] = field.title if field.title
         f[:value] = field.value if field.has_value?
         f[:required] = true if field.required
+        f[:hidden] = true if field.hidden
       end
     end
   end

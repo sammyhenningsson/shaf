@@ -73,6 +73,10 @@ module Shaf
         end
       end
 
+      def [](name)
+        fields.find { |field| field.name == name }
+      end
+
       def to_html
         form_element do
           [
