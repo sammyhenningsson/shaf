@@ -7,10 +7,10 @@ Gem::Specification.new do |gem|
   gem.description = 'A framework for building hypermedia driven APIs with sinatra and sequel.'
   gem.authors     = ['Sammy Henningsson']
   gem.email       = 'sammy.henningsson@gmail.com'
-  gem.homepage    = 'https://github.com/sammyhenningsson/shaf'
   gem.license     = 'MIT'
   gem.metadata    = {
-    'changelog_uri' => 'https://github.com/sammyhenningsson/shaf/blob/master/CHANGELOG.md'
+    'changelog_uri' => 'https://github.com/sammyhenningsson/shaf/blob/master/CHANGELOG.md',
+    'homepage_uri'  => 'https://github.com/sammyhenningsson/shaf'
   }
 
   gem.cert_chain  = ['certs/sammyhenningsson.pem']
