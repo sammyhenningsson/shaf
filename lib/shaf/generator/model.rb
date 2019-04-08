@@ -42,9 +42,19 @@ module Shaf
       def form_fields
         args[1..-1].map do |f|
           (name, type, label) = f.split(':')
-          type ||= "string"
-          label_str = label ? %Q(, label: "#{label}") : ""
-          format 'field :%s, type: "%s"%s' % [name, type, label_str]
+          label_str = label ? %(, label: "#{label}") : ''
+          format 'field :%s, type: "%s"%s' % [name, rewrite(type), label_str]
+        end
+      end
+
+      def rewrite(type)
+        case type
+        when /foreign_key/
+          'integer'
+        when NilClass
+          'string'
+        else
+          type
         end
       end
 
