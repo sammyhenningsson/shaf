@@ -2,8 +2,7 @@
 [![Gem Version](https://badge.fury.io/rb/shaf.svg)](https://badge.fury.io/rb/shaf)
 [![Build Status](https://travis-ci.org/sammyhenningsson/shaf.svg?branch=master)](https://travis-ci.org/sammyhenningsson/shaf)  
 Shaf is a framework for building hypermedia driven REST APIs. Its goal is to be like a lightweight version of `rails new --api` with hypermedia as a first class citizen. Instead of reinventing the wheel Shaf uses [Sinatra](http://sinatrarb.com/) and adds a layer of conventions similar to [Rails](http://rubyonrails.org/). It uses [Sequel](http://sequel.jeremyevans.net/) as ORM and [HALPresenter](https://github.com/sammyhenningsson/hal_presenter) for policies and serialization (which means that the mediatype being used is [HAL](http://stateless.co/hal_specification.html)).  
-Most APIs claiming to be RESTful completly lacks the concept of links and relies upon clients to construction urls to _known_ endpoints. Thoses APIs are missing some of the concepts that Roy Fielding put together in is dissertation about REST. Having the server always returning payloads with links (hypermedia) makes the responsibilies more clear and allows for robust implementations. Clients then always knows which actions are possible and which aren't, depending of the links present in the server response. For example, there's no need for a client to try to place an order or follow another user unless the server returns the corresponding link for those actions. Also if the server decides to move some resources to another location or change the access protocol (like https instead of http), this can be done without any changes to the client.  
-There are both pros and cons with hypermedia APIs, which means that Shaf will not suite everyone. However, if you are going to create an API driven by hypermedia then Shaf will help you, similar to how Rails helps you get up and running in no time. 
+Most APIs claiming to be RESTful completly lacks the concept of links and relies upon clients to construction urls to _known_ endpoints. Thoses APIs are missing some of the concepts that Roy Fielding put together in is dissertation about REST. Having the server always returning payloads with links (hypermedia) makes the responsibilies more clear and allows for robust implementations. Clients then always knows which actions are possible and which aren't, depending of the links present in the server response.  
 
 ## Getting started
 Install Shaf with
@@ -167,7 +166,7 @@ The response looks like this
 ```
 This is the collection of posts (which currently is empty, see `$response['_embedded']['posts']`). Notice the link with rel _doc:create-form_. This is how we add new post resources. Let's follow it!
 ```sh
-curl http://localhost:3000/posts/form | jq
+curl http://localhost:3000/post/form | jq
 ```
 The response looks like this
 ```sh
@@ -179,7 +178,7 @@ The response looks like this
   "type": "application/json",
   "_links": {
     "self": {
-      "href": "http://localhost:3000/posts/form"
+      "href": "http://localhost:3000/post/form"
     },
     "profile": {
       "href": "https://gist.githubusercontent.com/sammyhenningsson/39c8aafeaf60192b082762cbf3e08d57/raw/shaf-form.md"
@@ -247,7 +246,7 @@ Response:
       "href": "http://localhost:3000/"
     },
     "doc:create-form": {
-      "href": "http://localhost:3000/posts/form"
+      "href": "http://localhost:3000/post/form"
     },
     "curies": [
       {
@@ -297,11 +296,11 @@ Shaf version 1.0.0 introduced a few changes that are not backward compatible wit
 cd /path/to/my_project
 shaf upgrade
 ```
-Note: The upgrade command will try to apply patches to extisting files. Firstly, this requires the `patch` command to be installed (shouldn't be a problem for most distros). More importantly, if a patch does not succeed, then some manual processing is needed. When a patch is rejected the `.orig` and `.rej` files contains the file content before applying the patch resp. the patches that failed to be applied. Please apply all patches in the `.rej` files manually then delete the all `.orig` and `.rej` files. (Sometimes a patch success, but with a different line offset than expected, then a `.orig` file is created but no `.rej` file. This is normally fine and it should be safe to just remove the `.orig` file.)  
+Note: The upgrade command will try to apply patches to extisting files. Firstly, this requires the `patch` command to be installed (shouldn't be a problem for most distros). More importantly, if a patch does not succeed, then some manual processing is needed. When a patch is rejected the `.orig` and `.rej` files contains the file content before applying the patch resp. the patches that failed to be applied. Please apply all patches in the `.rej` files manually then delete the all `.orig` and `.rej` files. (Sometimes a patch succeed, but with a different line offset than expected, then a `.orig` file is created but no `.rej` file. This is normally fine and it should be safe to just remove the `.orig` file.)  
 Important: Always perform upgrades on a clean slate (e.g. run `git stash|commit`) before you start an upgrade.
 
 ## HAL
-The [HAL](http://stateless.co/hal_specification.html) mediatype is very simple and looks like your ordinary JSON objects, except for two reserved keys __links_ and __embedded_. __links_ displays possible actions that may be taken. __embedded_ contains nested resources. A HAL payload may contain a special link with rel _curies_, which is similar to namespaces in XML. Shaf uses a curie called _doc_ and makes it possible to fetch documentation for any link or embedded resources with a rel begining with 'doc:'. The href for curies are always templated, meaning that a part of the href (in our case '{rel}') must be replaced with a value. In the payload above the href of the doc curie is 'http://localhost:3000/doc/post/rels/{rel}' and there is one embedded resource prefixed with 'doc:', namely 'doc:create-form'. So this means that if we would like to find out information about what this embedded resource is and how it relates to the posts collection we replace '{rel}' with 'create-form' and perform a GET request to this url.
+The [HAL](http://stateless.co/hal_specification.html) mediatype is very simple and looks like your ordinary JSON objects, except for two reserved keys `_links` and `_embedded`. `_links` displays possible actions that may be taken. `_embedded` contains nested resources. A HAL payload may contain a special link with rel _curies_, which is similar to namespaces in XML. Shaf uses a curie called _doc_ and makes it possible to fetch documentation for any link or embedded resources with a rel begining with `doc:`. The href for curies are always templated, meaning that a part of the href (in our case `{rel}`) must be replaced with a value. In the payload above the href of the _doc_ curie is `http://localhost:3000/doc/post/rels/{rel}` and there is one embedded resource prefixed with `doc:`, namely `doc:create-form`. So this means that if we would like to find out information about what this embedded resource is and how it relates to the posts collection we replace `{rel}` with `create-form` and perform a GET request to this url.
 ```sh
 curl http://localhost:3000/doc/post/rels/create-form
 ```
@@ -309,8 +308,8 @@ This documentation is written as code comments in the corresponding serializer. 
 HAL supports profiles describing the semantic meaning if of keys/values. Shaf takes advantage of this and uses two profiles. One for describing generic error messages (see [The shaf-error media type profile](https://gist.github.com/sammyhenningsson/049d10e2b8978059cde104fc5d6c2d52)) and another for describing forms (see [The shaf-form media type profile](https://gist.github.com/sammyhenningsson/39c8aafeaf60192b082762cbf3e08d57)).  
 
 ## Generators
-Shaf supports a few different generators to make it easy to create new files. Each generator has an _identifier_ and they are called with `shaf generate IDENTIFIER` plus zero or more arguments.  
-Important: Always run `git stash|commit` before you generate new files. Generators may create/modify files and then delegate further work to another generator that happens to fail. In that case the generation is only partly performed and the project is in an unknown state. In such case, you would like to be able to easily restore the previous state (e.g `git checkout -- .`).
+Shaf ships with a couple of generators to simplify creation of new files. Each generator has an _identifier_ and they are called with `shaf generate IDENTIFIER` plus zero or more arguments.  
+Important: Always run `git [stash|commit]` before you generate new files. Generators may create/modify files and then delegate further work to another generator that happens to fail. In that case the generation is only partly performed and the project is in an unknown state. In such case, you would like to be able to easily restore the previous state (e.g `git checkout -- .`).
 
 #### Scaffold
 When adding a new resource its recommended to use the scaffold generator. It accepts a resource name and an arbitrary number of attribute:type arguments.
@@ -404,11 +403,11 @@ This adds four helpers for the conventional four CRUD actions. Each one has a __
 | --------------------------------------- | -------------------------------------------------- |
 | `posts_uri(**query_params)`             | http://localhost/posts                             |
 | `post_uri(post, **query_params)`        | http://localhost/posts/5                           |
-| `new_post_uri(**query_params)`          | http://localhost/posts/form                        |
+| `new_post_uri(**query_params)`          | http://localhost/post/form                        |
 | `edit_post_uri(post, **query_params)`   | http://localhost/posts/5/edit                      |
 | `posts_path(**query_params)`            | /posts                                             |
 | `post_path(post, **query_params)`       | /posts/5                                           |
-| `new_post_path(**query_params)`         | /posts/form                                        |
+| `new_post_path(**query_params)`         | /post/form                                        |
 | `edit_post_path(post, **query_params)`  | /posts/5/edit                                      |
 
 Methods taking an argument (e.g. `post_uri` and `edit_post_uri`) may be called with an object responding to `:id` or else `:to_s` will be called on it. E.g `post_uri(Post[27])` or `post_uri(27)`.  
@@ -488,7 +487,7 @@ class PostController < BaseController
 
   before_action :setup_index, only: posts_path
 
-  before_action only: [:new_path_path, :edit_post_path] do
+  before_action only: [:new_post_path, :edit_post_path] do
     # Do some form setup
   end
 
@@ -582,8 +581,8 @@ By default, forms retreived from instances will be prefilled with values from th
 Fields are filled with values retreived by calling an instance method of the same name as the field name. If the name of the form field does not match the corresponding instance method on the model, then pass the name of the model instance method that should be called to the `accessor_name` keyword argument when declaring the field. In the example above, the edit form will have the `:foo` field prefilled with a value like `User[5].foo` and the `:baz` field will be prefilled with the return value of `User[5].instance_method_returning_baz`.  
 When serialized these forms contain an array of _fields_ that specifies all attributes that are accepted for create/update. Each field has a `name` property that MUST be used as key when constructing a payload to be submitted. Each field also has a type which declares the kind of value that are accepted (currently only string and integer are supported).
 Optionally each field may specify the following keyword_arguments:
- - `title` - Meant to be displayed  in a UI)
- - `value` - An initial value. Normally set peformed on an instance (e.g. `some_form[:field_with_value].value = "some_value"`)
+ - `title` - Meant to be displayed in a UI
+ - `value` - An initial value. Normally set on an instance (e.g. `some_form[:field_with_value].value = "some_value"`)
  - `required` - Let clients know that this field must be submitted.
  - `hidden` - Let clients know that this field should not shown in a UI.  
 Clients submitting the form  MUST sent it to the url in _href_ with the HTTP method specified in _method_ with the Content-Type header set to the value of _type_. Here's the create form from the [Getting started](#getting-started) section.
@@ -596,7 +595,7 @@ Clients submitting the form  MUST sent it to the url in _href_ with the HTTP met
       "type": "application/json",
       "_links": {
         "self": {
-          "href": "http://localhost:3000/posts/form"
+          "href": "http://localhost:3000/post/form"
         }
       },
       "fields": [
@@ -626,11 +625,22 @@ class PostSerializer < BaseSerializer
   attribute :message
 
   link :self do
-    post_uri(resource)
+    post_path(resource)
   end
 end
+
+post = OpenStruct.new(id: 5, message: "hello")
+PostSerializer.to_hal(post) # This will return the following response:
+# {
+#   "message": "hello",
+#   "_links": {
+#     "self": {
+#       "href": "/posts/5"
+#     }
+#   }
+# }
 ```
-This serializer will send `:message` to the object being serializer and set the returned value in the 'message' property. It will also add a link with rel _self_ and `href` set to the returned value of the corresponding block. `post_uri` comes from `Shaf::UriHelper` and `resource` is a `HALPresenter` method that returns the resource being serialized. See [HALPresenter](https://github.com/sammyhenningsson/hal_presenter) for more information.  
+This serializer will send `:message` to the object being serializer and set the returned value in the 'message' property. It will also add a link with rel _self_ and `href` set to the returned value of the corresponding block. `post_path` comes from `Shaf::UriHelper` and `resource` is a `HALPresenter` method that returns the resource being serialized. See [HALPresenter](https://github.com/sammyhenningsson/hal_presenter) for more information.  
 This is also where the api should be documented. Each `attribute`/`link`/`curie`/`embed` directive should be preceeded with comments that document the corresponding usage. See [API Documentation](#api-documentation) for more info.
 
 ## Policies
@@ -646,6 +656,8 @@ end
 Here `resource` is the object being serialized (in our case the `post` object). Used together with a serializer that specifies links with rels _edit_, _edit-form_ and _delete_, those links will only be serialized when the block returns `true`. The `resource` method is inherited and general for all policies. To make this a bit prettier it's recommended to create an alias for the name of the resource that the policy handles.
 Policies should also be used in Controllers (through the `authorize_with` class method). Since the links that should be serialized should coincide with which action should be allowed in the controller it makes sense to refactor this logic into a method.
 ```sh
+class PostPolicy < BasePolicy
+
   alias post resource
 
   link :edit, :'edit-form', :delete do
@@ -655,6 +667,7 @@ Policies should also be used in Controllers (through the `authorize_with` class 
   def write?
     current_user&.id == post.author.id
   end
+end
 ```
 Then the controller can call `authorize! :write` in the actions for editing/deleting and fetching of edit-form. If the block returns true nothing happens. If the block returns false, then the server will respond with "403 Forbidden".
 
@@ -856,7 +869,7 @@ Since API clients should basically only have to care about the payloads that are
 
 ## HTTP Caching
 REST is a very chatty architecture. Fortunately it works very well with HTTP Caching. Resources that are unlikely to be changed often, such as the root resource, forms, documentation etc, will by default set the HTTP Header Cache-Control with a max-age (meant to be tweeked to a value that suites your api) to one day. Clients should respect this and cache those resources accordingly.
-Each time a response is send from the api the Etag header is set (with a weak Etag). Clients should make use of this and be able to handle a '304 Not Modified' response.
+Each time a response is sent from the api the Etag header is set (with a weak Etag). Clients should make use of this and be able to handle a '304 Not Modified' response.
 For more info check out [this page](https://developers.google.com/web/fundamentals/performance/optimizing-content-efficiency/http-caching) by Ilya Grigorik.
 
 ## Pagination
