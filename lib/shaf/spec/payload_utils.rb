@@ -48,20 +48,29 @@ module Shaf
         end
       end
 
-      def fill_form(fields)
-        fields.map do |field|
-          value = case field[:type]
-                  when 'integer'
-                    field[:name].size
-                  when 'string'
-                    "value for #{field[:name]}"
-                  when 'boolean'
-                    true
-                  else
-                    "type not supported"
-                  end
-          [field[:name], value]
-        end.to_h
+      def fill_form(fields, opts = {})
+        fields.each_with_object({}) do |field, payload|
+          key = field[:name]
+          payload[key] =
+            if opts.key? key
+              opts[key]
+            else
+              default_field_value(field)
+            end
+        end
+      end
+
+      def default_field_value(field)
+        case field[:type]
+        when 'integer'
+          field[:name].size
+        when 'string'
+          "value for #{field[:name]}"
+        when 'boolean'
+          true
+        else
+          'type not supported'
+        end
       end
 
       def assert_status(code)
