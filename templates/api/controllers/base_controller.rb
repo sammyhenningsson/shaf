@@ -62,6 +62,8 @@ class BaseController < Sinatra::Base
       ForbiddenError.new
     when ServerError
       err
+    when Sequel::ValidationFailed
+      Shaf::Errors::ValidationError.from_sequel(err)
     else
       ServerError.new(err.message)
     end
