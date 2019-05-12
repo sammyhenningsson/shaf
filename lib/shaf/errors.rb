@@ -22,7 +22,7 @@ module Shaf
       end
 
       def initialize(msg = nil)
-        msg ||= "The request cannot be understood"
+        msg ||= "The request could not be understood"
         super(msg, code: "INVALID_REQUEST", title: "Invalid request")
       end
     end

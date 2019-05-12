@@ -40,8 +40,7 @@ module Shaf
 
     def __method_for(action)
       return action if action.to_s.end_with? '?'
-      "#{action}?".to_sym
+      :"#{action}?"
     end
   end
-
 end

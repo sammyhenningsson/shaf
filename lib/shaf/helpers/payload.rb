@@ -30,7 +30,7 @@ module Shaf
     end
 
     def read_input
-      request.body.rewind unless request.body.pos == 0
+      request.body.rewind unless request.body.pos.zero?
       request.body.read
     ensure
       request.body.rewind
@@ -38,19 +38,25 @@ module Shaf
 
     def parse_payload
       if request.env['CONTENT_TYPE'] == 'application/x-www-form-urlencoded'
-        return params.reject { |key,_| EXCLUDED_FORM_PARAMS.include? key }
+        return params.reject { |key, _| EXCLUDED_FORM_PARAMS.include? key }
       end
 
       input = read_input
       return {} if input.empty?
 
-      if request.env['CONTENT_TYPE'] =~ %r(\Aapplication/(hal\+)?json)
-        JSON.parse(input, symbolize_names: true)
-      else
-        raise Errors::UnsupportedMediaTypeError.new(request: request)
-      end
+      raise raise_unsupported_media_type_error(request) unless suported_media_type?
+
+      JSON.parse(input, symbolize_names: true)
     rescue StandardError
       raise Errors::BadRequestError.new
+    end
+
+    def suported_media_type?
+      request.env['CONTENT_TYPE'].match? %r{\Aapplication/(hal\+)?json}
+    end
+
+    def raise_unsupported_media_type_error(request)
+      raise Errors::UnsupportedMediaTypeError.new(request: request)
     end
 
     def safe_params(*fields)
@@ -59,16 +65,14 @@ module Shaf
       fields = fields.map { |f| f.to_sym.downcase }.to_set
       fields << :id
 
-      {}.tap do |allowed|
-        fields.each do |f|
-          allowed[f] = payload[f] if payload.key? f
-          allowed[f] ||= payload[f.to_s] if payload.key? f.to_s
-        end
+      fields.each_with_object({}) do |f, allowed|
+        allowed[f] = payload[f] if payload.key? f
+        allowed[f] ||= payload[f.to_s] if payload.key? f.to_s
       end
     end
 
     def ignore_form_input?(name)
-      return name == '_method'
+      name == '_method'
     end
 
     def profile(value = nil)

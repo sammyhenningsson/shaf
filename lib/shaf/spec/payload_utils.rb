@@ -51,12 +51,7 @@ module Shaf
       def fill_form(fields, opts = {})
         fields.each_with_object({}) do |field, payload|
           key = field[:name]
-          payload[key] =
-            if opts.key? key
-              opts[key]
-            else
-              default_field_value(field)
-            end
+          payload[key] = opts.fetch(key, default_field_value(field))
         end
       end
 
