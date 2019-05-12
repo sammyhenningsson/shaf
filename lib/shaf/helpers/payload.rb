@@ -26,14 +26,7 @@ module Shaf
     private
 
     def payload
-      @@request_id ||= nil
-      @@payload ||= nil
-
-      if @@request_id != request.env["REQUEST_ID"]
-        @@request_id = request.env["REQUEST_ID"]
-        @@payload = parse_payload
-      end
-      @@payload
+      @payload ||= parse_payload
     end
 
     def read_input
