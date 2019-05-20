@@ -40,9 +40,16 @@ module Shaf
       def symbol_string(str)
         symbolize(str).inspect
       end
+
+      def rackify_header(str)
+        return if str.nil?
+        str.upcase.tr('-', '_').tap do |key|
+          key.prepend('HTTP_') unless key.start_with? 'HTTP_'
+        end
+      end
     end
 
-    def_delegators Utils, :pluralize, :singularize, :symbolize, :symbol_string, :gem_root
+    def_delegators Utils, :pluralize, :singularize, :symbolize, :symbol_string, :gem_root, :rackify_header
 
     def project_root
       return @project_root if defined? @project_root

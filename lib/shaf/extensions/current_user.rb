@@ -19,7 +19,7 @@ module Shaf
       'User model with a column auth_token_digest'.freeze
 
     def auth_token
-      header = settings.auth_token_header
+      header = Utils.rackify_header(settings.auth_token_header)
       request.env[header]
     end
 
