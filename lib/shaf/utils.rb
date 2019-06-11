@@ -80,9 +80,9 @@ module Shaf
       end
     end
 
-    def bootstrap
+    def bootstrap(env: 'development')
       in_project_root do
-        ENV['RACK_ENV'] ||= 'development'
+        ENV['RACK_ENV'] ||= env
         require 'config/bootstrap'
         yield if block_given?
       end

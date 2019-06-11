@@ -11,9 +11,10 @@ module Shaf
 end
 
 require 'shaf/command/base'
-require 'shaf/command/new'
-require 'shaf/command/upgrade'
-require 'shaf/command/server'
 require 'shaf/command/console'
 require 'shaf/command/generate'
+require 'shaf/command/new'
+require 'shaf/command/server'
+require 'shaf/command/test'
+require 'shaf/command/upgrade'
 require 'shaf/command/version'

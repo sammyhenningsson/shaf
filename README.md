@@ -864,6 +864,17 @@ end
 #### `::let!`
 Specs inheriting from `Shaf::Spec::Base` (E.g. Serializer, Integration and System specs) adds a `::let!` method similar to rspec.
 
+#### Running specs
+Specs are executed with `shaf test`, which will run all specs. It's also possible to give one more filter arguments to this command. A filter is made up of a pattern and a `:` separated list of line numbers. This is easier explained with some examples:
+```ruby
+shaf test                                               # Run all specs
+shaf test user_serializer_spec.rb                       # Run all specs in user_serializer_spec.rb
+shaf test user_serializer_spec.rb:15                    # Run a single spec that covers line 15 in user_serializer_spec.rb
+shaf test user_serializer_spec.rb:15:35                 # Run two specs that covers line 15 resp 35 in user_serializer_spec.rb
+shaf test user                                          # Run all specs in all files matching `/user/`
+shaf test user_serializer_spec.rb:15 users_controller   # Run spec on line 15 in user_serializer_spec.rb and all specs in files matching `/users_controller/`
+```
+
 ## API Documentation
 Since API clients should basically only have to care about the payloads that are returned from the API, it makes sense to keep the API documentation in the serializer files. Each `attribute`, `link`, `curie` and `embed` should be preceeded with code comments that documents how client should interpret/use it. The comments should be in markdown format. This makes it possible to generate API documentation with `rake doc:generate`. This documentation can then be retrieved from a running server at `/doc/RESOURCE_NAME`, where `RESOURCE_NAME` is the name of the resource to fetch doc for, e.g `curl localhost:3000/doc/post`.
 
@@ -882,7 +893,7 @@ Check out [ShafClient](https://github.com/sammyhenningsson/shaf_client) which is
 To make it easy to explore the API in a brower, Shaf includes a some very basic html views. They are only meant to be a quick and easy way to view the api and to add/edit resources that does not require authentication. They are really ugly and you should not look at them if you are a frontend developer ;) (PRs are welcome!).
 
 ## Customizations
-Currently Shaf only support four commands (`new`, `server`, `console`, `generate` and `upgrade`). Luckily it's possible to extend Shaf with custom commands and generators. Whenever the `shaf` command is executed the file `config/customize.rb` is loaded and checked for additional commands. To add a custom command, create a class that inherits from `Shaf::Command::Base`. Either put it directly in `config/customize.rb` or put it in a separate file and require that file inside `config/customize.rb`. Your customized class must call the inherited class method `identifier` with a `String`/`Symbol`/`Regexp` (or an array of `String`/`Symbol`/`Regexp` values) that _identifies_ the command. The identifier is used to match arguments passed to `shaf`. The command/generator must respond to `call` without any arguments. The arguments after the identifer will be availble from the instance method `args`. Writing a couple of simple commands that echos back the arguments would be written as:
+Currently Shaf support the following commands (`new`, `server`, `test`, `console`, `generate`, `upgrade` and `version`). It's also possible to extend Shaf with custom commands and generators. Whenever the `shaf` command is executed the file `config/customize.rb` is loaded and checked for additional commands. To add a custom command, create a class that inherits from `Shaf::Command::Base`. Either put it directly in `config/customize.rb` or put it in a separate file and require that file inside `config/customize.rb`. Your customized class must call the inherited class method `identifier` with a `String`/`Symbol`/`Regexp` (or an array of `String`/`Symbol`/`Regexp` values) that _identifies_ the command. The identifier is used to match arguments passed to `shaf`. The command/generator must respond to `call` without any arguments. The arguments after the identifer will be availble from the instance method `args`. Writing a couple of simple commands that echos back the arguments would be written as:
 ```sh
 class EchoCommand < Shaf::Command::Base
   identifier :echo
