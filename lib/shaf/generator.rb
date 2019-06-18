@@ -10,6 +10,7 @@ end
 
 require 'shaf/generator/base'
 require 'shaf/generator/controller'
+require 'shaf/generator/forms'
 require 'shaf/generator/migration'
 require 'shaf/generator/model'
 require 'shaf/generator/policy'

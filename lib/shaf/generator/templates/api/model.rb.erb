@@ -1,21 +1,4 @@
 class <%= class_name %> < Sequel::Model
-  extend Shaf::Formable
 
-<% if form_fields.any? %>
-  form do
-    <%= form_fields.join("\n    ") %>
-
-    create do
-      title 'Create <%= class_name %>'
-      name  'create-<%= model_name %>'
-    end
-
-    edit do
-      instance_accessor
-      title 'Update <%= class_name %>'
-      name  'update-<%= model_name %>'
-    end
-  end
-<% end %>
 end
 

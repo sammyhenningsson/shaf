@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require 'fileutils'
 require 'erb'
 require 'shaf/generator/helper'
@@ -31,13 +33,13 @@ module Shaf
       def call; end
 
       def template_dir
-        File.expand_path('../templates', __FILE__)
+        File.expand_path('templates', __dir__)
       end
 
       def read_template(file, directory = nil)
         directory ||= template_dir
         filename = File.join(directory, file)
-        filename << ".erb" unless filename.end_with?(".erb")
+        filename << '.erb' unless filename.end_with?('.erb')
         File.read(filename)
       end
 
@@ -46,8 +48,8 @@ module Shaf
         locals[:changes] ||= []
         b = Helper.new(locals).binding
 
-        return ERB.new(str, 0, '%-<>').result(b) if RUBY_VERSION < "2.6.0"
-        ERB.new(str,trim_mode: '-<>').result(b)
+        return ERB.new(str, 0, '%-<>').result(b) if RUBY_VERSION < '2.6.0'
+        ERB.new(str, trim_mode: '-<>').result(b)
       rescue SystemCallError => e
         puts "Failed to render template #{template}: #{e.message}"
         raise

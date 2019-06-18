@@ -41,10 +41,15 @@ module Shaf
 
       def parse_options!
         parser = OptionParser.new
-        self.class.options(parser, @options)
+        common_options(parser, options)
+        self.class.options(parser, options)
         parser.parse!(args)
       rescue OptionParser::InvalidOption => e
         raise ArgumentError, e.message
+      end
+
+      def common_options(parser, _options)
+        parser.on('--trace', 'Show backtrace on command failure')
       end
     end
   end

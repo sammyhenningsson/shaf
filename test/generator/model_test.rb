@@ -40,47 +40,12 @@ module Shaf
           assert_includes output.keys, "api/policies/blog_policy.rb"
         end
 
-        it "extends Formable" do
-          assert_match %r(^\s*extend Shaf::Formable$), output["api/models/blog.rb"]
+        it "generates a forms" do
+          assert_includes output.keys, "api/forms/blog_forms.rb"
         end
 
         it "inherits Sequel::Model" do
           assert_match %r(class Blog < Sequel::Model), output["api/models/blog.rb"]
-        end
-      end
-
-      describe "model with properties" do
-        let(:generator) do
-          Factory.create(*%w(model blog user_id:integer message:string:Inlägg))
-        end
-
-        it "declares a form" do
-          assert_match %r(^\s*form do$), output["api/models/blog.rb"]
-        end
-
-        it "adds form fields" do
-          assert_match(
-            %r(^\s*field :user_id, type: "integer"$),
-            output["api/models/blog.rb"],
-            "Model file does not include: 'field :user_id, type \"integer\"'\n"
-          )
-          assert_match(
-            %r(^\s*field :message, type: "string", label: "Inlägg"$),
-            output["api/models/blog.rb"],
-            "Model file does not include: 'field :message, type \"string\", label: \"Inlägg\"'\n"
-          )
-        end
-
-        it "sets title and name for create form" do
-          assert_match %r(^\s*create do$), output["api/models/blog.rb"]
-          assert_match %r(^\s*title 'Create Blog'$), output["api/models/blog.rb"]
-          assert_match %r(^\s*name  'create-blog'$), output["api/models/blog.rb"]
-        end
-
-        it "sets title and name for edit form" do
-          assert_match %r(^\s*edit do$), output["api/models/blog.rb"]
-          assert_match %r(^\s*title 'Update Blog'$), output["api/models/blog.rb"]
-          assert_match %r(^\s*name  'update-blog'$), output["api/models/blog.rb"]
         end
       end
     end

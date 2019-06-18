@@ -1,0 +1,19 @@
+class <%= class_name %>
+  extend Shaf::Formable
+
+  forms_for(<%= model_class_name %>) do
+    <%= fields.join("\n    ") %>
+
+    create do
+      title 'Create <%= model_class_name %>'
+      name  'create-<%= model_name %>'
+    end
+
+    edit do
+      instance_accessor
+      title 'Update <%= model_class_name %>'
+      name  'update-<%= model_name %>'
+    end
+  end
+end
+

@@ -9,21 +9,22 @@ module Shaf
         create_model
         create_migration
         create_serializer
+        create_forms
       end
 
       def model_name
-        n = args.first || ""
+        n = args.first || ''
         return n unless n.empty?
         raise Command::ArgumentError,
-          "Please provide a model name when using the model generator!"
+          'Please provide a model name when using the model generator!'
       end
 
       def model_class_name
-        Utils::model_name(model_name)
+        Utils.model_name(model_name)
       end
 
       def table_name
-        Utils::pluralize model_name
+        Utils.pluralize model_name
       end
 
       def template
@@ -39,30 +40,9 @@ module Shaf
         write_output(target, content)
       end
 
-      def form_fields
-        args[1..-1].map do |f|
-          (name, type, label) = f.split(':')
-          label_str = label ? %(, label: "#{label}") : ''
-          format 'field :%s, type: "%s"%s' % [name, rewrite(type), label_str]
-        end
-      end
-
-      def rewrite(type)
-        case type
-        when /foreign_key/
-          'integer'
-        when NilClass
-          'string'
-        else
-          type
-        end
-      end
-
       def opts
         {
-          model_name: model_name,
           class_name: model_class_name,
-          form_fields: form_fields
         }
       end
 
@@ -75,6 +55,11 @@ module Shaf
         serializer_args = %W(serializer #{model_name})
         serializer_args += args[1..-1].map { |arg| arg.split(':').first }
         Generator::Factory.create(*serializer_args, **options).call
+      end
+
+      def create_forms
+        form_args = %W(forms #{model_name}) + args[1..-1]
+        Generator::Factory.create(*form_args, **options).call
       end
     end
   end
