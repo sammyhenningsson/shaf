@@ -108,11 +108,12 @@ Added:      db/migrations/20180224225335_create_posts_table.rb
 Added:      api/serializers/post_serializer.rb
 Added:      spec/serializers/post_serializer_spec.rb
 Added:      api/policies/post_policy.rb
+Added:      api/forms/post_forms.rb
 Added:      api/controllers/posts_controller.rb
 Added:      spec/integration/posts_controller_spec.rb
 Modified:   api/serializers/root_serializer.rb
 ```
-As shown in the output, that command created, a model, a controller, a serializer and a policy. It also generated a DB migration file, some specs and a link to the new `post` collection was added the root resource. So let's check this out by migrating the DB and restarting the server. Close any running instance with `Ctrl + C` and then:
+As shown in the output, that command created, a model, a controller, a serializer and a policy. It also generated a DB migration file, some forms, some specs and a link to the new `post` collection was added the root resource. So let's check this out by migrating the DB and restarting the server. Close any running instance with `Ctrl + C` and then:
 ```sh
 rake db:migrate
 shaf server
@@ -203,7 +204,7 @@ curl -H "Content-Type: application/json" \
      -d '{"title": "hello", "message": "lorem ipsum"}' \
      localhost:3000/posts | jq
 ```
-The response shows us the new resource:
+The response shows us the new resource, with the attributes that we set as well as links for updating and deleting it.
 ```sh
 {
   "title": "hello",
@@ -290,8 +291,8 @@ shaf generate scaffold post title:string message:string
 rake db:migrate
 ```
 
-## Upgrading a project created with shaf version < 1.0.0
-Shaf version 1.0.0 introduced a few changes that are not backward compatible with previous versions. This means that if you created your Shaf project with an older version of this gem and then upgrade this gem to v1.0.0, your project will not function. To remedy this you will need to execute (from inside your project directory):
+## Upgrading a project created with shaf version < 1.1.0
+The latest version of Shaf introduced a few changes that are not backward compatible with previous versions. This means that if you created your Shaf project with an older version of this gem and then upgrade this gem to the latest version, your project will not function. To remedy this you will need to execute (from inside your project directory):
 ```sh
 cd /path/to/my_project
 shaf upgrade
