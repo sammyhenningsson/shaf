@@ -2,47 +2,46 @@ require 'shaf/formable/builder'
 
 module Shaf
   module Formable
-    # Deprecated legacy way of specifying forms inside models
-    def form(&block)
-      builder = Formable::Builder.new(&block)
-      builder.forms.each do |f|
-        next unless f.action
-        getter = "#{f.action}_form"
+    def self.add_class_reader(clazz, name, form)
+      clazz.define_singleton_method(name) { form }
+    end
 
-        define_singleton_method(getter) { f }
-        next unless instance_accessor = builder.instance_accessor_for(f)
-
-        define_method(getter) do
-          f.dup.tap do |fm|
-            fm.resource = self
-            fm.fill! if instance_accessor.prefill?
-          end
+    def self.add_instance_reader(clazz, name, form, prefill)
+      # :send is needed as long as ruby 2.4 is support
+      # Change to clazz.define_method(...) when ruby 2.4 support is dropped
+      clazz.send(:define_method, name) do
+        form.tap do |f|
+          f.resource = self
+          f.fill! if prefill
         end
       end
     end
 
+    # Deprecated legacy way of specifying forms inside models
+    def form(&block)
+      forms_for(self, &block)
+      return unless defined? $logger
+
+      $logger.info <<~MSG
+
+
+        DEPRECATED method ::form in #{self}
+        Declare forms in a separate class extending Shaf::Formable with the class method forms_for!
+      MSG
+    end
+
     # New way of writing forms in a separate class/file
-    def forms_for(model_class, &block)
+    def forms_for(clazz, &block)
       builder = Formable::Builder.new(&block)
-      builder.forms.each do |f|
-        next unless f.action
-        getter = "#{f.action}_form"
+      builder.forms.each do |form|
+        next unless form.action
+        method_name = "#{form.action}_form"
 
-        model_class.define_singleton_method(getter) { f }
-        next unless instance_accessor = builder.instance_accessor_for(f)
+        Formable.add_class_reader(clazz, method_name, form.dup)
 
-        b = proc do
-          f.dup.tap do |fm|
-            fm.resource = self
-            fm.fill! if instance_accessor.prefill?
-          end
-        end
-
-        if RUBY_VERSION < '2.5.0'
-          # :send is needed as long as ruby 2.4 is support
-          model_class.send(:define_method, getter, &b)
-        else
-          model_class.define_method(getter, &b)
+        if instance_accessor = builder.instance_accessor_for(form)
+          prefill_form = instance_accessor.prefill?
+          Formable.add_instance_reader(clazz, method_name, form.dup, prefill_form)
         end
       end
     end
