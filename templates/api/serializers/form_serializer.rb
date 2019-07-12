@@ -25,7 +25,7 @@ class FormSerializer < BaseSerializer
 
   post_serialize do |hash|
     fields = resource&.fields
-    break if fields.nil? || fields.empty?
+    next if fields.nil? || fields.empty?
     hash[:fields] = fields.map do |field|
       {
         name: field.name,
