@@ -162,21 +162,21 @@ module Shaf
       end
 
       def example(method, uri)
-        method_args = ""
+        curl_args = +'-H "Authorization: abcdef \\"'
         case method
         when "POST"
-          method_args = "\n#      -d@payload \\"
+          curl_args << "\n#      -d@payload \\"
         when "PUT"
-          method_args = "\n#      -X PUT -d@payload \\"
+          curl_args << "\n#      -X PUT -d@payload \\"
         when "DELETE"
-          method_args = "\n#      -X DELETE \\"
+          curl_args << "\n#      -X DELETE \\"
         end
 
         <<~EOS.chomp
           # Example:
           # ```
           # curl -H "Accept: application/hal+json" \\
-          #      -H "Authorization: abcdef" \\#{method_args}
+          #      #{curl_args}
           #      #{uri}
           #```
         EOS
