@@ -6,6 +6,7 @@ require 'open3'
 require 'fileutils'
 require 'tempfile'
 require 'yaml'
+require 'shaf/utils'
 
 module Shaf
   module Upgrade
@@ -19,7 +20,7 @@ module Shaf
       class MissingFileError < UpgradeError; end
       class BadChecksumError < UpgradeError; end
 
-      UPGRADE_FILES_PATH = File.join(Utils.gem_root, 'upgrades').freeze
+      UPGRADE_FILES_PATH = File.join(Shaf::Utils.gem_root, 'upgrades').freeze
       MANIFEST_FILENAME = 'manifest'.freeze
 
       attr_reader :version
@@ -70,6 +71,10 @@ module Shaf
         self
       end
 
+      def dump
+        raise NotImplementedError
+      end
+
       def <=>(other)
         version = other.is_a?(String) ? other : other.version
         @version <=> version
@@ -118,18 +123,20 @@ module Shaf
         )
       end
 
+      # FIXME move to manifest
       def validate
         raise ManifestNotFoundError unless @manifest
         raise VersionConflictError unless @version == @manifest.target_version
 
         from_file = @files.keys.to_set
 
-        manifest_patches = @manifest.files[:patch].keys.to_set
+        manifest_patches = @manifest.patches.keys.to_set
         raise MissingFileError if from_file < manifest_patches
 
-        to_add = @manifest.files[:add].keys.to_set
+        to_add = @manifest.additions.keys.to_set
         raise MissingFileError if from_file < to_add
 
+        # FIXME: validate more file types
         @files.each do |md5, content|
           raise BadChecksumError unless Digest::MD5.hexdigest(content) == md5
         end

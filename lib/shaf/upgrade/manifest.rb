@@ -3,7 +3,7 @@ require 'yaml'
 module Shaf
   module Upgrade
     class Manifest
-      attr_reader :target_version, :files
+      attr_reader :target_version
 
       def initialize(**params)
         @target_version = params[:target_version]
