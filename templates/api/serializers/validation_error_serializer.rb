@@ -1,5 +1,6 @@
 class ValidationErrorSerializer < BaseSerializer
   model Shaf::Errors::ValidationError
+  profile Shaf::Settings.error_profile_name
 
   attribute :title
   attribute :code

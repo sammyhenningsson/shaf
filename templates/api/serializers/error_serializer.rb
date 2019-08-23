@@ -2,6 +2,7 @@ require 'serializers/base_serializer'
 
 class ErrorSerializer < BaseSerializer
   model Shaf::Errors::ServerError
+  profile Shaf::Settings.error_profile_name
 
   attribute :title
   attribute :code

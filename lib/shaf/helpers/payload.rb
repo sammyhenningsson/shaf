@@ -96,6 +96,7 @@ module Shaf
       preferred_response = preferred_response_type(resource)
       http_cache = kwargs.delete(:http_cache) { Settings.http_cache }
 
+      serializer ||= HALPresenter.lookup_presenter(resource)
       serialized = serialize(resource, serializer, collection, **kwargs)
       add_cache_headers(serialized) if http_cache
 
@@ -104,12 +105,11 @@ module Shaf
       if preferred_response == mime_type(:html)
         respond_with_html(resource, serialized)
       else
-        respond_with_hal(resource, serialized)
+        respond_with_hal(resource, serialized, serializer)
       end
     end
 
     def serialize(resource, serializer, collection, **options)
-      serializer ||= HALPresenter
       if collection
         serializer.to_collection(resource, current_user: current_user, **options)
       else
@@ -117,9 +117,9 @@ module Shaf
       end
     end
 
-    def respond_with_hal(resource, serialized)
+    def respond_with_hal(resource, serialized, serializer)
       log.debug "Response payload (#{resource.class}): #{serialized}"
-      content_type :hal, content_type_params(resource)
+      content_type :hal, content_type_params(serializer)
       body serialized
     end
 
@@ -141,18 +141,10 @@ module Shaf
       etag sha1, :weak # Weak or Strong??
     end
 
-    def content_type_params(resource)
+    def content_type_params(serializer)
       return {profile: profile} if profile
 
-      name =
-        case resource
-        when Formable::Form
-          Shaf::Settings.form_profile_name
-        when Errors::ServerError
-          Shaf::Settings.error_profile_name
-        end
-
-      {profile: name}.compact
+      {profile: serializer.semantic_profile}.compact
     end
   end
 end

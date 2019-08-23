@@ -2,8 +2,8 @@ require 'serializers/base_serializer'
 require 'shaf/formable'
 
 class FormSerializer < BaseSerializer
-
   model Shaf::Formable::Form
+  profile Shaf::Settings.form_profile_name
 
   attribute :method do
     (options[:method] || resource&.method || 'POST').to_s.upcase
