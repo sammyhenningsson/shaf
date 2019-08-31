@@ -47,8 +47,10 @@ module Shaf
       raise raise_unsupported_media_type_error(request) unless suported_media_type?
 
       JSON.parse(input, symbolize_names: true)
-    rescue StandardError
-      raise Errors::BadRequestError.new
+    rescue Errors::UnsupportedMediaTypeError
+      raise
+    rescue StandardError => e
+      raise Errors::BadRequestError, "Failed to parse input payload: #{e.message}"
     end
 
     def suported_media_type?
