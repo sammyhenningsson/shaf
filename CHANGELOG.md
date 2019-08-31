@@ -1,3 +1,15 @@
+## 1.1.0
+ * Min required ruby version 2.5
+ * Get media type profile from serializer
+ * Moved forms instead separate class
+ * Add a command to run specs
+ * Specify override values when filling in form in specs
+## 1.0.4
+ * Catch Sequel validation errors
+## 1.0.3
+ * Fix bad form type for foreign keys
+ * Fix incorrect Cache-Control Header
+ * Add Sequel validation helpers
 ## 1.0.0
  * Min required ruby version 2.4
  * Continue upgrading when patch is rejected
