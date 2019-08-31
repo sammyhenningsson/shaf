@@ -20,7 +20,7 @@ Gem::Specification.new do |gem|
   gem.files         = Dir['lib/**/*rb'] + Dir['templates/**/*'] + Dir['upgrades/*.tar.gz']
   gem.require_paths = ['lib']
 
-  gem.required_ruby_version = '>= 2.4'
+  gem.required_ruby_version = '>= 2.5'
   gem.add_development_dependency 'minitest', '~> 5', '>= 5.10'
   gem.add_development_dependency 'rack-test', '~> 1.0'
   gem.add_development_dependency 'rake', '~> 12.0'

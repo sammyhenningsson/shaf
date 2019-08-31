@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 
 require 'yaml'
+require 'shaf/utils'
 
 module Shaf
   class Settings
@@ -26,12 +27,8 @@ module Shaf
         return {} unless File.exist? file
 
         yaml = File.read(file)
-        if RUBY_VERSION < '2.5.0'
-          YAML.safe_load(yaml, [], [], true).each_with_object({}) do |(k, v), hash|
-            hash[k.to_sym] = v
-          end
-        elsif RUBY_VERSION < '2.6.0'
-          YAML.safe_load(yaml, [], [], true).transform_keys(&:to_sym)
+        if RUBY_VERSION < '2.6.0'
+          Utils.deep_symbolize_keys(YAML.safe_load(yaml, [], [], true))
         else
           YAML.safe_load(yaml, aliases: true, symbolize_names: true)
         end

@@ -186,7 +186,8 @@ module Shaf
         puts '' unless @manifest.regexps.empty?
         files_in(dir).all? do |file|
           @manifest.regexps_for(file).all? do |name|
-            params = symbolize_keys(YAML.safe_load(@files[name]))
+            params = YAML.safe_load(@files[name])
+            params.transform_keys!(&:to_sym)
             apply_substitute(file, params)
           end
         end
@@ -206,11 +207,6 @@ module Shaf
         end
 
         FileUtils.mv(tmp.path, file)
-      end
-
-      # Refactor this when support for ruby 2.4 is dropped
-      def symbolize_keys(hash)
-        hash.each_with_object({}) { |(k, v), h| h[k.to_sym] = v }
       end
     end
   end

@@ -7,9 +7,7 @@ module Shaf
     end
 
     def self.add_instance_reader(clazz, name, form, prefill)
-      # :send is needed as long as ruby 2.4 is support
-      # Change to clazz.define_method(...) when ruby 2.4 support is dropped
-      clazz.send(:define_method, name) do
+      clazz.define_method(name) do
         form.tap do |f|
           f.resource = self
           f.fill! if prefill

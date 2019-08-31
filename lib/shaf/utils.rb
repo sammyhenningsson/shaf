@@ -47,6 +47,19 @@ module Shaf
           key.prepend('HTTP_') unless key.start_with? 'HTTP_'
         end
       end
+
+      def deep_symbolize_keys(value)
+        case value
+        when Hash
+          value.each_with_object({}) do |(k, v), h|
+            h[k.to_sym] = deep_symbolize_keys(v)
+          end
+        when Array
+          value.map { |v| deep_symbolize_keys(v) }
+        else
+          value
+        end
+      end
     end
 
     def_delegators Utils, :pluralize, :singularize, :symbolize, :symbol_string, :gem_root, :rackify_header
