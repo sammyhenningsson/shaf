@@ -64,8 +64,12 @@ module Shaf
             if block_given?
               yield [std_out, std_err].map { |s| s.read.chomp }
             elsif ENV['VERBOSE'].to_i == 1
+              unless exit_status.success?
+                out = std_out.read.chomp
+                STDERR.puts "\nOutput: #{out}\n" unless out.empty?
+              end
               err = std_err.read.chomp
-              STDERR.puts "\n#{err}" unless err.empty?
+              STDERR.puts "\nErr: #{err}" unless err.empty?
             end
             exit_status.success?
           end
