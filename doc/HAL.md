@@ -1,5 +1,7 @@
 ## HAL
-The [HAL](http://stateless.co/hal_specification.html) mediatype is very simple and looks like your ordinary JSON objects, except for two reserved keys `_links` and `_embedded`. `_links` displays links to related resources and possible actions that may be taken. `_embedded` contains nested resources. A HAL payload may contain a special link with rel _curies_, which is similar to namespaces in XML. Shaf uses a curie called _doc_ and makes it possible to fetch documentation for any link or embedded resources with a rel begining with `doc:`. The href for curies are always templated, meaning that a part of the href (in our case `{rel}`) must be replaced with a value. Here is the empty collection response from the [Getting started](README.md#getting-started) intro   
+The [HAL](http://stateless.co/hal_specification.html) mediatype is very simple and looks like your ordinary JSON objects, except for two reserved keys `_links` and `_embedded`.  
+`_links` displays links to related resources and possible actions that may be taken.  
+`_embedded` contains nested resources. A HAL payload may contain a special link with rel _curies_, which is similar to namespaces in XML. Shaf uses a curie called _doc_ and makes it possible to fetch documentation for any link or embedded resources with a rel begining with `doc:`. The href for curies are always templated, meaning that a part of the href (in our case `{rel}`) must be replaced with a value. Here is the empty collection response from the [Getting started](README.md#getting-started) intro   
 ```sh
 {
   "_links": {

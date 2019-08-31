@@ -308,7 +308,6 @@ rake db:migrate
 ## [ShafClient](doc/SHAF_CLIENT.md)
 ## [Frontend](doc/FRONTEND.md)
 ## [Customizations](doc/CUSTOMIZATIONS.md)
-## [Testing](doc/TESTING.md)
 
 
 ## Contributing
