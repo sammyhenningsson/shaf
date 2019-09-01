@@ -24,5 +24,5 @@ class PostPolicy < BasePolicy
   end
 end
 ```
-Then the controller can call `authorize! :write` in the actions for editing/deleting and fetching of edit-form. If the block returns true nothing happens. If the block returns false, then the server will respond with "403 Forbidden".
+Now the controller can call `authorize! :write, post` in the actions for editing/deleting and fetching of edit-form. This means we have a single method (`write?`) that controls both that we don't give out links to something a client cannot use as well as assuring that the corresponding controller actions are authorized correctly.
 

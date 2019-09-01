@@ -17,16 +17,16 @@ end
 ```
 This adds four helpers for the conventional four CRUD actions. Each one has a __uri_ and a __path_ version. The `PostsController` above would create these methods:
 
-| Method                                  | Returned string with no query_params (id may vary) | 
-| --------------------------------------- | -------------------------------------------------- |
-| `posts_uri(**query_params)`             | http://localhost/posts                             |
-| `post_uri(post, **query_params)`        | http://localhost/posts/5                           |
-| `new_post_uri(**query_params)`          | http://localhost/post/form                        |
-| `edit_post_uri(post, **query_params)`   | http://localhost/posts/5/edit                      |
-| `posts_path(**query_params)`            | /posts                                             |
-| `post_path(post, **query_params)`       | /posts/5                                           |
-| `new_post_path(**query_params)`         | /post/form                                        |
-| `edit_post_path(post, **query_params)`  | /posts/5/edit                                      |
+| Method                                  | Example of returned strings (no query_params given) | 
+| --------------------------------------- | --------------------------------------------------- |
+| `posts_uri(**query_params)`             | http://localhost/posts                          |
+| `post_uri(post, **query_params)`        | http://localhost/posts/5                        |
+| `new_post_uri(**query_params)`          | http://localhost/post/form                      |
+| `edit_post_uri(post, **query_params)`   | http://localhost/posts/5/ed                     |
+| `posts_path(**query_params)`            | /posts                                          |
+| `post_path(post, **query_params)`       | /posts/5                                        |
+| `new_post_path(**query_params)`         | /post/form                                      |
+| `edit_post_path(post, **query_params)`  | /posts/5/edit                                   |
 
 Methods taking an argument (e.g. `post_uri` and `edit_post_uri`) may be called with an object responding to `:id` or else `:to_s` will be called on it. E.g `post_uri(Post[27])` or `post_uri(27)`.  
 The optional `query_params` takes any given keyword arguments and appends a query string with them.  
@@ -158,7 +158,7 @@ class PostsController < BaseController
   end
 end
 ```
-After a policy class has been registered with `::authorize_with` then a call to `#authorize!` will create an instance of the policy with `current_user` and `resource` as arguments. Thus in the controller above, when a `GET` request is made to `post_uri` a policy instance will be created with `PostPolicy.new(current_user, nil)`. The `PUT` action will create the instance `PostPolicy.new(current_user, post)`. Then the arguments first argument sent to `#authorize!` will be sent (with an appended question mark unless already present) to the policy instance together with an optional argument. Like `policy.public_send(:show?)` resp. `policy.public_send(:edit?, post)`. So it's important to think about which policy rules should apply to a specific resource or should be a general rule (e.g. viewing a collection) where a specific resource is not present. 
+After a policy class has been registered with `::authorize_with` then a call to `#authorize!` will create an instance of the policy with `current_user` and `resource` as arguments. Thus in the controller above, when a `GET` request is made to `post_uri` a policy instance will be created with `PostPolicy.new(current_user, nil)`. The `PUT` action will create the instance `PostPolicy.new(current_user, post)`. Then the arguments first argument sent to `#authorize!` will be sent (with an appended question mark unless already present) to the policy instance together with an optional argument. Like `policy.show?` resp. `policy.edit?`. So it's important to think about which policy rules should apply to a specific resource or should be a general rule (e.g. viewing a collection) where a specific resource is not present. 
 Note: that the Policy instance methods must end with a question mark '?' while the symbol given to `authorize!` may or may not end with a question mark.  
 
 #### Rendering responses

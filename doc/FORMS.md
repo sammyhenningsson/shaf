@@ -1,5 +1,5 @@
 ## Forms
-Shaf uses forms for creating and editing resources. Forms makes it easy to evolve your API, by letting clients know how to create/edit resources. It also allows for clients to validate forms before submitting them as well as long HTTP caching (since they normally wont change very often).
+Shaf uses forms for creating and editing resources. Forms makes it easy to evolve your API, by letting clients know how to create/edit resources. It also allows for clients to validate forms before submitting them and they are well suited for HTTP caching (since they normally wont change very often, cached entries will be fresh for a long time).
 
 Forms are created by extending `Shaf::Formable`. The Formable module adds the class method `forms_for` which builds form clases. These form instances can then be accessed from the class passed as argument to `::forms_for`. By default, shaf generates two forms per resource, one for creating new resources and one for editing existing resources. However, as many as needed can easily be added.  
 As an example, the following class will add the standard create and update forms to the `User`class. The create form will have fields `foo` and `bar` The edit form will have fields `foo` and `baz`.
@@ -31,7 +31,9 @@ end
 This will create two instances of `Shaf::Formable::Form` which will be accessible from the `User` class, e.g `User.create_form` resp. `User.edit_form`. Forms with `instance_accessor` will also be retrievable from instances, e.g. `User[5].edit_form`.
 By default, forms retreived from instances will be prefilled with values from the instance (to change this, pass `prefill: false` to `instance_accessor`).  
 Fields are filled with values retreived by calling an instance method of the same name as the field name. If the name of the form field does not match the corresponding instance method on the model, then pass the name of the model instance method that should be called to the `accessor_name` keyword argument when declaring the field. In the example above, the edit form will have the `:foo` field prefilled with a value like `User[5].foo` and the `:baz` field will be prefilled with the return value of `User[5].instance_method_returning_baz`.  
-When serialized these forms contain an array of _fields_ that specifies all attributes that are accepted for create/update. Each field has a `name` property that MUST be used as key when constructing a payload to be submitted. Each field also has a type which declares the kind of value that are accepted (currently only string and integer are supported).
+
+#### Interacting with forms
+When serialized these forms contain an array of _fields_ that specifies all attributes accepted for create/update. Each field has a `name` property that must be used as key when constructing a payload to be submitted. Each field also has a type which declares the kind of value that are accepted (currently only string and integer are supported).
 Optionally each field may specify the following keyword_arguments:
  - `title` - Meant to be displayed in a UI
  - `value` - An initial value. Normally set on an instance (e.g. `some_form[:field_with_value].value = "some_value"`)
@@ -40,7 +42,7 @@ Optionally each field may specify the following keyword_arguments:
 
 See [the shaf-form media type profile](https://gist.github.com/sammyhenningsson/39c8aafeaf60192b082762cbf3e08d57) for more info.
 
-Clients submitting the form  MUST sent it to the url in _href_ with the HTTP method specified in _method_ with the Content-Type header set to the value of _type_. Here's the create form from the [Getting started](/README.md#getting-started) section.
+Clients submitting the form must send it to the url in `href` with the HTTP method specified in `method` with the Content-Type header set to the value of `type`. Here's the create form from the [Getting started](/README.md#getting-started) section.
 ```sh
     "create-form": {
       "method": "POST",
