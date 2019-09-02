@@ -63,13 +63,11 @@ module Shaf
             exit_status = wait_thr.value # Process::Status object returned.
             if block_given?
               yield [std_out, std_err].map { |s| s.read.chomp }
-            elsif ENV['VERBOSE'].to_i == 1
-              unless exit_status.success?
-                out = std_out.read.chomp
-                STDERR.puts "\nOutput: #{out}\n" unless out.empty?
+            elsif !exit_status.success? && ENV['VERBOSE'].to_i == 1
+              [[std_out, "Output"], [std_err, "Error"]].each do |fd, prefix|
+                output = fd.read.chomp
+                STDERR.puts "\n#{prefix}: #{output}\n" unless output.empty?
               end
-              err = std_err.read.chomp
-              STDERR.puts "\nErr: #{err}" unless err.empty?
             end
             exit_status.success?
           end

@@ -159,39 +159,37 @@ module Shaf
       end
     end
 
-    it "seed the db" do
+    it 'seed the db' do
       Dir.chdir(project_path) do
-        assert Test.system("bundle exec shaf generate scaffold user name:string")
-        # Currenly the model generator creates a borken serializer, due to undefined uri helpers.
-        # (Unless the corresponding controller and uri_helpers have been defined).
-        # Change scaffold to model, when that has been fixed!!
-        # assert system("shaf generate model user name:string", out: File::NULL)
+        assert Test.system('shaf generate scaffold user name:string')
 
-        Dir.mkdir "db/seeds"
-        File.open("db/seeds.rb", "w") do |f|
+        Dir.mkdir 'db/seeds'
+        File.open('db/seeds.rb', 'w') do |f|
           f.puts <<~RUBY
-            User.create(name: "user1")
+            User.create(name: 'one')
           RUBY
         end
 
         File.open("db/seeds/users.rb", "w") do |f|
           f.puts <<~RUBY
-            User.create(name: "user2")
+            User.create(name: 'two')
           RUBY
         end
 
-        File.open("db/seeds/more_users.rb", "w") do |f|
+        File.open('db/seeds/more_users.rb', 'w') do |f|
           f.puts <<~RUBY
-            User.create(name: "user3")
+            User.create(name: 'three')
           RUBY
         end
 
-        assert Test.system("bundle exec rake db:migrate")
-        assert Test.system("bundle exec rake db:seed")
+        assert Test.system('bundle exec rake db:migrate')
+        assert Test.system('bundle exec rake db:seed')
 
-        exit_status = Test.system("bundle exec shaf console", stdin: "User.count") do |out, err|
+        exit_status = Test.system('bundle exec shaf console', stdin: 'User.count') do |out, err|
+          assert_empty String(err)
+          assert_match %r{User\.count}, out
           output_rows = out.split("\n").map(&:strip)
-          i = output_rows.find_index "User.count"
+          i = output_rows.find_index 'User.count'
           user_count = output_rows[i + 1].to_i
           assert_equal 3, user_count
         end

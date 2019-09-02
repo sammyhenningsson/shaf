@@ -1,7 +1,7 @@
-require 'rubygems'
-require 'bundler'
-Bundler.setup(:default, :development)
-$:.unshift __dir__
+# frozen_string_literal: true
+
+$LOAD_PATH.unshift __dir__ unless $LOAD_PATH.include? __dir__
+
 require 'shaf/rake'
 require 'shaf/settings'
 

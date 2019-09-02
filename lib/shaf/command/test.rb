@@ -1,7 +1,4 @@
-require 'rubygems'
-require 'bundler'
 require 'set'
-Bundler.require :development, :test
 require 'shaf/command/test/filter'
 require 'shaf/command/test/runner'
 require 'shaf/command/test/runnable_method'

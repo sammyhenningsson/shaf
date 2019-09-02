@@ -95,7 +95,7 @@ module Shaf
 
     def bootstrap(env: 'development')
       in_project_root do
-        ENV['RACK_ENV'] ||= env
+        ENV['RACK_ENV'] = env
         require 'config/bootstrap'
         yield if block_given?
       end

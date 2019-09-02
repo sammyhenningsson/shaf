@@ -1,3 +1,5 @@
+require 'rack/test'
+
 module Shaf
   module Spec
     module HttpUtils
