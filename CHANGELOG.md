@@ -1,3 +1,5 @@
+## 1.1.1
+ * Fix problems with loadpath when not using bundle exec
 ## 1.1.0
  * Min required ruby version 2.5
  * Get media type profile from serializer
