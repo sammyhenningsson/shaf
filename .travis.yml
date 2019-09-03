@@ -4,3 +4,5 @@ env:
 rvm:
  - 2.5.3
  - 2.6
+before_install:
+  - gem install bundler

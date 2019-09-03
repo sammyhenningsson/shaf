@@ -32,9 +32,9 @@ module Shaf
 
   describe "Upgrading an old project" do
     let(:tmp_dir) { Dir.mktmpdir }
-    let(:project_path) { File.join(tmp_dir, 'old_project') }
+    let(:project_path) { File.join(tmp_dir, '0.4.0_project') }
     let(:project_tar) do
-      File.expand_path('../../data/0.3.1_project.tar.gz', __FILE__)
+      File.expand_path('../../data/0.4.0_project.tar.gz', __FILE__)
     end
 
     before do
@@ -46,11 +46,11 @@ module Shaf
       FileUtils.remove_dir(tmp_dir)
     end
 
-    it 'upgrades a 0.3.1 project to latest version' do
+    it 'upgrades a 0.4.0 project to latest version' do
       Dir.chdir(project_path) do
         Test.system("bundle exec shaf version") do |out, _|
           assert_match(/Installed Shaf version: #{VERSION}/, out)
-          assert_match(/Project .* created with Shaf version: 0.3.1/, out)
+          assert_match(/Project .* created with Shaf version: 0.4.0/, out)
         end
 
         Test.system("bundle exec shaf upgrade")
