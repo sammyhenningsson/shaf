@@ -28,7 +28,9 @@ module Shaf
       port ||= get_server_port
       pid = nil
       Dir.chdir(project_path) do
-        pid = Test.spawn("bundle exec shaf server -p #{port}", out: File::NULL, err: [:child, :out])
+        redirects = {out: File::NULL}
+        redirects[:err] = [:child, :out] unless ENV["VERBOSE"].to_i == 1
+        pid = Test.spawn("bundle exec shaf server -p #{port}", redirects)
         sleep 2
         yield port
       end
