@@ -27,11 +27,21 @@ module Shaf
       end
 
       def upgrade_packages
-        Shaf::Upgrade::Package.all.select { |package| package > current_version }
+        current = current_version
+        target = target_version
+
+        Shaf::Upgrade::Package.all.select do |package|
+          current < package.version && package.version <= target
+        end
       end
 
       def current_version
-        read_shaf_version or raise UnknownShafVersionError
+        version = read_shaf_version or raise UnknownShafVersionError
+        Shaf::Upgrade::Version.new(version)
+      end
+
+      def target_version
+        Shaf::Upgrade::Version.new(ENV.fetch('UPGRADE_TARGET', '99.9.9'))
       end
     end
   end
