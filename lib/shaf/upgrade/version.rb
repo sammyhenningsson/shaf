@@ -14,11 +14,13 @@ module Shaf
       end
 
       def initialize(version)
-        if self.class === version
+        case version
+        when Version
           @major, @minor, @patch = [:major, :minor, :patch].map { |m| version.send m }
-        else
-          raise UpgradeVersionError.new(version) unless version =~ /\d+\.\d+\.\d+/
+        when /\d+\.\d+(\.\d+)?/
           @major, @minor, @patch = split_version(version)
+        else
+          raise UpgradeVersionError.new(version)
         end
       end
 
@@ -37,7 +39,9 @@ module Shaf
       private
 
       def split_version(str)
-        str.split('.').map(&:to_i)
+        str.split('.').map(&:to_i).tap do |list|
+          list << 0 while list.size < 3
+        end
       end
 
       def compare_version(other_major, other_minor, other_patch)
