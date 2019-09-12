@@ -1,5 +1,7 @@
 ## 1.1.1
  * Fix problems with loadpath when not using bundle exec
+ * Add possiblity to run upgrade until specified version
+ * Env VERBOSE=1 will print some more info during upgrade
 ## 1.1.0
  * Min required ruby version 2.5
  * Get media type profile from serializer
