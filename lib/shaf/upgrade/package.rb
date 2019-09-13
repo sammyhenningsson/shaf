@@ -21,6 +21,7 @@ module Shaf
 
       UPGRADE_FILES_PATH = File.join(Utils.gem_root, 'upgrades').freeze
       MANIFEST_FILENAME = 'manifest'.freeze
+      IGNORE_FILE_PATTERNS = [/.rej\z/, /.orig\z/]
 
       attr_reader :version
 
@@ -140,7 +141,15 @@ module Shaf
 
       def files_in(dir)
         dir += '/' if !dir.nil? && dir[-1] != '/'
-        Dir["#{dir}**/*"]
+        Dir["#{dir}**/*"].reject do |file|
+          ignore? file
+        end
+      end
+
+      def ignore?(file)
+        IGNORE_FILE_PATTERNS.any? do |pattern|
+          file.match? pattern
+        end
       end
 
       def apply_patches(dir = nil)
