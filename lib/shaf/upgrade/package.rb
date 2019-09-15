@@ -78,10 +78,12 @@ module Shaf
 
       def apply(dir = nil)
         puts "Applying changes for version #{version}" if ENV["VERBOSE"] == "1"
-        apply_patches(dir)
-        apply_drops(dir)
-        apply_additions
-        apply_substitutes(dir)
+        [
+          apply_patches(dir),
+          apply_drops(dir),
+          apply_additions,
+          apply_substitutes(dir),
+        ].all?
       end
 
       def to_s
@@ -153,8 +155,8 @@ module Shaf
       end
 
       def apply_patches(dir = nil)
-        files_in(dir).each do |file|
-          @manifest.patches_for(file).each do |name|
+        files_in(dir).all? do |file|
+          @manifest.patches_for(file).all? do |name|
             patch = @files[name]
             apply_patch(file, patch)
           end
@@ -168,27 +170,37 @@ module Shaf
           puts o.read
           err = e.read
           puts err unless err.empty?
-          next if t.value.success?
-          STDERR.puts "Failed to apply patch for: #{file}\n"
+          t.value.success?.tap do |patch_succeeded|
+            next if patch_succeeded
+            STDERR.puts "Failed to apply patch for: #{file}\n"
+          end
         end
       end
 
       def apply_additions
         puts '' unless @manifest.additions.empty?
-        @manifest.additions.each do |chksum, filename|
+        @manifest.additions.all? do |chksum, filename|
           content = @files[chksum]
           FileUtils.mkdir_p File.dirname(filename)
           puts "adding file: #{filename}"
           File.open(filename, 'w') { |file| file.write(content) }
+          true
+        rescue StandardError => e
+          STDERR.puts "Failed to add '#{filename}': #{e.message}\n"
+          false
         end
       end
 
       def apply_drops(dir = nil)
         puts '' unless @manifest.removals.empty?
-        files_in(dir).map do |file|
-          next unless @manifest.drop?(file)
+        files_in(dir).all? do |file|
+          next true unless @manifest.drop?(file)
           puts "removing file: #{file}"
           File.unlink(file)
+          true
+        rescue StandardError => e
+          STDERR.puts "Failed to unlink '#{file}': #{e.message}\n"
+          false
         end
       end
 
