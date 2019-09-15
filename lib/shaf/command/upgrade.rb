@@ -5,25 +5,52 @@ module Shaf
     class Upgrade < Base
 
       class UnknownShafVersionError < CommandError; end
-      class UpgradeFailedError < CommandError; end
+      class UpgradeFailedError < CommandError
+        attr_reader :version
+
+        def initialize(version)
+          @version = version
+        end
+      end
 
       identifier %r(\Aupgrade\Z)
       usage 'upgrade'
+
+      def self.options(parser, options)
+        parser.on('--skip VERSION', String, 'Skip version') do |v|
+          options[:skip_version] = Shaf::Upgrade::Version.new(v)
+        end
+      end
 
       def call
         in_project_root do
           upgrade_packages.each { |package| apply(package) }
           puts "\nProject is up-to-date! Shaf version: #{current_version}"
         end
+      rescue UpgradeFailedError => e
+        puts <<~ERR
+        
+          Failed to upgrade project to version #{e.version}
+          Please try resolve these issues manually and try again.
+          For more info see:
+          https://github.com/sammyhenningsson/shaf/blob/master/doc/UPGRADE.md
+        ERR
       end
 
       def apply(package)
-        package.load.apply or raise UpgradeFailedError
+        unless skip? package
+          package.load.apply or raise UpgradeFailedError.new(package.version)
+        end
         write_shaf_version package.version.to_s
       rescue Errno::ENOENT
         raise UpgradeFailedError,
           "Failed to execute system command 'patch'. Make sure that 'patch' installed!" \
           " (E.g. `sudo apt install patch` for Ubuntu)"
+      end
+
+      def skip?(package)
+        return false unless options[:skip_version]
+        package.version == options[:skip_version]
       end
 
       def upgrade_packages
