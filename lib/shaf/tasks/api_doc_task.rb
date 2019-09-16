@@ -106,19 +106,19 @@ module Shaf
       end
 
       def attribute(line)
-        line[/\A\s*attribute[^s]\s*\(?\s*:(\w+)/, 1]
+        line[/\A\s*attribute[^s]\s*\(?:(\w+)/, 1]
       end
 
       def link(line)
-        line[/\A\s*link\s*\(?\s*:'?([-:\w]+)'?/, 1]
+        line[/\A\s*link\s*\(?:?['"]?([-:\w]+)['"]?/, 1]
       end
 
       def curie(line)
-        line[/\A\s*curie\s*\(?\s*:'?([-\w]+)'?/, 1]
+        line[/\A\s*curie\s*\(?:'?([-\w]+)'?/, 1]
       end
 
       def embed(line)
-        line[/\A\s*embed\s*\(?\s*:'?([-:\w]+)'?/, 1]
+        line[/\A\s*embed\s*\(?:'?([-:\w]+)'?/, 1]
       end
     end
   end
