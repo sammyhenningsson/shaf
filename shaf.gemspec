@@ -12,9 +12,11 @@ Gem::Specification.new do |gem|
     'changelog_uri' => 'https://github.com/sammyhenningsson/shaf/blob/master/CHANGELOG.md',
     'homepage_uri'  => 'https://github.com/sammyhenningsson/shaf'
   }
-
   gem.cert_chain  = ['certs/sammyhenningsson.pem']
-  gem.signing_key = File.expand_path('~/.ssh/gem-private_key.pem') if $0 =~ /gem\z/
+
+  unless ["0", "false", "off"].include? ENV["SIGN"]
+    gem.signing_key = File.expand_path('~/.ssh/gem-private_key.pem')
+  end
 
   gem.executables   = ['shaf']
   gem.files         = Dir['lib/**/*rb'] + Dir['templates/**/*'] + Dir['upgrades/*.tar.gz']
