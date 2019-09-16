@@ -69,7 +69,7 @@ module Shaf
       end
 
       def links
-        %w(doc:up self doc:edit-form doc:delete)
+        %w(collection self doc:edit-form doc:delete)
       end
 
       def curies_with_doc
@@ -103,7 +103,7 @@ module Shaf
 
       def collection_link
         link(
-          rel: "doc:up",
+          rel: "collection",
           desc: "Link to the collection of all #{plural_name}. " \
           "Send a POST request to this uri to create a new #{name}",
           method: "GET or POST",

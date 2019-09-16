@@ -8,7 +8,7 @@ class <%= policy_class_name %> < BasePolicy
 
   <%= attributes.join("\n  ") %>
 
-  link :up
+  link :collection
 
   link :'create-form', :'edit-form', :delete do
     write?
