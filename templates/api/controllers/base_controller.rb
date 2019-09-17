@@ -39,6 +39,14 @@ class BaseController < Sinatra::Base
   before do
     log.info "Processing: #{request.request_method} #{request.path_info}"
     log.debug "Payload: #{payload || 'empty'}"
+    set_vary_header
+  end
+
+  def set_vary_header
+    return unless settings.auth_token_header
+    return unless [:get, :head].include? request.request_method.downcase.to_sym
+
+    headers('Vary' => Shaf::Settings.auth_token_header)
   end
 
   not_found do
