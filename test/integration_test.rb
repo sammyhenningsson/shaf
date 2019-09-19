@@ -30,10 +30,12 @@ module Shaf
       Dir.chdir(project_path) do
         redirects = {out: File::NULL}
         redirects[:err] = [:child, :out] unless ENV["VERBOSE"].to_i == 1
-        pid = Test.spawn("bundle exec shaf server -p #{port}", redirects)
+        pid = Test.spawn("bundle exec shaf server -p #{port}", redirects: redirects)
         sleep 2
         yield port
       end
+    rescue StandardError => e
+      STDERR.puts "\n Failed to start server: #{e.message}"
     ensure
       Process.kill("TERM", pid)
       Process.waitpid2(pid)
@@ -105,7 +107,7 @@ module Shaf
       Dir.chdir(project_path) do
         assert Test.system("bundle exec shaf generate scaffold post message:string:Meddelande author:integer:Författare")
         assert Test.system("bundle exec rake db:migrate")
-        assert Test.system("bundle exec rake test")
+        assert Test.system("bundle exec shaf test")
       end
     end
 

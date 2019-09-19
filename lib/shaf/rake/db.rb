@@ -1,7 +1,7 @@
 Shaf::DbTask.new(:version, description: "Prints current schema version") do
   if migrations.any?
     version, filename = extract_version_and_filename(last_migration)
-    puts "Schema version: #{version} (#{filename})"
+    puts "Schema version: #{version} (#{filename}) [#{ENV['RACK_ENV']}]"
   else
     puts "No migrations found"
   end

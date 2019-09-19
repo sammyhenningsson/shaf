@@ -52,9 +52,9 @@ module Shaf
         Bundler.with_clean_env { `bundle install` }
       end
 
-      def system(*args, stdin: nil)
+      def system(*args, stdin: nil, rack_env: 'development')
         return if args.size.zero?
-        env = {'RUBYLIB' => gem_lib_dir}
+        env = {'RUBYLIB' => gem_lib_dir, 'RACK_ENV' => rack_env}
         cmd = args.join(' ')
 
         Bundler.with_clean_env do
@@ -74,11 +74,11 @@ module Shaf
         end
       end
 
-      def spawn(*args)
+      def spawn(*args, redirects: {}, rack_env: 'development')
         return if args.size.zero?
-        env = {'RUBYLIB' => gem_lib_dir}
+        env = {'RUBYLIB' => gem_lib_dir, 'RACK_ENV' => rack_env}
         Bundler.with_clean_env do
-          Kernel::spawn(env, *args)
+          Kernel::spawn(env, *args, redirects)
         end
       end
     end
