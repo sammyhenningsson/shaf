@@ -3,30 +3,43 @@ require 'config/database'
 
 Sequel.extension :migration
 
-def current?
-  return true unless Dir[migrations_dir_glob].any?
-  Sequel::Migrator.is_current?(DB, migrations_dir)
-end
+class DbMigrations
+  def self.verify
+    new.verify
+  end
 
-def migrations_dir
-  File.join(Shaf::Settings.app_root, Shaf::Settings.migrations_dir)
-end
+  def verify
+    return if fully_migrated?
+    run_migrations? ? migrate : show_warning
+  end
 
-def migrations_dir_glob
-  File.join(migrations_dir, '*')
-end
+  def fully_migrated?
+    return true unless Dir[migrations_dir_glob].any?
+    Sequel::Migrator.is_current?(DB, migrations_dir)
+  end
 
-def environment
-  ENV['RACK_ENV']
-end
+  def migrations_dir
+    File.join(Shaf::Settings.app_root, Shaf::Settings.migrations_dir)
+  end
 
-def init
-  return if current?
+  def migrations_dir_glob
+    File.join(migrations_dir, '*')
+  end
 
-  if environment == 'test'
-    $logger.info "Running migrations in 'test' environment.."
+  def environment
+    ENV['RACK_ENV']
+  end
+
+  def run_migrations?
+    environment == 'test'
+  end
+
+  def migrate
+    $logger&.info "Running migrations in #{environment} environment.."
     Sequel::Migrator.run(DB, migrations_dir)
-  else
+  end
+
+  def show_warning
     msg = "Database for environment '#{environment}' is not " \
       'updated to the latest migration'
     STDERR.puts msg
@@ -34,4 +47,4 @@ def init
   end
 end
 
-init
+DbMigrations.verify
