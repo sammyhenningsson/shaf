@@ -1,4 +1,15 @@
-## 1.1.1
+## 1.2.0
+ * Wrap spec expectations with \_(…)
+ * Run erb on configs
+ * Move database config into yaml
+ * Refactored db migrations initializer
+ * Add auth token header to Vary
+ * Show rel 'collection' instead of 'up' for items
+ * Fix problem with generating doc for links
+ * Break if package cannot be applied
+ * Add option to skip a version during upgrade
+ * Add missing patches to previous upgrade pkgs
+ * Ignore .rej and .orig files during upgrades
  * Fix problems with loadpath when not using bundle exec
  * Add possiblity to run upgrade until specified version
  * Env VERBOSE=1 will print some more info during upgrade
