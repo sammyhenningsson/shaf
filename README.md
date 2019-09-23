@@ -38,6 +38,7 @@ Your newly created project should contain the following files:
 │   ├── bootstrap.rb
 │   ├── customize.rb
 │   ├── database.rb
+│   ├── database.yml
 │   ├── directories.rb
 │   ├── helpers.rb
 │   ├── initializers
@@ -210,7 +211,7 @@ The response shows us the new resource, with the attributes that we set as well 
   "title": "hello",
   "message": "lorem ipsum",
   "_links": {
-    "doc:up": {
+    "collection": {
       "href": "http://localhost:3000/posts"
     },
     "self": {
@@ -232,7 +233,7 @@ The response shows us the new resource, with the attributes that we set as well 
   }
 }
 ```
-This new resource is of course added to the collection of posts, which can now be retrieved by the link with rel _doc:up_.
+This new resource is of course added to the collection of posts, which can now be retrieved by the link with rel _collection_.
 ```sh
 curl localhost:3000/posts | jq
 ```
@@ -263,7 +264,7 @@ Response:
         "title": "hello",
         "message": "lorem ipsum",
         "_links": {
-          "doc:up": {
+          "collection": {
             "href": "http://localhost:3000/posts"
           },
           "self": {
@@ -293,6 +294,7 @@ rake db:migrate
 
 ## [Upgrading a shaf project](doc/UPGRADE.md)
 ## [HAL mediatype](doc/HAL.md)
+## [Sinatra](doc/SINATRA.md)
 ## [Generators](doc/GENERATORS.md)
 ## [Routing/Controllers](doc/ROUTING.md)
 ## [Models](doc/MODELS.md)
@@ -308,6 +310,7 @@ rake db:migrate
 ## [ShafClient](doc/SHAF_CLIENT.md)
 ## [Frontend](doc/FRONTEND.md)
 ## [Customizations](doc/CUSTOMIZATIONS.md)
+## [Business logic](doc/BUSINESS_LOGIC.md)
 
 
 ## Contributing
