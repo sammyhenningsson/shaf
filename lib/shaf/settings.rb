@@ -19,20 +19,10 @@ module Shaf
     class << self
       def load
         @settings = DEFAULTS.dup
-        config = read_config(SETTINGS_FILE)
+        config = Utils.read_config(SETTINGS_FILE, erb: true)
         @settings.merge! config.fetch(env, {})
       end
 
-      def read_config(file)
-        return {} unless File.exist? file
-
-        yaml = File.read(file)
-        if RUBY_VERSION < '2.6.0'
-          Utils.deep_symbolize_keys(YAML.safe_load(yaml, [], [], true))
-        else
-          YAML.safe_load(yaml, aliases: true, symbolize_names: true)
-        end
-      end
 
       def env
         (ENV['APP_ENV'] || ENV['RACK_ENV'] || 'development').to_sym

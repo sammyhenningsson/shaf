@@ -1,0 +1,14 @@
+production:
+  adapter: postgres
+  host: <%= ENV['SHAF_DB_HOST'] %>
+  database: <%= ENV['SHAF_DB_NAME'] %>
+  user: <%= ENV['SHAF_DB_USER'] %>
+  password: <%= ENV['SHAF_DB_PASS'] %>
+
+development:
+  adapter: sqlite
+  database: db/development.sqlite3
+
+test:
+  adapter: sqlite
+  database: db/test.sqlite3

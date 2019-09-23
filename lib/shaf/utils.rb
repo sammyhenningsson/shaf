@@ -1,7 +1,10 @@
 # frozen_string_literal: true
 
+require 'erb'
 require 'forwardable'
+require 'yaml'
 require 'shaf/version'
+require 'sinatra/base'
 
 module Shaf
   module Utils
@@ -41,6 +44,10 @@ module Shaf
         symbolize(str).inspect
       end
 
+      def environment
+        Sinatra::Application.settings.environment
+      end
+
       def rackify_header(str)
         return if str.nil?
         str.upcase.tr('-', '_').tap do |key|
@@ -59,6 +66,24 @@ module Shaf
         else
           value
         end
+      end
+
+      def read_config(file, erb: false, erb_binding: nil)
+        return {} unless File.exist? file
+
+        yaml = File.read(file)
+        yaml = erb(yaml, binding: erb_binding) if erb || erb_binding
+        if RUBY_VERSION < '2.6.0'
+          Utils.deep_symbolize_keys(YAML.safe_load(yaml, [], [], true))
+        else
+          YAML.safe_load(yaml, aliases: true, symbolize_names: true)
+        end
+      end
+
+      def erb(content, binding: nil)
+        bindings = binding ? [binding] : []
+        return ERB.new(content, 0, '%-<>').result(*bindings) if RUBY_VERSION < '2.6.0'
+        ERB.new(content, trim_mode: '-<>').result(*bindings)
       end
     end
 

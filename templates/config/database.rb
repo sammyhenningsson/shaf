@@ -1,39 +1,45 @@
 # frozen_string_literal: true
 
-require 'sinatra/base'
 require 'sequel'
 require 'fileutils'
+require 'yaml'
+require 'shaf/utils'
 
-config = {
+class Database
+  CONFIG_FILE = File.expand_path("../database.yml", __FILE__)
+  MIGRATIONS_DIR = 'db/migrations'
 
-  production: {
-    adapter: 'postgres',
-    host: ENV['SHAF_DB_HOST'],
-    database: ENV['SHAF_DB_NAME'],
-    user: ENV['SHAF_DB_USER'],
-    password: ENV['SHAF_DB_PASS']
-  }.freeze,
+  class << self
+    def get_connection
+      ensure_config
+      ensure_migrations_dir
 
-  development: {
-    adapter: 'sqlite',
-    database: 'db/development.sqlite3'
-  }.freeze,
+      connect
+    end
 
-  test: {
-    adapter: 'sqlite',
-    database: 'db/test.sqlite3'
-  }.freeze
+    def config
+      @config ||= Shaf::Utils.read_config(CONFIG_FILE, erb: true)
+    end
 
-}.freeze
+    def env
+      Shaf::Utils.environment
+    end
 
-env = Sinatra::Application.settings.environment
+    def connect
+      Sequel.connect config[env]
+    end
 
-unless config[env]
-  STDERR.puts "No Database config for environment '#{env}'"
-  exit 1
+    def ensure_config
+      return if config[env]
+      STDERR.puts "No Database config for environment '#{env}'"
+      exit 1
+    end
+
+    def ensure_migrations_dir
+      return if Dir.exist?(MIGRATIONS_DIR)
+      FileUtils.mkdir_p(MIGRATIONS_DIR)
+    end
+  end
 end
 
-migrations_dir = 'db/migrations'
-FileUtils.mkdir_p(migrations_dir) unless Dir.exist?(migrations_dir)
-
-DB = Sequel.connect(config[env])
+DB = Database.get_connection
