@@ -13,11 +13,11 @@ module Shaf
       end
 
       it "#link" do
-        task.link("  link :self do").must_equal 'self'
-        task.link("  link :'doc:up' do").must_equal 'doc:up'
-        task.link('  link :"doc:up" do').must_equal 'doc:up'
-        task.link('  link :foo_bar" do').must_equal 'foo_bar'
-        task.link('  link :foo, curie :bar do').must_equal 'foo'
+        _(task.link("  link :self do")).must_equal 'self'
+        _(task.link("  link :'doc:up' do")).must_equal 'doc:up'
+        _(task.link('  link :"doc:up" do')).must_equal 'doc:up'
+        _(task.link('  link :foo_bar" do')).must_equal 'foo_bar'
+        _(task.link('  link :foo, curie :bar do')).must_equal 'foo'
       end
     end
   end

@@ -23,18 +23,18 @@ module Shaf
       end
 
       it 'can access items' do
-        obj.must_respond_to :orders
-        obj.orders.keys.must_equal([:order1])
+        _(obj).must_respond_to :orders
+        _(obj.orders.keys).must_equal([:order1])
       end
 
       it 'can access nested fixtures' do
-        obj.orders(:order1).must_equal(%w[one two])
+        _(obj.orders(:order1)).must_equal(%w[one two])
       end
 
       it 'raise exception when key does not exist' do
-        lambda {
-          obj.orders(:not_existing)
-        }.must_raise Fixtures::FixtureNotFound
+        _(
+          lambda { obj.orders(:not_existing) }
+        ).must_raise Fixtures::FixtureNotFound
       end
     end
   end

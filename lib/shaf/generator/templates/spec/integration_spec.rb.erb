@@ -5,11 +5,11 @@ describe <%= model_class_name %>, type: :integration do
   it "returns a <%= name %>" do
     <%= name %> = <%= model_class_name %>.create
     get <%= name %>_uri(<%= name %>)
-    status.must_equal 200
-    link_rels.must_include(:self)
-    links[:self][:href].must_equal <%= name %>_uri(<%= name %>)
+    _(status).must_equal 200
+    _(link_rels).must_include(:self)
+    _(links[:self][:href]).must_equal <%= name %>_uri(<%= name %>)
 <% params.each do |param| -%>
-    attributes.must_include(:'<%= param[0] %>')
+    _(attributes).must_include(:'<%= param[0] %>')
 <% end -%>
   end
 
@@ -18,15 +18,15 @@ describe <%= model_class_name %>, type: :integration do
     <%= model_class_name %>.create
 
     get <%= plural_name %>_uri
-    status.must_equal 200
-    link_rels.must_include(:self)
-    links[:self][:href].must_include <%= plural_name %>_uri
-    embedded(:'<%= plural_name %>').size.must_equal 2
+    _(status).must_equal 200
+    _(link_rels).must_include(:self)
+    _(links[:self][:href]).must_include <%= plural_name %>_uri
+    _(embedded(:'<%= plural_name %>').size).must_equal 2
 
     each_embedded :'<%= plural_name %>' do
-      link_rels.must_include(:self)
+      _(link_rels).must_include(:self)
 <% params.each do |param| -%>
-      attributes.must_include(:'<%= param[0] %>')
+      _(attributes).must_include(:'<%= param[0] %>')
 <% end -%>
     end
   end
@@ -34,34 +34,34 @@ describe <%= model_class_name %>, type: :integration do
   it "can create <%= plural_name %>" do
     get <%= plural_name %>_uri
 
-    link_rels.must_include(:'doc:create-form')
+    _(link_rels).must_include(:'doc:create-form')
     follow_rel :'doc:create-form'
-    links[:self][:href].must_equal new_<%= name %>_uri
-    attributes[:href].must_equal <%= plural_name %>_uri
-    attributes[:method].must_equal "POST"
-    attributes[:name].must_equal "create-<%= name %>"
-    attributes[:title].must_equal "Create <%= model_class_name %>"
-    attributes[:type].must_equal "application/json"
-    attributes[:fields].size.must_equal <%= params.size %>
+    _(links[:self][:href]).must_equal new_<%= name %>_uri
+    _(attributes[:href]).must_equal <%= plural_name %>_uri
+    _(attributes[:method]).must_equal "POST"
+    _(attributes[:name]).must_equal "create-<%= name %>"
+    _(attributes[:title]).must_equal "Create <%= model_class_name %>"
+    _(attributes[:type]).must_equal "application/json"
+    _(attributes[:fields].size).must_equal <%= params.size %>
 
     payload = fill_form attributes[:fields]
     post attributes[:href], payload
-    status.must_equal 201
-    link_rels.must_include(:self)
-    headers["Location"].must_equal links[:self][:href]
+    _(status).must_equal 201
+    _(link_rels).must_include(:self)
+    _(headers["Location"]).must_equal links[:self][:href]
 
     get <%= plural_name %>_uri
-    status.must_equal 200
-    links[:self][:href].must_include <%= plural_name %>_uri
-    embedded(:'<%= plural_name %>').size.must_equal 1
+    _(status).must_equal 200
+    _(links[:self][:href]).must_include <%= plural_name %>_uri
+    _(embedded(:'<%= plural_name %>').size).must_equal 1
 
     embedded :'<%= plural_name %>' do
       <%= name %> = last_payload.first
 <% params.each do |param| -%>
 <% if param[1] == 'string' -%>
-      <%= name %>[:<%= param[0] %>].must_equal "value for <%= param[0] %>"
+      _(<%= name %>[:<%= param[0] %>]).must_equal "value for <%= param[0] %>"
 <% elsif param[1] == 'integer' -%>
-      <%= name %>[:<%= param[0] %>].must_equal "<%= param[0] %>".size
+      _(<%= name %>[:<%= param[0] %>]).must_equal "<%= param[0] %>".size
 <% end -%>
 <% end -%>
     end
@@ -70,37 +70,37 @@ describe <%= model_class_name %>, type: :integration do
   it "<%= plural_name %> can be updated" do
     <%= name %> = <%= model_class_name %>.create
     get <%= name %>_uri(<%= name %>)
-    status.must_equal 200
+    _(status).must_equal 200
 
-    link_rels.must_include(:'doc:edit-form')
+    _(link_rels).must_include(:'doc:edit-form')
     follow_rel :'doc:edit-form'
 
-    links[:self][:href].must_equal edit_<%= name %>_uri(<%= name %>)
-    attributes[:href].must_equal <%= name %>_uri(<%= name %>)
-    attributes[:method].must_equal "PUT"
-    attributes[:name].must_equal "update-<%= name %>"
-    attributes[:title].must_equal "Update <%= model_class_name %>"
-    attributes[:type].must_equal "application/json"
-    attributes[:fields].size.must_equal <%= params.size %>
+    _(links[:self][:href]).must_equal edit_<%= name %>_uri(<%= name %>)
+    _(attributes[:href]).must_equal <%= name %>_uri(<%= name %>)
+    _(attributes[:method]).must_equal "PUT"
+    _(attributes[:name]).must_equal "update-<%= name %>"
+    _(attributes[:title]).must_equal "Update <%= model_class_name %>"
+    _(attributes[:type]).must_equal "application/json"
+    _(attributes[:fields].size).must_equal <%= params.size %>
 
     payload = fill_form attributes[:fields]
     put attributes[:href], payload
-    status.must_equal 200
-    link_rels.must_include(:self)
+    _(status).must_equal 200
+    _(link_rels).must_include(:self)
   end
 <% end -%>
 
   it "<%= plural_name %> can be deleted" do
     <%= name %> = <%= model_class_name %>.create
     get <%= name %>_uri(<%= name %>)
-    status.must_equal 200
-    link_rels.must_include(:'doc:delete')
+    _(status).must_equal 200
+    _(link_rels).must_include(:'doc:delete')
 
     follow_rel(:'doc:delete', method: :delete)
-    status.must_equal 204
+    _(status).must_equal 204
 
     get <%= name %>_uri(<%= name %>)
-    status.must_equal 404
+    _(status).must_equal 404
   end
 
 end

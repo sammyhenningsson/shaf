@@ -61,11 +61,11 @@ module Shaf
         form1.fill!(from: resource)
         fields = form1.fields
         field1 = fields.find { |f| f.name == :field1 }
-        field1.must_be :has_value?
-        field1.value.must_equal 'foo'
+        _(field1).must_be :has_value?
+        _(field1.value).must_equal 'foo'
         field2 = fields.find { |f| f.name == :field2 }
-        field2.must_be :has_value?
-        field2.value.must_equal 'bar'
+        _(field2).must_be :has_value?
+        _(field2.value).must_equal 'bar'
       end
     end
   end

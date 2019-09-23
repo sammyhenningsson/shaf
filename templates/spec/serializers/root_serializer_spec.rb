@@ -7,6 +7,6 @@ describe RootSerializer do
   end
 
   it "serializes links" do
-    links.keys.must_include(:self)
+    _(links.keys).must_include(:self)
   end
 end

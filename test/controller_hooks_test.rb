@@ -33,33 +33,33 @@ module Shaf
     it 'registers method as callback' do
       controller.stub :before, before_stub do
         controller.before_action(:callback, only: :post_path)
-        before_args.size.must_equal 1
-        before_args[0][1].must_equal 'return_value_from_controller_cb'
+        _(before_args.size).must_equal 1
+        _(before_args[0][1]).must_equal 'return_value_from_controller_cb'
       end
     end
 
     it 'registers block as callback' do
       controller.stub :before, before_stub do
         controller.before_action(only: :post_path) { 'foobar' }
-        before_args.size.must_equal 1
-        before_args[0].size.must_equal 2
-        before_args[0][1].must_equal 'foobar'
+        _(before_args.size).must_equal 1
+        _(before_args[0].size).must_equal 2
+        _(before_args[0][1]).must_equal 'foobar'
       end
     end
 
     it 'passes a regexp as filter' do
       controller.stub :before, before_stub do
         controller.before_action(only: :post_path) { 'foobar' }
-        before_args.size.must_equal 1
-        before_args[0].size.must_equal 2
-        before_args[0][0].must_equal %r{/posts/\w+/?}
+        _(before_args.size).must_equal 1
+        _(before_args[0].size).must_equal 2
+        _(before_args[0][0]).must_equal %r{/posts/\w+/?}
       end
     end
 
     it 'registers all uri_methods' do
       controller.stub :before, before_stub do
         controller.before_action(:callback)
-        before_args.size.must_equal(
+        _(before_args.size).must_equal(
           %w[posts_path post_path new_post_path edit_post_path archive_post_path].size
         )
       end
@@ -68,7 +68,7 @@ module Shaf
     it 'can exclude a uri by symbol' do
       controller.stub :before, before_stub do
         controller.before_action(:callback, except: :post_path)
-        before_args.size.must_equal(
+        _(before_args.size).must_equal(
           %w[posts_path new_post_path edit_post_path archive_post_path].size
         )
       end
@@ -77,7 +77,7 @@ module Shaf
     it 'can excludes an array of symbols' do
       controller.stub :before, before_stub do
         controller.before_action(:callback, except: [:post_path, :edit_post_path])
-        before_args.size.must_equal(
+        _(before_args.size).must_equal(
           %w[posts_path new_post_path archive_post_path].size
         )
       end

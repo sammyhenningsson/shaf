@@ -16,13 +16,13 @@ describe <%= class_name %> do
 
     it "serializes attributes" do
 <% attributes.each do |attr| -%>
-      attributes.keys.must_include(<%= attr %>)
+      _(attributes.keys).must_include(<%= attr %>)
 <% end -%>
     end
 
     it "serializes links" do
 <% ['self', 'collection'].each do |rel| -%>
-      link_rels.must_include(:'<%= rel %>')
+      _(link_rels).must_include(:'<%= rel %>')
 <% end -%>
     end
   end
@@ -34,13 +34,13 @@ describe <%= class_name %> do
 
     it "serializes attributes" do
 <% attributes.each do |attr| -%>
-      attributes.keys.must_include(<%= attr %>)
+      _(attributes.keys).must_include(<%= attr %>)
 <% end -%>
     end
 
     it "serializes links" do
 <% links.each do |rel| -%>
-      link_rels.must_include(:'<%= rel %>')
+      _(link_rels).must_include(:'<%= rel %>')
 <% end -%>
     end
   end

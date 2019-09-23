@@ -27,14 +27,14 @@ describe FooSerializer do
   end
 
   it "serializes attributes" do
-    attributes.keys.must_include(:foo)
-    attributes.keys.must_include(:bar)
-    attributes.keys.wont_include(:baz)
+    _(attributes.keys).must_include(:foo)
+    _(attributes.keys).must_include(:bar)
+    _(attributes.keys).wont_include(:baz)
   end
 
   it "serializes links" do
-    link_rels.must_include(:self)
-    link_rels.must_include(:some_action)
+    _(link_rels).must_include(:self)
+    _(link_rels).must_include(:some_action)
   end
 end
 ```
@@ -55,12 +55,12 @@ describe BarSerializer do
 
   it "embeds a foo resource" do
     embedded :foo do
-      attributes.keys.must_include(:foo)
-      attributes.keys.must_include(:bar)
-      attributes.keys.wont_include(:baz)
+      _(attributes.keys).must_include(:foo)
+      _(attributes.keys).must_include(:bar)
+      _(attributes.keys).wont_include(:baz)
 
-      link_rels.must_include(:self)
-      link_rels.must_include(:some_action)
+      _(link_rels).must_include(:self)
+      _(link_rels).must_include(:some_action)
     end
   end
 end
@@ -81,12 +81,12 @@ describe BarSerializer do
 
   it "all embeded foo resources has correct attributes and links" do
     each_embedded :foo do
-      attributes.keys.must_include(:foo)
-      attributes.keys.must_include(:bar)
-      attributes.keys.wont_include(:baz)
+      _(attributes.keys).must_include(:foo)
+      _(attributes.keys).must_include(:bar)
+      _(attributes.keys).wont_include(:baz)
 
-      link_rels.must_include(:self)
-      link_rels.must_include(:some_action)
+      _(link_rels).must_include(:self)
+      _(link_rels).must_include(:some_action)
     end
   end
 end
@@ -102,28 +102,28 @@ describe "Post", type: :integration do
     get posts_uri
 
     embedded :'doc:create-form' do
-      links[:self][:href].must_equal new_post_uri
-      attributes[:href].must_equal posts_uri
-      attributes[:method].must_equal "POST"
-      attributes[:name].must_equal "create-post"
-      attributes[:title].must_equal "Create Post"
-      attributes[:type].must_equal "application/json"
-      attributes[:fields].size.must_equal 1
+      _(links[:self][:href]).must_equal new_post_uri
+      _(attributes[:href]).must_equal posts_uri
+      _(attributes[:method]).must_equal "POST"
+      _(attributes[:name]).must_equal "create-post"
+      _(attributes[:title]).must_equal "Create Post"
+      _(attributes[:type]).must_equal "application/json"
+      _(attributes[:fields].size).must_equal 1
 
       payload = fill_form attributes[:fields]
       post posts_uri, payload
-      status.must_equal 201
-      link_rels.must_include(:self)
-      headers["Location"].must_equal links[:self][:href]
+      _(status).must_equal 201
+      _(link_rels).must_include(:self)
+      _(headers["Location"]).must_equal links[:self][:href]
     end
 
     get posts_uri
-    status.must_equal 200
-    links[:self][:href].must_include posts_uri
-    embedded(:'posts').size.must_equal 1
+    _(status).must_equal 200
+    _(links[:self][:href]).must_include posts_uri
+    _(embedded(:'posts').size).must_equal 1
 
     all_messages = embedded(:posts).map { |post| post[:message] }
-    all_messages.must_include("value for message")
+    _(all_messages).must_include("value for message")
   end
 end
 ```

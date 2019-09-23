@@ -6,16 +6,16 @@ module Shaf
 
     it 'prints shaf version' do
       output = Mutable.capture_output { cmd.call }
-      output.must_match(/Installed Shaf version: #{VERSION}/)
-      output.wont_match(/Project .+ created with Shaf version:/)
+      _(output).must_match(/Installed Shaf version: #{VERSION}/)
+      _(output).wont_match(/Project .+ created with Shaf version:/)
     end
 
     it 'prints shaf version and project version' do
       cmd.stub :project_root, '/my_project' do
         cmd.stub :read_shaf_version, '1.2.0' do
           output = Mutable.capture_output { cmd.call }
-          output.must_match(/Installed Shaf version: #{VERSION}/)
-          output.must_match(/Project 'my_project' created with Shaf version:/)
+          _(output).must_match(/Installed Shaf version: #{VERSION}/)
+          _(output).must_match(/Project 'my_project' created with Shaf version:/)
         end
       end
     end
