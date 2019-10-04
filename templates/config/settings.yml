@@ -20,8 +20,8 @@ default: &default
 
 production:
   <<: *default
-  port: 443
-  protocol: https
+  port: <%= ENV.fetch('PORT', 443) %>
+  base_uri: https://my.public.shaf.api.com
 
 development:
   <<: *default

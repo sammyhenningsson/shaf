@@ -56,6 +56,10 @@ module Shaf
           @settings[key] = arg
         end
       end
+
+      def to_h
+        @settings.dup
+      end
     end
   end
 end

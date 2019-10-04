@@ -74,6 +74,8 @@ module Shaf
     end
 
     def self.base_uri
+      return Settings.base_uri if Settings.base_uri
+
       protocol = Settings.protocol || 'http'
       host = Settings.hostname || 'localhost'
       port = Settings.port ? ":#{Settings.port}" : ""
