@@ -1,3 +1,9 @@
+## 1.2.2
+ * Fix bug with broken settings for ruby 2.5
+ * Removed failing settings patch from 1.2.1 upgrade pkg
+## 1.2.1
+ * Add base_uri config to fix port problem in prodction
+ * Fix path issue when using thin -R config.ru start
 ## 1.2.0
  * Wrap spec expectations with \_(…)
  * Run erb on configs
