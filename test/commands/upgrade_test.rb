@@ -48,16 +48,16 @@ module Shaf
 
     it 'upgrades a 0.4.0 project to latest version' do
       Dir.chdir(project_path) do
-        Test.system("bundle exec shaf version") do |out, _|
+        Test.system("shaf version") do |out, _|
           assert_match(/Installed Shaf version: #{VERSION}/, out)
           assert_match(/Project .* created with Shaf version: 0.4.0/, out)
         end
 
-        Test.system("bundle exec shaf upgrade")
+        Test.system("shaf upgrade")
 
         expected_new_version = Upgrade::Package.all.last.version
 
-        Test.system("bundle exec shaf version") do |out, _|
+        Test.system("shaf version") do |out, _|
           assert_match(/Installed Shaf version: #{VERSION}/, out)
           assert_match(/Project .* created with Shaf version: #{expected_new_version}/, out)
         end
