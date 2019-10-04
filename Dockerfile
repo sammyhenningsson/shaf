@@ -7,10 +7,8 @@ ENV APP_HOME /app
 RUN adduser --home $APP_HOME --shell /bin/bash shaf
 
 WORKDIR $APP_HOME
-COPY . $APP_HOME
-ADD Gemfile Gemfile.lock ./
-RUN chown -R shaf:shaf $APP_HOME
 USER shaf
+COPY --chown=shaf:shaf . $APP_HOME
 
 RUN gem update bundler
 RUN SIGN=false gem build shaf.gemspec
