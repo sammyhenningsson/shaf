@@ -90,12 +90,12 @@ module Shaf
         return {} unless File.exist? file
 
         yaml = File.read(file)
-        load_args = [yaml, {aliases: true, symbolize_names: true}]
+        yaml = erb(yaml, binding: erb_binding) if erb || erb_binding
         if RUBY_VERSION < '2.6.0'
-          load_args.pop
-          load_args += [[], [], true]
+          deep_symbolize_keys(YAML.safe_load(yaml, [], [], true))
+        else
+          YAML.safe_load(yaml, aliases: true, symbolize_names: true)
         end
-        YAML.safe_load(*load_args)
       end
 
       private
