@@ -56,15 +56,33 @@ module Shaf
       end
 
       def deep_symbolize_keys(value)
-        case value
+        deep_transform_keys(value) { |key| key.to_sym }
+      end
+
+      def deep_transform_keys(hash, &block)
+        case hash
         when Hash
-          value.each_with_object({}) do |(k, v), h|
-            h[k.to_sym] = deep_symbolize_keys(v)
+          hash.each_with_object({}) do |(k, v), h|
+            key = block.call(k)
+            h[key] = deep_transform_keys(v, &block)
           end
         when Array
-          value.map { |v| deep_symbolize_keys(v) }
+          hash.map { |v| deep_transform_keys(v, &block) }
         else
-          value
+          hash
+        end
+      end
+
+      def deep_transform_values(hash, &block)
+        case hash
+        when Hash
+          hash.each_with_object({}) do |(k, v), h|
+            h[k] = deep_transform_values(v, &block)
+          end
+        when Array
+          hash.map { |v| deep_transform_values(v, &block) }
+        else
+          block.call(hash)
         end
       end
 
@@ -72,13 +90,15 @@ module Shaf
         return {} unless File.exist? file
 
         yaml = File.read(file)
-        yaml = erb(yaml, binding: erb_binding) if erb || erb_binding
+        load_args = [yaml, {aliases: true, symbolize_names: true}]
         if RUBY_VERSION < '2.6.0'
-          Utils.deep_symbolize_keys(YAML.safe_load(yaml, [], [], true))
-        else
-          YAML.safe_load(yaml, aliases: true, symbolize_names: true)
+          load_args.pop
+          load_args += [[], [], true]
         end
+        YAML.safe_load(*load_args)
       end
+
+      private
 
       def erb(content, binding: nil)
         bindings = binding ? [binding] : []
