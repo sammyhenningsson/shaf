@@ -69,7 +69,7 @@ module Shaf
       end
 
       def links
-        %w(collection self doc:edit-form doc:delete)
+        %w(collection self edit-form doc:delete)
       end
 
       def curies_with_doc
@@ -123,7 +123,7 @@ module Shaf
 
       def edit_link
         link(
-          rel: "doc:edit-form",
+          rel: "edit-form",
           desc: "Link to a form to edit this resource",
           uri: "/#{plural_name}/5/edit",
           uri_helper: "edit_#{name}_uri(resource)"
@@ -142,7 +142,7 @@ module Shaf
 
       def create_link
         link(
-          rel: "doc:create-form",
+          rel: "create-form",
           desc: "Link to a form used to create new #{name} resources",
           uri: "/#{plural_name}/form",
           uri_helper: "new_#{name}_uri"
@@ -188,7 +188,7 @@ module Shaf
             curie(:doc) { doc_curie_uri('#{name}') }
 
             link :self, #{plural_name}_uri
-            link :'doc:up', root_uri
+            link :up, root_uri
 
             #{create_link.join("\n  ")}
           end

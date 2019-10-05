@@ -8,11 +8,14 @@ The [HAL](http://stateless.co/hal_specification.html) mediatype is very simple a
     "self": {
       "href": "http://localhost:3000/posts?page=1&per_page=25"
     },
-    "doc:up": {
+    "up": {
       "href": "http://localhost:3000/"
     },
-    "doc:create-form": {
+    "create-form": {
       "href": "http://localhost:3000/post/form"
+    },
+    "author": {
+      "href": "http://localhost:3000/users/1"
     },
     "curies": [
       {
@@ -27,9 +30,9 @@ The [HAL](http://stateless.co/hal_specification.html) mediatype is very simple a
   }
 }
 ```
-In the payload above the href of the _doc_ curie is `http://localhost:3000/doc/post/rels/{rel}` and there are two links prefixed with `doc:` (e.g. `doc:up` and `doc:create-form`). This means that if we would like to find out information about how the `doc:create-form` relates to the posts collection we replace `{rel}` with `create-form` and perform a GET request to this url.
+In the payload above the href of the _doc_ curie is `http://localhost:3000/doc/post/rels/{rel}` and the author link is prefixed with `doc:`. This means that if we would like to find out information about how the `doc:author` link relates to the posts collection we replace `{rel}` with `author` and perform a GET request to this url.
 ```sh
-curl http://localhost:3000/doc/post/rels/create-form
+curl http://localhost:3000/doc/post/rels/author
 ```
 This documentation is written as code comments in the corresponding serializer. See [Serializers](SERIALIZERS.md) for more info. Before this documentation can be fetched, a rake task to extract the comments needs to be executed, see [API Documentation](DOCUMENTATION.md) for more info.  
 HAL supports profiles that describes the semantic meaning if of keys/values. Shaf takes advantage of this and uses two profiles. One for describing generic error messages (see [shaf-error media type profile](https://gist.github.com/sammyhenningsson/049d10e2b8978059cde104fc5d6c2d52)) and another for describing forms (see [shaf-form media type profile](https://gist.github.com/sammyhenningsson/39c8aafeaf60192b082762cbf3e08d57)).  

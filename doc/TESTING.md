@@ -101,7 +101,7 @@ describe "Post", type: :integration do
   it "can create posts" do
     get posts_uri
 
-    embedded :'doc:create-form' do
+    embedded :'create-form' do
       _(links[:self][:href]).must_equal new_post_uri
       _(attributes[:href]).must_equal posts_uri
       _(attributes[:method]).must_equal "POST"
@@ -129,7 +129,7 @@ end
 ```
 This spec will:
 - start by fetching the posts_uri (e.g. `GET /posts`). This will call `set_payload(response)` behind the scenes.
-- Verify that the response embeds a resource with rel `doc:create-form` with some speced attributes.
+- Verify that the response embeds a resource with rel `create-form` with some speced attributes.
 - Build a new payload with the cryptic call to `fill_form` which just adds some jibrish values for each attribute.
 - Post this payload to the form `href`.
 - Verify HTTP Status code and HTTP Location header.

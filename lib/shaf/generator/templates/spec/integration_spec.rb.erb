@@ -34,8 +34,8 @@ describe <%= model_class_name %>, type: :integration do
   it "can create <%= plural_name %>" do
     get <%= plural_name %>_uri
 
-    _(link_rels).must_include(:'doc:create-form')
-    follow_rel :'doc:create-form'
+    _(link_rels).must_include(:'create-form')
+    follow_rel :'create-form'
     _(links[:self][:href]).must_equal new_<%= name %>_uri
     _(attributes[:href]).must_equal <%= plural_name %>_uri
     _(attributes[:method]).must_equal "POST"
@@ -72,8 +72,8 @@ describe <%= model_class_name %>, type: :integration do
     get <%= name %>_uri(<%= name %>)
     _(status).must_equal 200
 
-    _(link_rels).must_include(:'doc:edit-form')
-    follow_rel :'doc:edit-form'
+    _(link_rels).must_include(:'edit-form')
+    follow_rel :'edit-form'
 
     _(links[:self][:href]).must_equal edit_<%= name %>_uri(<%= name %>)
     _(attributes[:href]).must_equal <%= name %>_uri(<%= name %>)

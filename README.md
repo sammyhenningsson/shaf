@@ -147,10 +147,10 @@ The response looks like this
     "self": {
       "href": "http://localhost:3000/posts?page=1&per_page=25"
     },
-    "doc:up": {
+    "up": {
       "href": "http://localhost:3000/"
     },
-    "doc:create-form": {
+    "create-form": {
       "href": "http://localhost:3000/post/form"
     },
     "curies": [
@@ -166,7 +166,7 @@ The response looks like this
   }
 }
 ```
-This is the collection of posts (which currently is empty, see `$response['_embedded']['posts']`). Notice the link with rel _doc:create-form_. This is the api telling us that we may add new post resources. Let's follow that link!
+This is the collection of posts (which currently is empty, see `$response['_embedded']['posts']`). Notice the link with rel _create-form_. This is the api telling us that we may add new post resources. Let's follow that link!
 ```sh
 curl http://localhost:3000/post/form | jq
 ```
@@ -217,7 +217,7 @@ The response shows us the new resource, with the attributes that we set as well 
     "self": {
       "href": "http://localhost:3000/posts/1"
     },
-    "doc:edit-form": {
+    "edit-form": {
       "href": "http://localhost:3000/posts/1/edit"
     },
     "doc:delete": {
@@ -244,10 +244,10 @@ Response:
     "self": {
       "href": "http://localhost:3000/posts?page=1&per_page=25"
     },
-    "doc:up": {
+    "up": {
       "href": "http://localhost:3000/"
     },
-    "doc:create-form": {
+    "create-form": {
       "href": "http://localhost:3000/post/form"
     },
     "curies": [
@@ -270,7 +270,7 @@ Response:
           "self": {
             "href": "http://localhost:3000/posts/1"
           },
-          "doc:edit-form": {
+          "edit-form": {
             "href": "http://localhost:3000/posts/1/edit"
           },
           "doc:delete": {

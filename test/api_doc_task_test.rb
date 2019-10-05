@@ -14,8 +14,8 @@ module Shaf
 
       it "#link" do
         _(task.link("  link :self do")).must_equal 'self'
-        _(task.link("  link :'doc:up' do")).must_equal 'doc:up'
-        _(task.link('  link :"doc:up" do')).must_equal 'doc:up'
+        _(task.link("  link :'doc:foo' do")).must_equal 'doc:foo'
+        _(task.link('  link :"doc:foo" do')).must_equal 'doc:foo'
         _(task.link('  link :foo_bar" do')).must_equal 'foo_bar'
         _(task.link('  link :foo, curie :bar do')).must_equal 'foo'
       end
