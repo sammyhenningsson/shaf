@@ -159,7 +159,10 @@ module Shaf
     end
 
     def write_shaf_file(data = {})
-      data = read_shaf_file.merge(data)
+      write_shaf_file! read_shaf_file.merge(data)
+    end
+
+    def write_shaf_file!(data = {})
       File.write SHAF_VERSION_FILE,
         YAML.dump(data)
     end
@@ -168,8 +171,19 @@ module Shaf
       read_shaf_file['version']
     end
 
+    def read_shaf_upgrade_failure_version
+      read_shaf_file['failed_upgrade']
+    end
+
     def write_shaf_version(version = nil)
-      write_shaf_file('version' => version || Shaf::VERSION)
+      version ||= Shaf::VERSION
+      data = read_shaf_file.merge('version' => version.to_s)
+      data.delete('failed_upgrade')
+      write_shaf_file! data
+    end
+
+    def write_shaf_upgrade_failure(version)
+      write_shaf_file 'failed_upgrade' => version.to_s
     end
   end
 end

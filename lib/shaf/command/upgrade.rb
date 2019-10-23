@@ -24,10 +24,23 @@ module Shaf
 
       def call
         in_project_root do
-          upgrade_packages.each { |package| apply(package) }
+          upgrade_packages.each do |package|
+            next if skip? package
+
+            if package.version == current_failed_version
+              print_previous_failed_warning package.version
+            else
+              apply!(package)
+            end
+
+            write_shaf_version(package.version)
+          end
+
           puts "\nProject is up-to-date! Shaf version: #{current_version}"
         end
       rescue UpgradeFailedError => e
+        write_shaf_upgrade_failure e.version
+
         puts <<~ERR
         
           Failed to upgrade project to version #{e.version}
@@ -35,13 +48,12 @@ module Shaf
           For more info see:
           https://github.com/sammyhenningsson/shaf/blob/master/doc/UPGRADE.md
         ERR
+
+        raise
       end
 
-      def apply(package)
-        unless skip? package
-          package.load.apply or raise UpgradeFailedError.new(package.version)
-        end
-        write_shaf_version package.version.to_s
+      def apply!(package)
+        package.load.apply or raise UpgradeFailedError.new(package.version)
       rescue Errno::ENOENT
         raise UpgradeFailedError,
           "Failed to execute system command 'patch'. Make sure that 'patch' installed!" \
@@ -69,6 +81,19 @@ module Shaf
 
       def target_version
         Shaf::Upgrade::Version.new(ENV.fetch('UPGRADE_TARGET', '99.9.9'))
+      end
+
+      def current_failed_version
+        version = read_shaf_upgrade_failure_version
+        Shaf::Upgrade::Version.new(version) if version
+      end
+
+      def print_previous_failed_warning(version)
+        puts <<~MSG
+          Previous upgrade to version #{version} failed!
+          Assuming all files has been fixed manually and continuing with
+          upgrade.
+        MSG
       end
     end
   end

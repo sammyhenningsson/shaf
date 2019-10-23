@@ -25,9 +25,10 @@ module Shaf
       end
 
       def <=>(other)
-        if other.is_a? String
+        case other
+        when String
           compare_version(*split_version(other))
-        else
+        when Version
           compare_version(other.major, other.minor, other.patch)
         end
       end

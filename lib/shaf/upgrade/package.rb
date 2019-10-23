@@ -77,7 +77,7 @@ module Shaf
       end
 
       def apply(dir = nil)
-        puts "Applying changes for version #{version}" if ENV["VERBOSE"] == "1"
+        puts "Applying changes for version #{version}"
         [
           apply_patches(dir),
           apply_drops(dir),

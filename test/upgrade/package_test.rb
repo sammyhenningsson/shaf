@@ -99,9 +99,11 @@ module Shaf
         {'0123456789abcdef' => 'some_patch_data'}
       )
 
-      package.stub :files_in, project_files do
-        package.stub :apply_patch, apply_patch_stub do
-          package.apply
+      Mutable.suppress_output do
+        package.stub :files_in, project_files do
+          package.stub :apply_patch, apply_patch_stub do
+            package.apply
+          end
         end
       end
 
