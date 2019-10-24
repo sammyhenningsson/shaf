@@ -133,11 +133,12 @@ module Shaf
 
       def delete_link
         link(
-          rel: "doc:delete",
+          rel: "delete",
           desc: "Link to delete this #{name}",
           method: "DELETE",
           uri: "/#{plural_name}/5",
-          uri_helper: "#{name}_uri(resource)"
+          uri_helper: "#{name}_uri(resource)",
+          kwargs: ", curie: :doc"
         )
       end
 
