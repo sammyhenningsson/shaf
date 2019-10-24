@@ -1,3 +1,9 @@
+## 1.3.0
+ * Render api ocumentation as HAL
+ * Fix errors rendering documentation
+ * Fixed some previous bad upgrade packages
+ * Continue upgrade from correct version
+ * Remove doc curie from rels already in IANA
 ## 1.2.2
  * Fix bug with broken settings for ruby 2.5
  * Removed failing settings patch from 1.2.1 upgrade pkg
