@@ -3,17 +3,19 @@ class DocsController < BaseController
   register_uri :doc_curie,      '/doc/:resource/rels/{rel}'
   register_uri :documentation,  '/doc/:resource'
 
-  get :doc_curie_uri do
+  before_action do
     cache_control(:private, http_cache_max_age: :long)
-    doc.link(params[:rel])
   end
 
-  get :documentation_uri do
-    cache_control(:private, http_cache_max_age: :long)
-    doc.to_s
+  get :doc_curie_path do
+    respond_with doc, path: request.path_info, rel: params[:rel]
+  end
+
+  get :documentation_path do
+    respond_with doc, path: request.path_info
   end
 
   def doc
-    Shaf::DocModel.find!(params[:resource])
+    Shaf::ResourceDoc.find!(params[:resource])
   end
 end

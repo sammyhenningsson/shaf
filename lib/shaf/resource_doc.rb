@@ -1,7 +1,7 @@
 require 'yaml'
 
 module Shaf
-  class DocModel
+  class ResourceDoc
     class << self
       def find(name)
         unless docs[name]
