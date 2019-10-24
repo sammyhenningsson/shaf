@@ -3,6 +3,7 @@ Serializers generated with `shaf generate` inherits from `BaseSerializer` which 
 ```sh
 class PostSerializer < BaseSerializer
 
+  model Post
   attribute :message
 
   link :self do

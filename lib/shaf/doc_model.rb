@@ -29,12 +29,12 @@ module Shaf
     
     attr_reader :name, :attributes, :links, :curies, :embeds
 
-    def initialize(name, **kwargs)
+    def initialize(name, properties = {})
       @name       = name
-      @attributes = kwargs.fetch(:attributes, {})
-      @links      = kwargs.fetch(:links, {})
-      @curies     = kwargs.fetch(:curies, {})
-      @embeds     = kwargs.fetch(:embeds, {})
+      @attributes = properties.fetch('attributes', {})
+      @links      = properties.fetch('links', {})
+      @curies     = properties.fetch('curies', {})
+      @embeds     = properties.fetch('embeds', {})
     end
 
     def to_s

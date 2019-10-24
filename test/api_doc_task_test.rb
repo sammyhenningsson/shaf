@@ -12,6 +12,11 @@ module Shaf
         end
       end
 
+      it "#attribute" do
+        _(task.attribute("  attribute :foo")).must_equal 'foo'
+        _(task.attribute("  attributes :foo, bar")).must_be_nil
+      end
+
       it "#link" do
         _(task.link("  link :self do")).must_equal 'self'
         _(task.link("  link :'doc:foo' do")).must_equal 'doc:foo'

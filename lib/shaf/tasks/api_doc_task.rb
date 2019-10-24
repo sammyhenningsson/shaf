@@ -28,7 +28,7 @@ module Shaf
             files = Dir.glob(File.join(source_dir, "*.rb"))
             files.each do |file|
               read_file file do |doc|
-                next unless doc.has_enough_info?
+                next unless doc.valid?
                 doc.write_html @html_output_dir
                 doc.write_yaml @yaml_output_dir
               end
@@ -106,19 +106,19 @@ module Shaf
       end
 
       def attribute(line)
-        line[/\A\s*attribute[^s]\s*\(?:(\w+)/, 1]
+        line[/\A\s*attribute\s+\(?:(\w+)/, 1]
       end
 
       def link(line)
-        line[/\A\s*link\s*\(?:?['"]?([-:\w]+)['"]?/, 1]
+        line[/\A\s*link\s+\(?:?['"]?([-:\w]+)['"]?/, 1]
       end
 
       def curie(line)
-        line[/\A\s*curie\s*\(?:'?([-\w]+)'?/, 1]
+        line[/\A\s*curie\s+\(?:'?([-\w]+)'?/, 1]
       end
 
       def embed(line)
-        line[/\A\s*embed\s*\(?:'?([-:\w]+)'?/, 1]
+        line[/\A\s*embed\s+\(?:'?([-:\w]+)'?/, 1]
       end
     end
   end

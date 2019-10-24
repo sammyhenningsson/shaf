@@ -40,7 +40,7 @@ module Shaf
         @embeds[strip_curie(name)] = comment unless comment.empty?
       end
 
-      def has_enough_info?
+      def valid?
         return false unless model
         attributes.merge(links).merge(curies).any?
       end
@@ -70,12 +70,17 @@ module Shaf
         hash.to_yaml
       end
 
+      def markdown
+        generate_markdown!
+        @md[:doc]
+      end
+
       def to_html
+        options = {autolink: true, fenced_code_blocks: true}
+        markdown_renderer = Redcarpet::Markdown.new(Redcarpet::Render::HTML, options)
+        html = markdown_renderer.render markdown
         # For some reason redcarpet don't like to surround my markdown code blocks
         # with <pre> tags, so let's fix that here.
-        options = {autolink: true, fenced_code_blocks: true}
-        markdown = Redcarpet::Markdown.new(Redcarpet::Render::HTML, options)
-        html = markdown.render(generate_markdown!)
         html.gsub!("<code>", "<pre><code>")
         html.gsub!("</code>", "</code></pre>")
         html
@@ -103,26 +108,26 @@ module Shaf
       end
 
       def generate_title!
-        @md[:doc] = "##%s\n" % model.capitalize
+        @md[:doc] = "# #{model.capitalize}\n"
         @md[:title] = model.capitalize
       end
 
       def generate_policy!
         return if policy.nil?
-        @md[:doc] << "###Policy\n#{policy}\n"
+        @md[:doc] << "## Policy\n#{policy}\n"
         @md[:policy] = policy
       end
 
       def generate_section!(key:, heading:, sub_title: "")
         list = send(key)
-        @md[:doc] << "####{heading}\n"
+        @md[:doc] << "## #{heading}\n"
         @md[key] = {}
         if list.empty?
           @md[:doc] << "This resource does not have any documented #{heading.downcase}\n"
         else
-          sub_title << ": " unless sub_title.empty?
+          sub_title += ": " unless sub_title.empty?
           list.each do |name, comment|
-            @md[:doc] << "#######{sub_title}#{name.tr('_', '-')}\n#{comment.to_s}\n"
+            @md[:doc] << "- *#{sub_title}#{name.tr('_', '-')}*\n  #{comment.to_s.gsub("\n", "\n  ")}\n\n"
             @md[key][name] = comment.to_s.chomp
           end
         end
