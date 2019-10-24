@@ -108,7 +108,8 @@ module Shaf
           "Send a POST request to this uri to create a new #{name}",
           method: "GET or POST",
           uri: "/#{plural_name}",
-          uri_helper: "#{plural_name}_uri"
+          uri_helper: "#{plural_name}_uri",
+          kwargs: ', embed_depth: 0'
         )
       end
 
@@ -149,13 +150,13 @@ module Shaf
         )
       end
 
-      def link(rel:, method: "GET", desc:, uri:, uri_helper:)
+      def link(rel:, method: "GET", desc:, uri:, uri_helper:, kwargs: "")
         <<~EOS.split("\n")
           # Auto generated doc:  
           # #{desc}.  
           # Method: #{method}  
           #{example(method, uri)}
-          link #{Utils.symbol_string(rel)} do
+          link #{Utils.symbol_string(rel)}#{kwargs} do
             #{uri_helper}
           end
         EOS
