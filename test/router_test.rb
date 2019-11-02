@@ -51,7 +51,7 @@ module Shaf
     end
 
     it 'routes to the right controller' do
-      get 'one'
+      get '/one'
       assert_equal 'one1', last_response.body
 
       get '/one/5'
@@ -79,6 +79,7 @@ module Shaf
     it 'uses the default controller when no match is found' do
       get '/doesnotexist'
       assert_equal 'nada', last_response.body
+      assert_equal 404, last_response.status
     end
 
     it 'can cascade to another controller' do
@@ -87,6 +88,17 @@ module Shaf
 
       get '/two/7'
       assert_equal 'another_two', last_response.body
+    end
+
+
+    it 'returns 405 when route matches but not the HTTP method' do
+      put '/one'
+
+      assert_equal 405, last_response.status
+      allowed = last_response.headers['Allow']
+        .split(',')
+        .map(&:strip)
+      assert_equal ["GET", "HEAD"], allowed.sort
     end
   end
 end

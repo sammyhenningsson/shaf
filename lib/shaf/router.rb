@@ -5,6 +5,22 @@ require 'set'
 
 module Shaf
   class Router
+    class MethodNotAllowedResponder
+      attr_reader :supported_methods
+
+      def initialize(supported_methods)
+        @supported_methods = supported_methods
+      end
+
+      def allowed
+        supported_methods.join(', ')
+      end
+
+      def call(env)
+        [405, {'Allow' => allowed}, '']
+      end
+    end
+
     class << self
       def mount(controller, default: false)
         @default_controller = controller if default
@@ -28,13 +44,14 @@ module Shaf
       attr_reader :controllers
 
       def init_routes
-        @routes = {}
+        @routes = Hash.new do |hash, key|
+          hash[key] = Hash.new { |hash, key| hash[key] = Set.new }
+        end
         controllers.each { |controller| init_routes_for(controller) }
       end
 
       def init_routes_for(controller)
         controller.routes.each do |method, controller_routes|
-          routes[method] ||= Hash.new { |hash, key| hash[key] = [] }
           routes[method][controller] += controller_routes.map(&:first)
         end
       end
@@ -74,6 +91,11 @@ module Shaf
         yield ctrlr unless ctrlr == controller
       end
 
+      supported_methods = supported_methods_for(path)
+      if !supported_methods.empty? && !supported_methods.include?(http_method)
+        yield MethodNotAllowedResponder.new(supported_methods)
+      end
+
       yield default_controller
     end
 
@@ -105,6 +127,17 @@ module Shaf
       end
     end
 
+    def supported_methods_for(path)
+      methods = Set.new
+      routes.each do |http_method, controllers|
+        controllers.each do |_, patterns|
+          next unless patterns.any? { |pattern| pattern.match(path) }
+          methods << http_method
+        end
+      end
+      methods.to_a
+    end
+
     def cascade?(result)
       result.dig(1, 'X-Cascade') == 'pass'
     end
@@ -114,6 +147,8 @@ module Shaf
     end
 
     def add_cache(controller, http_method, path)
+      return unless controller
+
       key = cache_key(http_method, path)
       cache[key] << controller
     end
