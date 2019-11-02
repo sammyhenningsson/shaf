@@ -17,8 +17,9 @@ class DocumentationSerializer < BaseSerializer
       hash[attr] = resource.attribute(attr)
     else
       hash[:attributes] = resource.attributes
-      hash[:rels] = resource.links
-      hash[:embeds] = resource.embeds
+      hash[:relations] = resource.links
+      embeds = resource.embeds
+      hash[:embedded_resources] = embeds unless embeds.empty?
     end
   end
 end
