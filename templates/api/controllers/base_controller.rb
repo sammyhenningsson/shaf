@@ -6,7 +6,6 @@ class BaseController < Sinatra::Base
     disable :static
     enable :logging
     enable :method_override
-    mime_type :hal, 'application/hal+json'
     set :views, Shaf::Settings.views_folder
     set :static, !production?
     set :public_folder, Shaf::Settings.public_folder
