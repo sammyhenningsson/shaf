@@ -37,6 +37,7 @@ class BaseController < Sinatra::Base
 
   before do
     log.info "Processing: #{request.request_method} #{request.path_info}"
+    log.debug "Headers: #{request_headers}"
     log.debug "Payload: #{payload || 'empty'}"
     set_vary_header
   end

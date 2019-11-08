@@ -1,27 +1,11 @@
 # frozen_string_literal: true
 
 require 'set'
+require 'shaf/responder'
 
 module Shaf
   module Payload
     EXCLUDED_FORM_PARAMS = ['captures', 'splat'].freeze
-
-    def supported_response_types(resource)
-      [
-        mime_type(:hal),
-        mime_type(:json),
-        mime_type(:html)
-      ]
-    end
-
-    def preferred_response_type(resource)
-      supported_types = supported_response_types(resource)
-      request.preferred_type(supported_types)
-    end
-
-    def prefer_html?
-      request.preferred_type.to_s == mime_type(:html)
-    end
 
     private
 
@@ -95,58 +79,31 @@ module Shaf
     def respond_with(resource, status: 200, serializer: nil, collection: false, **kwargs)
       status(status)
 
-      preferred_response = preferred_response_type(resource)
-      http_cache = kwargs.delete(:http_cache) { Settings.http_cache }
-
-      serializer ||= HALPresenter.lookup_presenter(resource)
-      serialized = serialize(resource, serializer, collection, **kwargs)
-      add_cache_headers(serialized) if http_cache
+      kwargs.merge!(
+        profile: profile,
+        serializer: serializer,
+        collection: collection
+      )
 
       log.info "#{request.request_method} #{request.path_info} => #{status}"
-
-      if preferred_response == mime_type(:html)
-        respond_with_html(resource, serialized)
+      payload = Responder.for(request, resource).call(self, resource, **kwargs)
+      add_cache_headers(payload, kwargs)
+    rescue StandardError => err
+      log.error "Failure: #{err.message}\n#{err.backtrace}"
+      if status == 500
+        content_type mime_type(:json)
+        body JSON.generate(failure: err.message)
       else
-        respond_with_hal(resource, serialized, serializer)
+        respond_with(Errors::ServerError.new(err.message), status: 500)
       end
     end
 
-    def serialize(resource, serializer, collection, **options)
-      if collection
-        serializer.to_collection(resource, current_user: current_user, **options)
-      else
-        serializer.to_hal(resource, current_user: current_user, **options)
-      end
-    end
-
-    def respond_with_hal(resource, serialized, serializer)
-      log.debug "Response payload (#{resource.class}): #{serialized}"
-      content_type :hal, content_type_params(serializer)
-      body serialized
-    end
-
-    def respond_with_html(resource, serialized)
-      log.debug "Responding with html. Output payload (#{resource.class}): #{serialized}"
-      content_type :html
-      case resource
-      when Formable::Form
-        body erb(:form, locals: {form: resource, serialized: serialized})
-      else
-        body erb(:payload, locals: {serialized: serialized})
-      end
-    end
-
-    def add_cache_headers(payload)
+    def add_cache_headers(payload, kwargs)
+      return unless kwargs.delete(:http_cache) { Settings.http_cache }
       return if payload.nil? || payload.empty?
 
       sha1 = Digest::SHA1.hexdigest payload
       etag sha1, :weak # Weak or Strong??
-    end
-
-    def content_type_params(serializer)
-      return {profile: profile} if profile
-
-      {profile: serializer.semantic_profile}.compact
     end
   end
 end
