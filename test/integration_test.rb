@@ -3,8 +3,7 @@
 require 'test_helper'
 require 'tmpdir'
 require 'fileutils'
-require 'net/http'
-require 'uri'
+require 'faraday'
 require 'socket'
 
 module Shaf
@@ -24,19 +23,25 @@ module Shaf
       FileUtils.remove_dir(tmp_dir)
     end
 
+    def verbose?
+      ENV["VERBOSE"].to_i == 1
+    end
+
     def with_server(port: nil)
       port ||= get_server_port
       pid = nil
       Dir.chdir(project_path) do
         redirects = {out: File::NULL}
-        redirects[:err] = [:child, :out] unless ENV["VERBOSE"].to_i == 1
+        redirects[:err] = [:child, :out] unless verbose?
         pid = Test.spawn("bundle exec shaf server -p #{port}", redirects: redirects)
         sleep 2
         yield port
       end
     rescue StandardError => e
       STDERR.puts "\n Failed to start server: #{e.message}"
+      STDERR.puts e.backtrace if verbose?
     ensure
+      return unless pid
       Process.kill("TERM", pid)
       Process.waitpid2(pid)
     end
@@ -48,10 +53,12 @@ module Shaf
       port
     end
 
-    def get(uri)
-      response = Net::HTTP.get(URI(uri))
-      assert response, "Failed to get response from server"
-      @response = JSON.parse(response)
+    def get(uri, expected_status: 200)
+      response = Faraday.get(uri, {}, 'Accept' => 'application/hal+json')
+
+      assert response.body, "Failed to get response from server"
+      assert_equal expected_status, response.status
+      @response = JSON.parse(response.body)
     end
 
     def get_root(port: 3030)
@@ -59,7 +66,7 @@ module Shaf
     end
 
     def get_link(rel)
-      assert @response["_links"][rel],
+      assert @response&.dig("_links", rel),
         "Response does not contain link with rel '#{rel}', #{@response}"
       get(@response["_links"][rel]["href"])
     end
