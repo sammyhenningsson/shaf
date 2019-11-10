@@ -1,3 +1,8 @@
+## 1.4.0
+ * Replace Net::HTTP with Faraday in tests
+ * Support application/problem+json
+ * Added Responder classes
+ * Respond with 405 when http method is not allowed
 ## 1.3.0
  * Render api ocumentation as HAL
  * Fix errors rendering documentation
