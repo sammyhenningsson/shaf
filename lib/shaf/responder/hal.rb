@@ -17,6 +17,8 @@ module Shaf
       end
 
       def profile
+        return unless serializer
+
         @profile ||= options[:profile] || serializer.semantic_profile
       end
     end
