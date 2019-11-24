@@ -15,7 +15,7 @@ module Shaf
     def __action_hook(hook, method_name, block, **options)
       only = Array(options[:only]) if options.key? :only
       except = Array(options[:except]) if options.key? :except
-      validate_symbols(hook: hook, only: only, except: except)
+      __validate_symbols(hook: hook, only: only, except: except)
 
       path_helpers.each do |helper|
         next if only && !only.include?(helper)
@@ -43,7 +43,7 @@ module Shaf
       Regexp.new("#{str}/?")
     end
 
-    def validate_symbols(hook:, only: [], except: [])
+    def __validate_symbols(hook:, only: [], except: [])
       s = "\n\n\"%s\" given as :%s keyword arg to %s hook. Must be a symbol!\n"
       Array(only).each do |value|
         next if value.is_a? Symbol
@@ -56,6 +56,4 @@ module Shaf
       end
     end
   end
-
-  Sinatra.register ControllerHooks
 end
