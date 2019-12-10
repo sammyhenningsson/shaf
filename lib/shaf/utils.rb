@@ -4,7 +4,6 @@ require 'erb'
 require 'forwardable'
 require 'yaml'
 require 'shaf/version'
-require 'sinatra/base'
 
 module Shaf
   module Utils
@@ -45,6 +44,7 @@ module Shaf
       end
 
       def environment
+        require 'sinatra/base'
         Sinatra::Application.settings.environment
       end
 
