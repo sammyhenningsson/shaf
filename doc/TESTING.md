@@ -120,7 +120,7 @@ describe "Post", type: :integration do
     get posts_uri
     _(status).must_equal 200
     _(links[:self][:href]).must_include posts_uri
-    _(embedded(:'posts').size).must_equal 1
+    _(embedded(:posts).size).must_equal 1
 
     all_messages = embedded(:posts).map { |post| post[:message] }
     _(all_messages).must_include("value for message")

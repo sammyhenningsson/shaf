@@ -33,4 +33,4 @@ test:
   <<: *default
   port: 3030
 ```
-These settings can be read from your code with `Shaf::Settings.NAME_OF_SETTING`. So for example `Shaf::Settings.port` would return 443 in production environment and 300 in development.
+These settings can be read from your code with `Shaf::Settings.NAME_OF_SETTING`. So for example `Shaf::Settings.port` would return 443 in production environment and 3000 in development.

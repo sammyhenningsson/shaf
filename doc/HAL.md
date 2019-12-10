@@ -14,7 +14,7 @@ The [HAL](http://stateless.co/hal_specification.html) mediatype is very simple a
     "create-form": {
       "href": "http://localhost:3000/post/form"
     },
-    "author": {
+    "doc:author": {
       "href": "http://localhost:3000/users/1"
     },
     "curies": [
