@@ -6,26 +6,26 @@ PATH
 GEM
   remote: https://rubygems.org/
   specs:
-    faraday (0.17.0)
+    faraday (0.17.1)
       multipart-post (>= 1.2, < 3)
-    minitest (5.11.3)
+    minitest (5.13.0)
     multipart-post (2.1.1)
     mustermann (1.0.3)
-    rack (2.0.6)
-    rack-protection (2.0.5)
+    rack (2.0.8)
+    rack-protection (2.0.7)
       rack
     rack-test (1.1.0)
       rack (>= 1.0, < 3)
-    rake (12.3.2)
+    rake (12.3.3)
     redcarpet (3.5.0)
-    sequel (5.18.0)
-    sinatra (2.0.5)
+    sequel (5.27.0)
+    sinatra (2.0.7)
       mustermann (~> 1.0)
       rack (~> 2.0)
-      rack-protection (= 2.0.5)
+      rack-protection (= 2.0.7)
       tilt (~> 2.0)
-    sqlite3 (1.4.0)
-    tilt (2.0.9)
+    sqlite3 (1.4.2)
+    tilt (2.0.10)
 
 PLATFORMS
   ruby

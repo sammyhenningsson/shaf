@@ -31,9 +31,9 @@ module Shaf
         def options(option_parser, options); end
       end
 
-      def initialize(*args)
+      def initialize(*args, **options)
         @args = args.dup
-        @options = {}
+        @options = options
         parse_options!
       end
 

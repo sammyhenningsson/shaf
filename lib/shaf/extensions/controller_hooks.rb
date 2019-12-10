@@ -3,11 +3,11 @@ require 'sinatra/base'
 module Shaf
   module ControllerHooks
     def before_action(method_name = nil, **options, &block)
-      __action_hook(:before, method_name, block, options)
+      __action_hook(:before, method_name, block, **options)
     end
 
     def after_action(method_name = nil, **options, &block)
-      __action_hook(:after, method_name, block, options)
+      __action_hook(:after, method_name, block, **options)
     end
 
     private

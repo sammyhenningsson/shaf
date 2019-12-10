@@ -39,12 +39,12 @@ module Shaf
       end
     end
 
-    def create(*params)
+    def create(*params, **options)
       clazz = lookup(*params)
       raise NotFoundError.new(%Q(Command '#{ARGV}' is not supported)) unless clazz
 
       args = init_args(clazz, params)
-      clazz.new(*args)
+      clazz.new(*args, **options)
     end
 
     private

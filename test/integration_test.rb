@@ -136,6 +136,11 @@ module Shaf
         end
 
         exit_status =  Test.system("bundle exec shaf my_command") do |out, err|
+          # FIXME: remove these ruby 2.7 related warning when they have ben fixed in dependancies
+          err = String(err)
+          err.gsub!(/^.*warning: The last argument is used as the keyword parameter.*$/, "")
+          err.gsub!(/^.*warning: for .* defined here.*$/, "")&.strip!
+          ##################################################
           assert_equal "hej", out
           assert err.empty?
         end
@@ -196,13 +201,19 @@ module Shaf
         assert Test.system('bundle exec rake db:migrate')
         assert Test.system('bundle exec rake db:seed')
 
-        exit_status = Test.system('bundle exec shaf console', stdin: 'User.count') do |out, err|
+        exit_status = Test.system('bundle exec shaf console', stdin: "User.count\n") do |out, err|
+          # FIXME: remove these ruby 2.7 related warning when they have ben fixed in dependancies
+          err = String(err)
+          err.gsub!(/^.*warning: The last argument is used as the keyword parameter.*$/, "")
+          err.gsub!(/^.*warning: for .* defined here.*$/, "")&.strip!
+          ##################################################
           assert_empty String(err)
           assert_match %r{User\.count}, out
           output_rows = out.split("\n").map(&:strip)
           i = output_rows.find_index 'User.count'
+          assert i
           user_count = output_rows[i + 1].to_i
-          assert_equal 3, user_count
+          assert_equal 3, user_count.to_i
         end
         assert exit_status
       end
