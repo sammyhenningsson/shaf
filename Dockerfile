@@ -1,4 +1,5 @@
 FROM ruby:2.5
+ARG build
 
 RUN apt update && apt install -y vim sudo
 
@@ -11,8 +12,8 @@ USER shaf
 COPY --chown=shaf:shaf . $APP_HOME
 
 RUN gem update bundler
-RUN SIGN=false gem build shaf.gemspec
-RUN gem install shaf-*.gem
+RUN if [ -n "$build" ]; then SIGN=false gem build shaf.gemspec; gem install shaf-*.gem; fi
+
 RUN bundle install
 
 # Configure production environment variables
@@ -20,4 +21,4 @@ ENV RACK_ENV=test
 
 EXPOSE 3000
 
-CMD ["rake", "test"]
+CMD ["bundle", "exec", "rake", "test"]

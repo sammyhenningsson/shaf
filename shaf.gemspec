@@ -32,4 +32,5 @@ Gem::Specification.new do |gem|
   gem.add_development_dependency 'redcarpet', '~> 3.5'
   gem.add_development_dependency 'faraday', '~> 0.17'
   gem.add_development_dependency 'git', '~> 1.5'
+  gem.add_development_dependency 'bundler', '~> 2.1'
 end

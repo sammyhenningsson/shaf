@@ -49,7 +49,7 @@ module Shaf
 
       def bundle_install
         return if ENV['SKIP_BUNDLE_INSTALL']
-        Bundler.with_clean_env { `bundle install` }
+        Bundler.with_unbundled_env { `bundle install` }
       end
 
       def system(*args, stdin: nil, rack_env: 'development')
@@ -57,7 +57,7 @@ module Shaf
         env = {'RUBYLIB' => gem_lib_dir, 'RACK_ENV' => rack_env}
         cmd = args.join(' ')
 
-        Bundler.with_clean_env do
+        Bundler.with_unbundled_env do
           Open3.popen3(env, cmd) do |std_in, std_out, std_err, wait_thr|
             std_in.write(stdin) && std_in.close unless stdin.nil?
             exit_status = wait_thr.value # Process::Status object returned.
@@ -77,7 +77,7 @@ module Shaf
       def spawn(*args, redirects: {}, rack_env: 'development')
         return if args.size.zero?
         env = {'RUBYLIB' => gem_lib_dir, 'RACK_ENV' => rack_env}
-        Bundler.with_clean_env do
+        Bundler.with_unbundled_env do
           Kernel::spawn(env, *args, redirects)
         end
       end
