@@ -31,4 +31,5 @@ Gem::Specification.new do |gem|
   gem.add_development_dependency 'sqlite3', '~> 1.3'
   gem.add_development_dependency 'redcarpet', '~> 3.5'
   gem.add_development_dependency 'faraday', '~> 0.17'
+  gem.add_development_dependency 'git', '~> 1.5'
 end

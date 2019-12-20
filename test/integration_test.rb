@@ -3,24 +3,47 @@
 require 'test_helper'
 require 'tmpdir'
 require 'fileutils'
-require 'faraday'
 require 'socket'
+require 'logger'
+require 'faraday'
+require 'git'
 
 module Shaf
   describe "Setting up a new project" do
     let(:tmp_dir) { Dir.mktmpdir }
     let(:project_name) { "blog" }
-    let(:project_path) { File.join(tmp_dir, project_name) }
 
     before do
-      Dir.chdir(tmp_dir) do
-        Command::New.new(project_name).call
-        Dir.chdir(project_name) { Test.bundle_install }
-      end
+      setup_project
     end
 
     after do
-      FileUtils.remove_dir(tmp_dir)
+      reset_project
+    end
+
+    def setup_project
+      return if defined? @@project_path
+
+      Dir.chdir(tmp_dir) do
+        Command::New.new(project_name).call
+        Dir.chdir(project_name) do
+          Test.bundle_install
+          git = Git.init
+          git.config('user.name', 'Shaf IntegrationTest')
+          git.config('user.email', 'shaf@integration.test')
+          git.add
+          git.commit('clean')
+        end
+      end
+
+      @@project_path =  File.join(tmp_dir, project_name)
+    end
+
+    def reset_project
+      assert defined? @@project_path
+      git = Git.open(@@project_path)
+      git.reset_hard
+      git.clean(force: true, d: true)
     end
 
     def verbose?
@@ -30,7 +53,7 @@ module Shaf
     def with_server(port: nil)
       port ||= get_server_port
       pid = nil
-      Dir.chdir(project_path) do
+      Dir.chdir(@@project_path) do
         redirects = {out: File::NULL}
         redirects[:err] = [:child, :out] unless verbose?
         pid = Test.spawn("bundle exec shaf server -p #{port}", redirects: redirects)
@@ -72,7 +95,7 @@ module Shaf
     end
 
     it "copies templates" do
-      Dir.chdir(project_path) do
+      Dir.chdir(@@project_path) do
         %w(Gemfile Rakefile config.ru .shaf config/bootstrap.rb config/settings.yml
         config/paths.rb config/database.rb config/directories.rb config/helpers.rb
         config/initializers.rb config/initializers/db_migrations.rb
@@ -99,7 +122,7 @@ module Shaf
     end
 
     it "adds a link to a new resource" do
-      Dir.chdir(project_path) do
+      Dir.chdir(@@project_path) do
         assert Test.system("bundle exec shaf generate scaffold post message:string:Meddelande author:integer:Författare")
         assert Test.system("bundle exec rake db:migrate")
 
@@ -111,7 +134,7 @@ module Shaf
     end
 
     it "passes specs" do
-      Dir.chdir(project_path) do
+      Dir.chdir(@@project_path) do
         assert Test.system("bundle exec shaf generate scaffold post message:string:Meddelande author:integer:Författare")
         assert Test.system("bundle exec rake db:migrate")
         assert Test.system("bundle exec shaf test")
@@ -119,7 +142,7 @@ module Shaf
     end
 
     it "can use custom commands" do
-      Dir.chdir(project_path) do
+      Dir.chdir(@@project_path) do
         File.open("config/customize.rb", "w") do |f|
           f.puts <<~EOS
             require 'shaf'
@@ -149,7 +172,7 @@ module Shaf
     end
 
     it "can use custom generators" do
-      Dir.chdir(project_path) do
+      Dir.chdir(@@project_path) do
 
         filename = 'lib/generators/my_generator.rb'
         content = 'Some content'
@@ -176,7 +199,7 @@ module Shaf
     end
 
     it 'seed the db' do
-      Dir.chdir(project_path) do
+      Dir.chdir(@@project_path) do
         assert Test.system('shaf generate scaffold user name:string')
 
         Dir.mkdir 'db/seeds'
