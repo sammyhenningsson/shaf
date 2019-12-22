@@ -1,3 +1,7 @@
+## 1.4.1
+ * Test ruby 2.7 in CI
+ * Fix ruby 2.7 warnings
+ * Gem test speed up
 ## 1.4.0
  * Replace Net::HTTP with Faraday in tests
  * Support application/problem+json
