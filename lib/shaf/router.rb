@@ -45,7 +45,7 @@ module Shaf
 
       def init_routes
         @routes = Hash.new do |hash, key|
-          hash[key] = Hash.new { |hash, key| hash[key] = Set.new }
+          hash[key] = Hash.new { |h, k| h[k] = Set.new }
         end
         controllers.each { |controller| init_routes_for(controller) }
       end
