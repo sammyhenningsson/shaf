@@ -19,19 +19,6 @@ class BaseController < Sinatra::Base
 
   Shaf::Router.mount(self, default: true)
 
-  def self.inherited(controller)
-    super
-    Shaf::Router.mount controller
-  end
-
-  def self.log
-    $logger
-  end
-
-  def log
-    self.class.log
-  end
-
   register(*Shaf.extensions)
   helpers(*Shaf.helpers)
 
@@ -40,13 +27,6 @@ class BaseController < Sinatra::Base
     log.debug "Headers: #{request_headers}"
     log.debug "Payload: #{payload || 'empty'}"
     set_vary_header
-  end
-
-  def set_vary_header
-    return unless settings.auth_token_header
-    return unless [:get, :head].include? request.request_method.downcase.to_sym
-
-    headers('Vary' => Shaf::Settings.auth_token_header)
   end
 
   not_found do
@@ -62,6 +42,16 @@ class BaseController < Sinatra::Base
     respond_with api_error(err)
   end
 
+  def self.inherited(controller)
+    super
+    Shaf::Router.mount controller
+  end
+
+  def set_vary_header
+    return unless settings.auth_token_header
+    return unless [:get, :head].include? request.request_method.downcase.to_sym
+
+    headers('Vary' => Shaf::Settings.auth_token_header)
   end
 
   def api_error(err)
