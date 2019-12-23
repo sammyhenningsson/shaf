@@ -59,12 +59,12 @@ class BaseController < Sinatra::Base
     log.error err.message
     Array(err.backtrace).each(&log.method(:error))
 
-    api_error = to_api_error(err)
-
-    respond_with(api_error, status: api_error.http_status)
+    respond_with api_error(err)
   end
 
-  def to_api_error(err)
+  end
+
+  def api_error(err)
     case err
     when Shaf::Authorize::PolicyViolationError
       ForbiddenError.new

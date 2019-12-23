@@ -66,7 +66,7 @@ module Shaf
       @profile = value
     end
 
-    def respond_with_collection(resource, status: 200, serializer: nil, **kwargs)
+    def respond_with_collection(resource, status: nil, serializer: nil, **kwargs)
       respond_with(
         resource,
         status: status,
@@ -76,7 +76,8 @@ module Shaf
       )
     end
 
-    def respond_with(resource, status: 200, serializer: nil, collection: false, **kwargs)
+    def respond_with(resource, status: nil, serializer: nil, collection: false, **kwargs)
+      status ||= resource.respond_to?(:http_status) ? resource.http_status : 200
       status(status)
 
       kwargs.merge!(
@@ -88,13 +89,14 @@ module Shaf
       log.info "#{request.request_method} #{request.path_info} => #{status}"
       payload = Responder.for(request, resource).call(self, resource, **kwargs)
       add_cache_headers(payload, kwargs)
+      payload
     rescue StandardError => err
       log.error "Failure: #{err.message}\n#{err.backtrace}"
       if status == 500
         content_type mime_type(:json)
         body JSON.generate(failure: err.message)
       else
-        respond_with(Errors::ServerError.new(err.message), status: 500)
+        respond_with(Errors::ServerError.new(err.message))
       end
     end
 
