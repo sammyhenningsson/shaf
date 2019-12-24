@@ -31,6 +31,10 @@ module Shaf
 
     alias current_user! authenticate!
 
+    def authenticated?(realm: nil)
+      !current_user(realm: realm).nil?
+    end
+
     def current_user(realm: nil)
       @current_user ||= {}
       @current_user[realm] ||= Authenticator.user(request.env, realm: realm)
