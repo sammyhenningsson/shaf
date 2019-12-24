@@ -35,12 +35,8 @@ module Shaf
         noun[0..-2]
       end
 
-      def symbolize(str)
-        :"#{str}"
-      end
-
       def symbol_string(str)
-        symbolize(str).inspect
+        str.to_sym.inspect
       end
 
       def environment
@@ -107,7 +103,7 @@ module Shaf
       end
     end
 
-    def_delegators Utils, :pluralize, :singularize, :symbolize, :symbol_string, :gem_root, :rackify_header
+    def_delegators Utils, :pluralize, :singularize, :symbol_string, :gem_root, :rackify_header
 
     def project_root
       return @project_root if defined? @project_root

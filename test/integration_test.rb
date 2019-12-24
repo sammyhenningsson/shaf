@@ -63,6 +63,7 @@ module Shaf
     rescue StandardError => e
       STDERR.puts "\n Failed to start server: #{e.message}"
       STDERR.puts e.backtrace if verbose?
+      raise
     ensure
       return unless pid
       Process.kill("TERM", pid)
@@ -76,37 +77,45 @@ module Shaf
       port
     end
 
-    def get(uri, expected_status: 200)
-      response = Faraday.get(uri, {}, 'Accept' => 'application/hal+json')
+    def get(uri, expected_status: 200, **opts)
+      headers = {'Accept' => 'application/hal+json'}.merge(opts.fetch(:headers, {}))
+      response = Faraday.get(uri, {}, headers)
+      body = response.body
 
-      assert response.body, "Failed to get response from server"
-      assert_equal expected_status, response.status
-      @response = JSON.parse(response.body)
+      assert body, "Failed to get response from server"
+      assert_equal expected_status, response.status, <<~MSG
+        Server responded with status #{response.status} (expected: #{expected_status})
+        Response: #{body}
+      MSG
+      @response = response
+      @body = JSON.parse(body)
     end
 
-    def get_root(port: 3030)
-      get("http://localhost:#{port}/")
+    def get_root(port: 3030, **opts)
+      get("http://localhost:#{port}/", **opts)
     end
 
-    def get_link(rel)
-      assert @response&.dig("_links", rel),
-        "Response does not contain link with rel '#{rel}', #{@response}"
-      get(@response["_links"][rel]["href"])
+    def get_link(rel, **opts)
+      assert @body&.dig("_links", rel),
+        "Response does not contain link with rel '#{rel}', #{@body}"
+      get(@body["_links"][rel]["href"], **opts)
     end
 
     it "copies templates" do
       Dir.chdir(@@project_path) do
-        %w(Gemfile Rakefile config.ru .shaf config/bootstrap.rb config/settings.yml
-        config/paths.rb config/database.rb config/directories.rb config/helpers.rb
-        config/initializers.rb config/initializers/db_migrations.rb
-        config/initializers/hal_presenter.rb config/initializers/logging.rb
-        config/initializers/sequel.rb api/controllers/base_controller.rb
-        api/controllers/root_controller.rb api/controllers/docs_controller.rb
-        api/serializers/error_serializer.rb api/serializers/form_serializer.rb
-        api/serializers/root_serializer.rb frontend/assets/css/main.css
-        frontend/views/form.erb frontend/views/layout.erb
-        frontend/views/payload.erb spec/spec_helper.rb
-        spec/serializers/root_serializer_spec.rb spec/integration/root_spec.rb
+        %w(Gemfile Rakefile config.ru .shaf config/bootstrap.rb
+          config/settings.yml config/paths.rb config/database.rb
+          config/directories.rb config/helpers.rb config/initializers.rb
+          config/initializers/db_migrations.rb
+          config/initializers/authentication.rb
+          config/initializers/hal_presenter.rb config/initializers/logging.rb
+          config/initializers/sequel.rb api/controllers/base_controller.rb
+          api/controllers/root_controller.rb api/controllers/docs_controller.rb
+          api/serializers/error_serializer.rb api/serializers/form_serializer.rb
+          api/serializers/root_serializer.rb frontend/assets/css/main.css
+          frontend/views/form.erb frontend/views/layout.erb
+          frontend/views/payload.erb spec/spec_helper.rb
+          spec/serializers/root_serializer_spec.rb spec/integration/root_spec.rb
         ).each do |file|
           assert File.exist?(file),
             "The file '#{file}' does not exist in a newly created project"
@@ -194,7 +203,70 @@ module Shaf
         end
         assert Test.system("bundle exec shaf generate my_generator")
         assert File.exist?(filename)
-        assert_equal File.read(filename), content
+        assert_equal content, File.read(filename)
+      end
+    end
+
+    it "authenticates" do
+      Dir.chdir(@@project_path) do
+        File.open("config/initializers/authentication.rb", "w") do |f|
+          f.puts <<~EOF
+            require 'shaf'
+            require 'ostruct'
+
+            Shaf::Authenticator::BasicAuth.restricted realm: 'MyApi' do |user, password|
+              return unless user && user == password
+              OpenStruct.new(name: user)
+            end
+          EOF
+        end
+
+        File.open("api/controllers/test_controller.rb", "w") do |f|
+          f.puts <<~EOF
+            require 'serializers/base_serializer'
+
+            class UserSerializer < BaseSerializer
+              attribute :name
+            end
+
+            class TestController < BaseController
+              get '/foo' do
+                www_authenticate realm: 'MyApi'
+                respond_with nil, status: 200, serializer: RootSerializer
+              end
+
+              get '/bar' do
+                authenticate!
+                respond_with current_user, status: 200, serializer: UserSerializer
+              end
+            end
+          EOF
+        end
+      end
+
+      with_server do |port|
+        base_uri = "http://localhost:#{port}"
+        get("#{base_uri}/foo")
+        assert_includes @response.headers.keys, 'www-authenticate'
+        assert_equal 'Basic realm="MyApi"', @response.headers['www-authenticate']
+
+        good_credentials = ['bob:bob'].pack("m*").chomp
+        get(
+          "#{base_uri}/bar",
+          expected_status: 200,
+          headers: {'Authorization': "Basic #{good_credentials}"}
+        )
+        assert_equal('bob', @body['name'])
+        refute_includes @response.headers.keys, 'www-authenticate'
+
+        bad_credentials = ['bob:123'].pack("m*").chomp
+        get(
+          "#{base_uri}/bar",
+          expected_status: 401,
+          headers: {'Authorization': "Basic #{bad_credentials}"}
+        )
+        assert_includes @response.headers.keys, 'www-authenticate'
+        assert_equal 'Basic realm="MyApi"', @response.headers['www-authenticate']
       end
     end
 
