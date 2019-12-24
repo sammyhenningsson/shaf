@@ -3,6 +3,7 @@ require 'shaf/helpers/json_html'
 require 'shaf/helpers/paginate'
 require 'shaf/helpers/payload'
 require 'shaf/helpers/http_header'
+require 'shaf/helpers/authentication'
 
 module Shaf
   def self.helpers
@@ -12,6 +13,7 @@ module Shaf
       Paginate,
       Payload,
       HttpHeader,
+      Authentication,
     ]
   end
 end

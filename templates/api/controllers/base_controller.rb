@@ -11,7 +11,6 @@ class BaseController < Sinatra::Base
     set :public_folder, Shaf::Settings.public_folder
     disable :dump_errors
     set :show_exceptions, :after_handler
-    enable :current_user
     set :auth_token_header, Shaf::Settings.auth_token_header
   end
 
