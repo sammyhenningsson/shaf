@@ -46,7 +46,6 @@ end
 %i[lib_dir src_dir app_dir].each do |cfg|
   dir = Shaf::Settings.send cfg
   next unless Dir.exist? dir
-  $LOAD_PATH.unshift dir
 
   Dir.chdir(dir) do
     require_ruby_files
