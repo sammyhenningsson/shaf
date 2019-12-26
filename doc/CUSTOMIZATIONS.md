@@ -74,7 +74,7 @@ Each responder is a subclass of `Shaf::Responder::Base`. To add more responders,
 All responders must implement `#body` and the must call `::mime_type(key, mime_type)` (where `key` is `Symbol` and `mime_type` is a `String`).  
 `#body` must return the serialized response.
 Responders are instantiated with `new(controller, resource, **options)` and they have `attr_readers` for each of those arguments.  
-Responders may override `::can_handle?(resource)`, which is used to decide with or not a responder is able to process a given object.  
+Responders may override `::can_handle?(resource)`, which is used to decide whether or not a responder is able to process a given object.  
 Say that you would like to be able to return siren payloads. And you happen to have a `MyCustomSirenSerializer` class that can turn any object into a proper siren payload. Then adding a Siren responder would look like this.
 ```ruby
 class SirenResponder < Shaf::Responder::Base
