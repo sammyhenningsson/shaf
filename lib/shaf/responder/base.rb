@@ -29,30 +29,59 @@ module Shaf
           Responder.default = self
         end
 
-        def call(controller, resource, **kwargs)
+        def call(controller, resource, preload: [], **kwargs)
           responder = new(controller, resource, **kwargs)
           response = responder.response
           log_response(controller, response)
-          write_response(controller, response)
+          write_response(controller, response, preload: preload)
         end
 
         def can_handle?(_obj)
           true
         end
 
+        def lookup_rel(rel, response)
+          []
+        end
+
         private
 
         def log_response(controller, response)
-          return unless controller.respond_to? :log
-
-          controller.log.debug(
+          log(
+            controller,
             "Response (#{response.resource.class}) payload: #{response.serialized}"
           )
         end
 
-        def write_response(controller, response)
+        def log(controller, msg, type: :debug)
+          return unless controller.respond_to? :log
+          controller.log.send(type, msg)
+        end
+
+        def write_response(controller, response, preload:)
           controller.content_type(response.content_type)
+          add_preload_links(controller, response, preload)
           controller.body(response.body)
+        end
+
+        def add_preload_links(controller, response, preload)
+          Array(preload).each do |rel|
+            links = Array(lookup_rel(rel, response))
+            next log(
+              controller,
+              "Failed to preload '#{rel}', link could not be extracted from response"
+            ) if links.empty?
+
+            links.each do |href, type|
+              next unless href
+              # Nginx http2_push_preload only processes relative URIs with absolute path
+              href.sub!(%r{https?://\w+(:\d+)?}, "")
+              type ||= 'object'
+              links = (controller.headers['Link'] || "").split(',').map(&:strip)
+              links << "<#{href}>; rel=preload; as=#{type}"
+              controller.headers["Link"] = links.join(', ') unless links.empty?
+            end
+          end
         end
       end
 

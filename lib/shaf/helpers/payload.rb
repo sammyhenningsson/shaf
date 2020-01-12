@@ -66,7 +66,7 @@ module Shaf
       @profile = value
     end
 
-    def respond_with_collection(resource, status: nil, serializer: nil, **kwargs)
+    def respond_with_collection(resource, status: nil, serializer: nil, preload: [], **kwargs)
       respond_with(
         resource,
         status: status,
@@ -76,7 +76,7 @@ module Shaf
       )
     end
 
-    def respond_with(resource, status: nil, serializer: nil, collection: false, **kwargs)
+    def respond_with(resource, status: nil, serializer: nil, collection: false, preload: [], **kwargs)
       status ||= resource.respond_to?(:http_status) ? resource.http_status : 200
       status(status)
 
@@ -87,7 +87,7 @@ module Shaf
       )
 
       log.info "#{request.request_method} #{request.path_info} => #{status}"
-      payload = Responder.for(request, resource).call(self, resource, **kwargs)
+      payload = Responder.for(request, resource).call(self, resource, preload: preload, **kwargs)
       add_cache_headers(payload, kwargs)
       payload
     rescue StandardError => err
