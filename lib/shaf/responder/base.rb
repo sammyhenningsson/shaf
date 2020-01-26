@@ -1,17 +1,23 @@
 module Shaf
   module Responder
     class Response
-      attr_reader :content_type, :body, :resource, :serialized
+      attr_reader :content_type, :body, :serialized_hash, :resource
 
-      def initialize(content_type, body, resource, serialized = nil)
+      def initialize(content_type:, body:, serialized_hash: {}, resource: nil)
         @content_type = content_type
         @body = body
+        @serialized_hash = serialized_hash
         @resource = resource
-        @serialized = serialized
+      end
+
+      def log_entry
+        "Response (#{resource.class}) payload: #{body}"
       end
     end
 
     class Base
+      PRELOAD_FAILED_MSG = "Failed to preload '%s'. Link could not be extracted from response"
+
       class << self
         def mime_type(type = nil, value = nil)
           if type
@@ -31,26 +37,20 @@ module Shaf
 
         def call(controller, resource, preload: [], **kwargs)
           responder = new(controller, resource, **kwargs)
-          response = responder.response
+          response = responder.build_response
           log_response(controller, response)
-          write_response(controller, response, preload: preload)
+          preload_links = preload_links(preload, responder, response, controller)
+          write_response(controller, response, preload_links)
         end
 
         def can_handle?(_obj)
           true
         end
 
-        def lookup_rel(rel, response)
-          []
-        end
-
         private
 
         def log_response(controller, response)
-          log(
-            controller,
-            "Response (#{response.resource.class}) payload: #{response.serialized}"
-          )
+          log(controller, response.log_entry)
         end
 
         def log(controller, msg, type: :debug)
@@ -58,27 +58,31 @@ module Shaf
           controller.log.send(type, msg)
         end
 
-        def write_response(controller, response, preload:)
+        def preload_links(rels, responder, response, controller = nil)
+          Array(rels).map do |rel|
+            links = responder.lookup_rel(rel, response)
+            links = [links].compact unless links.is_a? Array
+            log(controller, PRELOAD_FAILED_MSG % rel) if links.empty?
+            links
+          end
+        end
+
+        def write_response(controller, response, preload_links)
           controller.content_type(response.content_type)
-          add_preload_links(controller, response, preload)
+          add_preload_links(controller, response, preload_links)
           controller.body(response.body)
         end
 
-        def add_preload_links(controller, response, preload)
-          Array(preload).each do |rel|
-            links = Array(lookup_rel(rel, response))
-            next log(
-              controller,
-              "Failed to preload '#{rel}', link could not be extracted from response"
-            ) if links.empty?
-
-            links.each do |href, type|
-              next unless href
+        def add_preload_links(controller, response, preload_links)
+          preload_links.each do |links|
+            links.each do |link|
+              next unless link[:href]
               # Nginx http2_push_preload only processes relative URIs with absolute path
-              href.sub!(%r{https?://\w+(:\d+)?}, "")
-              type ||= 'object'
+              href = link[:href].sub(%r{https?://[^/]+}, "")
+              type = link.fetch(:as, 'fetch')
+              xorigin = link.fetch(:crossorigin, 'anonymous')
               links = (controller.headers['Link'] || "").split(',').map(&:strip)
-              links << "<#{href}>; rel=preload; as=#{type}"
+              links << "<#{href}>; rel=preload; as=#{type}; crossorigin=#{xorigin}"
               controller.headers["Link"] = links.join(', ') unless links.empty?
             end
           end
@@ -97,12 +101,21 @@ module Shaf
         raise NotImplementedError, "#{self.class} must implement #body"
       end
 
-      def serialized
-        @serialize
+      def serialized_hash
+        {}
       end
 
-      def response
-        Response.new(mime_type, body, resource, serialized)
+      def build_response
+        Response.new(
+          content_type: mime_type,
+          body: body,
+          serialized_hash: serialized_hash,
+          resource: resource
+        )
+      end
+
+      def lookup_rel(_rel, _response)
+        []
       end
 
       private
@@ -111,29 +124,10 @@ module Shaf
         self.class.mime_type
       end
 
-      def collection?
-        !!options.fetch(:collection, false)
-      end
-
       def user
         options.fetch(:current_user) do
           controller.current_user if controller.respond_to? :current_user
         end
-      end
-
-      def serializer
-         @serializer ||= options[:serializer] || HALPresenter.lookup_presenter(resource)
-      end
-
-      def serialize
-        return "" unless serializer
-
-        @serialize ||=
-          if collection?
-            serializer.to_collection(resource, current_user: user, **options)
-          else
-            serializer.to_hal(resource, current_user: user, **options)
-          end
       end
     end
   end

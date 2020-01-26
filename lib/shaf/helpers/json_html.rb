@@ -2,8 +2,11 @@ module Shaf
   module JsonHtml
 
     def json2html(json)
-      o = JSON.parse(json)
-      "<pre><code>#{to_html(o)}</code></pre>"
+      as_html JSON.parse(json)
+    end
+
+    def as_html(obj)
+      "<pre><code>#{to_html(obj)}</code></pre>"
     end
 
     private
