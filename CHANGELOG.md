@@ -1,3 +1,6 @@
+## 1.5.0
+ * Link preloading
+ * Fix problem leading to sinatra html error responses
 ## 1.4.1
  * Test ruby 2.7 in CI
  * Fix ruby 2.7 warnings
