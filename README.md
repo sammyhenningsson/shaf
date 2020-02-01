@@ -2,7 +2,23 @@
 [![Gem Version](https://badge.fury.io/rb/shaf.svg)](https://badge.fury.io/rb/shaf)
 [![Build Status](https://travis-ci.org/sammyhenningsson/shaf.svg?branch=master)](https://travis-ci.org/sammyhenningsson/shaf)  
 Shaf is a framework for building hypermedia driven REST APIs. Its goal is to be like a lightweight version of `rails new --api` with hypermedia as a first class citizen. Instead of reinventing the wheel Shaf uses [Sinatra](http://sinatrarb.com/) and adds a layer of conventions similar to [Rails](http://rubyonrails.org/). It uses [Sequel](http://sequel.jeremyevans.net/) as ORM and [HALPresenter](https://github.com/sammyhenningsson/hal_presenter) for policies and serialization (which means that the mediatype being used is [HAL](http://stateless.co/hal_specification.html)).  
-Most APIs claiming to be RESTful completly lacks the concept of links and relies upon clients to construction urls to _known_ endpoints. Thoses APIs are missing some of the concepts that Roy Fielding put together in is dissertation about REST. Having the server always returning payloads with links (hypermedia) makes the responsibilies more clear and allows for robust implementations.  
+Most APIs claiming to be RESTful completly lacks the concept of links and relies upon clients to construction urls to _known_ endpoints. Thoses APIs are missing some of the concepts that Roy Fielding put together in is dissertation about REST.  
+If you don't have full understanding of what REST is then that's fine. Though you are encouraged to read up on the basics. Perhaps [this blog](https://apisyouwonthate.com/blog/rest-and-hypermedia-in-2019) might make things a little bit more clear.  
+_TL;DR_: REST was "invented" by describing how the web is architectured. Browsers, servers, cache proxies etc all use the same interface, where URIs and mediatypes play a big part. This enables any browser to connect to any web server without prior knowledge about each other.  
+In my oppinion, the goal of REST APIs is to be a part of that web architecture. As an example this means that any hypermedia client, speaking HAL (or some other hypermedia type) should be able to communicate with any API which can return HAL responses without prior knowledge. Of course a developer and/or a user needs to guide the client into what actions to take, but it shouldn't require a special Foo Client to talk to a Foo API.  
+
+Building a REST API requires knowledge about standards and a lot of boring stuff. Shaf aims to reduce those prerequirements, minimize bikeshedding and to get up and running quickly. Some of the benefits of using Shaf is that you get:
+ - Scaffolding
+ - Serialization
+ - Authorization
+ - Content negotiation
+ - Documentation
+ - Forms
+ - Uri helpers
+ - Pagination
+ - Testing
+ - HTTP caching
+ - Link preloading (enables HTTP2 Push)
 
 ## Getting started
 Install Shaf with

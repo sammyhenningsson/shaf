@@ -168,3 +168,17 @@ Shaf controllers includes two helper methods that simplifies rendering responses
 
 Given that you have a Serializer that is registered to process instances of `Post` (see [Serializers](SERIALIZERS.md) for more info), then a controller route may simply end with `respond_with post` (as shown above) and the response payload will be serialized as expected. Use the keyword arguments, `status` and `serializer`, if you would like to override the default http response code resp. the serializer to be used.
 
+Link preloads can be added by passing the `preload` keyword argument to `#respond_with` and `#respond_with_collection`. The value must be a `Symbol` or and array of `Symbol`s with the link rels that should be preloaded. Like: `respond_with(resource, status: 200, preload: :author)`. This will extract the href of the link with rel `author` and add a Link preload to the response. For example:
+```sh
+curl -I https://my.shaf.api/
+
+HTTP/1.1 200 OK
+Content-Type: application/hal+json
+Vary: X-User,Accept-Encoding
+Cache-Control: private, max-age=86400
+Link: </users/5>; rel=preload; as=fetch; crossorigin=anonymous
+ETag: W/"cc0cd5e786525f3ce721992dbe00f67086e94f43"
+Content-Length: 147
+```
+
+This means that if you run Shaf behind Nginx and your clients can speak HTTP2, then Nginx (if configured to do so) will push resources to the client, which greatly improves performance.
