@@ -1,3 +1,5 @@
+## 1.5.1
+ * Fix preloading problem for collections
 ## 1.5.0
  * Link preloading
  * Fix problem leading to sinatra html error responses
