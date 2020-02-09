@@ -72,6 +72,7 @@ module Shaf
         status: status,
         serializer: serializer,
         collection: true,
+        preload: preload,
         **kwargs
       )
     end
