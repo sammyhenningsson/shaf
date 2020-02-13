@@ -22,7 +22,7 @@ This adds four helpers for the conventional four CRUD actions. Each one has a __
 | `posts_uri(**query_params)`             | http://localhost/posts                          |
 | `post_uri(post, **query_params)`        | http://localhost/posts/5                        |
 | `new_post_uri(**query_params)`          | http://localhost/post/form                      |
-| `edit_post_uri(post, **query_params)`   | http://localhost/posts/5/ed                     |
+| `edit_post_uri(post, **query_params)`   | http://localhost/posts/5/edit                   |
 | `posts_path(**query_params)`            | /posts                                          |
 | `post_path(post, **query_params)`       | /posts/5                                        |
 | `new_post_path(**query_params)`         | /post/form                                      |
