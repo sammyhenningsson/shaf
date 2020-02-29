@@ -1,3 +1,5 @@
+## 1.5.2
+ * Fix problem with missing patches during upgrade
 ## 1.5.1
  * Fix preloading problem for collections
 ## 1.5.0
