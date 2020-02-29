@@ -155,12 +155,12 @@ module Shaf
       end
 
       def apply_patches(dir = nil)
-        files_in(dir).all? do |file|
-          @manifest.patches_for(file).all? do |name|
+        files_in(dir).map do |file|
+          @manifest.patches_for(file).map do |name|
             patch = @files[name]
             apply_patch(file, patch)
-          end
-        end
+          end.all?
+        end.all?
       end
 
       def apply_patch(file, patch)
@@ -170,10 +170,9 @@ module Shaf
           puts o.read
           err = e.read
           puts err unless err.empty?
-          t.value.success?.tap do |patch_succeeded|
-            next if patch_succeeded
-            STDERR.puts "Failed to apply patch for: #{file}\n"
-          end
+          result = t.value.success?
+          STDERR.puts "Failed to apply patch for: #{file}\n" unless result
+          result
         end
       end
 
@@ -206,13 +205,13 @@ module Shaf
 
       def apply_substitutes(dir = nil)
         puts '' unless @manifest.regexps.empty?
-        files_in(dir).all? do |file|
-          @manifest.regexps_for(file).all? do |name|
+        files_in(dir).map do |file|
+          @manifest.regexps_for(file).map do |name|
             params = YAML.safe_load(@files[name])
             params.transform_keys!(&:to_sym)
             apply_substitute(file, params)
-          end
-        end
+          end.all?
+        end.all?
       end
 
       def apply_substitute(file, params)
