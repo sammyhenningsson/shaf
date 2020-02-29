@@ -1,0 +1,13 @@
+<div class="container">
+  <section class="section headers">
+    <h3><%= title %></h3>
+    <table class="hal-payload">
+      <% headers.each do |key, value| %>
+        <tr>
+          <td><%= key %></td>
+          <td><%= value %></td>
+        </tr>
+      <% end %>
+    </table>
+  </section>
+</div>

@@ -48,7 +48,7 @@ module Shaf
     end
 
     def sub_hash(key, value, indent)
-      if key == 'href'
+      if key.to_s == 'href'
         %Q(#{indentation(indent)}"#{key}"<span>:</span> <a href="#{value}">#{value}</a>)
       else
         "#{indentation(indent)}\"#{key}\"<span>:</span> #{to_html(value, indent: indent) }"

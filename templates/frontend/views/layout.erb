@@ -6,6 +6,12 @@
     <link rel="stylesheet" type="text/css" href="/css/main.css">
   </head>
   <body>
-    <%= yield %>
+    <div class="main-container">
+      <main>
+        <%= yield %>
+      </main>
+      <%= erb :headers, locals: {title: 'Request headers', headers: request_headers} %>
+      <%= erb :headers, locals: {title: 'Response headers', headers: response_headers} %>
+    </div>
   </body>
 </html>

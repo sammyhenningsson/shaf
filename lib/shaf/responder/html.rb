@@ -8,12 +8,22 @@ module Shaf
       mime_type :html
 
       def body
-        case resource
-        when Formable::Form
-          controller.erb(:form, locals: {form: resource, serialized: serialized_hash})
-        else
-          controller.erb(:payload, locals: {serialized: serialized_hash})
-        end
+        locals = {
+          request_headers: controller.request_headers,
+          response_headers: controller.headers,
+          serialized: serialized_hash
+        }
+
+        template =
+          case resource
+          when Formable::Form
+            locals.merge!(form: resource)
+            :form
+          else
+            :payload
+          end
+
+        controller.erb(template, locals: locals)
       end
     end
   end
