@@ -1,2 +1,3 @@
 ## Frontend
-To make it easy to explore the API in a brower, Shaf includes a some very basic html views. They are only meant to be a quick and easy way to view the api and to add/edit resources that does not require authentication. They are really ugly and you should not look at them if you are a frontend developer ;) (PRs are welcome!).
+To make it easy to explore the API in a brower, Shaf includes a some very basic html views.
+They are only meant to be a quick and easy way to view the api and to add/edit resources that does not require authentication.

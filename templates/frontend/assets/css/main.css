@@ -25,7 +25,7 @@ pre {
 }
 
 main {
-  padding-bottom: 10em;
+  padding-bottom: 8em;
 }
 
 .container {
@@ -39,6 +39,10 @@ main {
 .section {
   width: 50%;
   height: 100%;
+}
+
+.headers {
+  margin-bottom: 2em;
 }
 
 .hal-form {
@@ -77,3 +81,22 @@ main {
   border-radius: 20px;
 }
 
+span.boolean {
+  color: #0277BD;
+}
+
+span.null {
+  color: #757575;
+}
+
+span.number {
+  color: #3F51B5;
+}
+
+span.structural {
+  color: black;
+}
+
+span.string {
+  color: #43A047;
+}
