@@ -6,6 +6,7 @@ require 'shaf/responder'
 module Shaf
   module Payload
     EXCLUDED_FORM_PARAMS = ['captures', 'splat'].freeze
+    NO_VALUE = Object.new.freeze
 
     private
 
@@ -61,8 +62,8 @@ module Shaf
       name == '_method'
     end
 
-    def profile(value = nil)
-      return @profile unless value
+    def profile(value = NO_VALUE)
+      return @profile if value == NO_VALUE
       @profile = value
     end
 
@@ -81,15 +82,13 @@ module Shaf
       status ||= resource.respond_to?(:http_status) ? resource.http_status : 200
       status(status)
 
-      kwargs.merge!(
-        profile: profile,
-        serializer: serializer,
-        collection: collection
-      )
+      kwargs.merge!(serializer: serializer, collection: collection)
+      kwargs[:profile] ||= profile
 
       log.info "#{request.request_method} #{request.path_info} => #{status}"
       payload = Responder.for(request, resource).call(self, resource, preload: preload, **kwargs)
       add_cache_headers(payload, kwargs)
+
       payload
     rescue StandardError => err
       log.error "Failure: #{err.message}\n#{err.backtrace}"
