@@ -102,10 +102,16 @@ module Shaf
 
     def add_cache_headers(payload, kwargs)
       return unless kwargs.delete(:http_cache) { Settings.http_cache }
+
+      chksum, kind = etag_for(payload)
+      etag(chksum, kind: kind) if chksum
+    end
+
+    def etag_for(payload)
       return if payload.nil? || payload.empty?
 
       sha1 = Digest::SHA1.hexdigest payload
-      etag sha1, :weak # Weak or Strong??
+     [sha1, :weak] # Weak or Strong??
     end
   end
 end

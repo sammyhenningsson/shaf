@@ -9,7 +9,7 @@ module Shaf
       mime_type :hal, 'application/hal+json'
 
       def body
-        @body ||= JSON.generate(serialized_hash)
+        @body ||= generate_json
       end
 
       private
@@ -18,12 +18,6 @@ module Shaf
         type = super
         type = "#{type};profile=#{profile}" if profile
         type
-      end
-
-      def profile
-        return unless serializer
-
-        @profile ||= options[:profile] || serializer.semantic_profile
       end
     end
   end

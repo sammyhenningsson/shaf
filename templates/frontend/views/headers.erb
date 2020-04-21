@@ -9,5 +9,12 @@
         </tr>
       <% end %>
     </table>
+    <ul>
+    <% notes.each do |note| %>
+      <li>
+        <p><sub><%= note %></sub></p>
+      </li>
+    <% end %>
+    </ul>
   </section>
 </div>

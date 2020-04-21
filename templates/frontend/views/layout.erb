@@ -10,8 +10,8 @@
       <main>
         <%= yield %>
       </main>
-      <%= erb :headers, locals: {title: 'Request headers', headers: request_headers} %>
-      <%= erb :headers, locals: {title: 'Response headers', headers: response_headers} %>
+      <%= erb :headers, locals: {title: 'Request headers', headers: request_headers, notes: []} %>
+      <%= erb :headers, locals: {title: 'Response headers', headers: response_headers, notes: ["This is an example of a response to a request with Accept: #{response_headers['Content-Type']}. YMMV"]} %>
     </div>
   </body>
 </html>

@@ -6,9 +6,7 @@ module Shaf
     module HalSerializable
       def lookup_rel(rel, response)
         hal = response.serialized_hash
-        return [] unless hal
-
-        links = hal.dig(:_links, rel.to_sym)
+        links = hal&.dig(:_links, rel.to_sym)
         return [] unless links
 
         links = [links] unless links.is_a? Array
@@ -48,6 +46,18 @@ module Shaf
         end
 
         @serialized_hash
+      end
+
+      def profile
+        @profile ||= options[:profile]
+        return unless @profile || serializer
+
+        @profile ||= serializer.semantic_profile
+      end
+
+      def generate_json
+        # FIXME: change to Oj??
+        JSON.generate(serialized_hash)
       end
     end
   end
