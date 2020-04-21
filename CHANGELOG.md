@@ -1,3 +1,6 @@
+## 1.6.0
+ * Add HTTP headers to html view
+ * Add some css styling
 ## 1.5.2
  * Fix problem with missing patches during upgrade
 ## 1.5.1
