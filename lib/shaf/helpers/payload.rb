@@ -15,7 +15,7 @@ module Shaf
     end
 
     def read_input
-      request.body.rewind unless request.body.pos.zero?
+      request.body.rewind
       request.body.read
     ensure
       request.body.rewind
