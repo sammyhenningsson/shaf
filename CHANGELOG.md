@@ -1,3 +1,6 @@
+## 1.6.1
+ * Fix bug when reading input from Rack
+ * Minor fix in config.ru
 ## 1.6.0
  * Add HTTP headers to html view
  * Add some css styling
