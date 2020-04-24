@@ -3,6 +3,8 @@
 require 'erb'
 require 'forwardable'
 require 'yaml'
+require 'csv'
+require 'zlib'
 require 'shaf/version'
 
 module Shaf
@@ -35,12 +37,8 @@ module Shaf
         noun[0..-2]
       end
 
-      def symbolize(str)
-        :"#{str}"
-      end
-
       def symbol_string(str)
-        symbolize(str).inspect
+        str.to_sym.inspect
       end
 
       def environment
@@ -98,6 +96,11 @@ module Shaf
         end
       end
 
+      def iana_link_relations_csv
+        zip_file = File.join(gem_root, 'iana_link_relations.csv.gz')
+        Zlib::GzipReader.open(zip_file) { |content| CSV.new(content.read) }
+      end
+
       private
 
       def erb(content, binding: nil)
@@ -107,7 +110,7 @@ module Shaf
       end
     end
 
-    def_delegators Utils, :pluralize, :singularize, :symbolize, :symbol_string, :gem_root, :rackify_header
+    def_delegators Utils, :pluralize, :singularize, :symbol_string, :gem_root, :rackify_header
 
     def project_root
       return @project_root if defined? @project_root

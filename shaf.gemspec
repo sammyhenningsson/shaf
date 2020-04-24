@@ -19,7 +19,10 @@ Gem::Specification.new do |gem|
   end
 
   gem.executables   = ['shaf']
-  gem.files         = Dir['lib/**/*rb'] + Dir['templates/**/*'] + Dir['upgrades/*.tar.gz']
+  gem.files         = Dir['lib/**/*rb'] \
+                    + Dir['templates/**/*'] \
+                    + Dir['upgrades/*.tar.gz'] \
+                    + ['iana_link_relations.csv.gz']
   gem.require_paths = ['lib']
 
   gem.required_ruby_version = '>= 2.5'
