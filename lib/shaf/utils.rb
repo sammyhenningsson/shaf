@@ -3,6 +3,8 @@
 require 'erb'
 require 'forwardable'
 require 'yaml'
+require 'csv'
+require 'zlib'
 require 'shaf/version'
 
 module Shaf
@@ -92,6 +94,11 @@ module Shaf
         else
           YAML.safe_load(yaml, aliases: true, symbolize_names: true)
         end
+      end
+
+      def iana_link_relations_csv
+        zip_file = File.join(gem_root, 'iana_link_relations.csv.gz')
+        Zlib::GzipReader.open(zip_file) { |content| CSV.new(content.read) }
       end
 
       private
