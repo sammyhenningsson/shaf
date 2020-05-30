@@ -1,6 +1,7 @@
 class DocsController < BaseController
 
   register_uri :doc_curie,      '/doc/:resource/rels/{rel}'
+  register_uri :profile,        '/doc/profiles/:name'
   register_uri :documentation,  '/doc/:resource'
 
   before_action do
@@ -9,6 +10,10 @@ class DocsController < BaseController
 
   get :doc_curie_path do
     respond_with doc, path: request.path_info, rel: params[:rel]
+  end
+
+  get :profile_path do
+    respond_with Shaf::Profiles.find!(params[:name])
   end
 
   get :documentation_path do
