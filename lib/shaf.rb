@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require 'shaf/version'
 require 'shaf/logger'
 require 'shaf/settings'
@@ -12,3 +14,4 @@ require 'shaf/helpers'
 require 'shaf/resource_doc'
 require 'shaf/upgrade'
 require 'shaf/profiles'
+require 'shaf/serializer'

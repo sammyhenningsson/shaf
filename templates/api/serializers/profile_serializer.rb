@@ -2,12 +2,11 @@ require 'serializers/base_serializer'
 require 'shaf/formable'
 
 class ProfileSerializer < BaseSerializer
-
   model Shaf::Profile
-  # profile ALPS
+  profile :alps
 
   attribute :attributes do
-    resource.attributes.map  do |attr|
+    resource.attributes.map do |attr|
       {
         name: attr.name,
         doc: attr.doc,
@@ -17,13 +16,13 @@ class ProfileSerializer < BaseSerializer
   end
 
   attribute :relations do
-    resource.relations.map  do |rel|
+    resource.relations.map do |rel|
       {
         name: rel.name,
         doc: rel.doc,
         http_method: rel.http_method,
         payload_type: rel.payload_type,
-        content_type: rel.content_type,
+        content_type: rel.content_type
       }
     end
   end
