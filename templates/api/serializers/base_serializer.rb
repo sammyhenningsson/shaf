@@ -1,4 +1,2 @@
-class BaseSerializer
-  extend HALPresenter
-  extend Shaf::UriHelper
+class BaseSerializer < Shaf::Serializer
 end
