@@ -4,7 +4,7 @@ module Shaf
   module Command
     class Generate < Base
 
-      identifier %r(\Ag(en(erate)?)?\Z)
+      identifier %r(\Ag(\b|en(\b|erate))\Z)
       usage Generator::Factory.usage.flatten.sort
 
       def self.options(parser, options)
