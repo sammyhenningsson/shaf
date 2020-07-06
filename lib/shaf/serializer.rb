@@ -9,7 +9,7 @@ module Shaf
     class << self
       # Creates a link with rel profile and href pointing to the corresponding profile.
       # @param name [String] the name of the profile
-      def profile(name)
+      def profile(name, curie: :doc)
         link :profile do
           profile_path(name)
         end
