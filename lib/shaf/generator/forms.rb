@@ -33,6 +33,7 @@ module Shaf
 
       def create_forms
         content = render(template, opts)
+        # FIXME: Append if file exists!
         write_output(target, content)
       end
 

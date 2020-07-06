@@ -4,7 +4,7 @@ module Shaf
   module Command
     class Console < Base
 
-      identifier %r(\Ac(onsole)?\Z)
+      identifier %r(\Ac(\b|onsole)\Z)
       usage 'console'
 
       def call
