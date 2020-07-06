@@ -20,7 +20,12 @@ module Shaf
       end
 
       def resource_name
-        name.to_s.sub(/_?serializer$/i, '').capitalize
+        str = name.to_s.sub(/_?serializer$/i, '')
+        return str unless str.match? '_'
+
+        str.split('_')
+           .map(&:capitalize)
+           .join
       end
 
       def profile?
