@@ -1,4 +1,5 @@
 require 'shaf/version'
+require 'shaf/logger'
 require 'shaf/settings'
 require 'shaf/command'
 require 'shaf/app'

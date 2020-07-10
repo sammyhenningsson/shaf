@@ -35,7 +35,7 @@ class DbMigrations
   end
 
   def migrate
-    $logger&.info "Running migrations in #{environment} environment.."
+    Shaf.log.info "Running migrations in #{environment} environment.."
     Sequel::Migrator.run(DB, migrations_dir)
   end
 
@@ -43,7 +43,7 @@ class DbMigrations
     msg = "Database for environment '#{environment}' is not " \
       'updated to the latest migration'
     STDERR.puts msg
-    $logger&.warn msg
+    Shaf.log.warn msg
   end
 end
 
