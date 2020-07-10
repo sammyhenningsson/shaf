@@ -8,7 +8,7 @@ module Shaf
       alias eql? ==
 
       class UpgradeVersionError < StandardError
-        def initialize(message = "")
+        def initialize(message = '')
           super("Bad upgrade version: #{message}")
         end
       end
@@ -16,25 +16,26 @@ module Shaf
       def initialize(version)
         case version
         when Version
-          @major, @minor, @patch = [:major, :minor, :patch].map { |m| version.send m }
+          @major, @minor, @patch = version.to_a
         when /\d+\.\d+(\.\d+)?/
           @major, @minor, @patch = split_version(version)
         else
-          raise UpgradeVersionError.new(version)
+          raise UpgradeVersionError, version
         end
       end
 
       def <=>(other)
-        case other
-        when String
-          compare_version(*split_version(other))
-        when Version
-          compare_version(other.major, other.minor, other.patch)
-        end
+        return unless other
+        other = self.class.new(other)
+        compare_version(other.major, other.minor, other.patch)
       end
 
       def to_s
-        [major, minor, patch].join('.')
+        to_a.join('.')
+      end
+
+      def to_a
+        [major, minor, patch]
       end
 
       private
