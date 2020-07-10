@@ -2,7 +2,7 @@ class RootController < BaseController
 
   register_uri :root, '/'
 
-  get :root_uri do
+  get :root_path do
     cache_control(:private, http_cache_max_age: :long)
     # Uncomment the line below (and change realm if you like) if your api has
     # resources that requires authentication. See
