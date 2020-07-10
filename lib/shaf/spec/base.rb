@@ -24,7 +24,7 @@ module Shaf
       end
 
       before do
-        $logger&.info <<~LOG
+        Shaf.log.info <<~LOG
           \n
           ##########################################################################
           # #{self.class.superclass.name} - #{name}

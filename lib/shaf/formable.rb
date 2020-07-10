@@ -18,9 +18,8 @@ module Shaf
     # Deprecated legacy way of specifying forms inside models
     def form(&block)
       forms_for(self, &block)
-      return unless defined? $logger
 
-      $logger.info <<~MSG
+      Shaf.log.info <<~MSG
 
 
         DEPRECATED method ::form in #{self}

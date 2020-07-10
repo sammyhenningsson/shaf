@@ -1,7 +1,5 @@
 # frozen_string_literal: true
 
-$logger = nil
-
 require 'shaf'
 if ENV['RACK_ENV'] == 'test'
   require 'minitest'

@@ -35,7 +35,7 @@ module Shaf
         return true unless allowed
         return true if allowed.include? name
 
-        $logger&.warn "#{name} is not allowed to be nested inside #{parent.class} " \
+        Shaf.log.warn "#{name} is not allowed to be nested inside #{parent.class} " \
           "(or parent object containing #{parent.class})"
 
         false

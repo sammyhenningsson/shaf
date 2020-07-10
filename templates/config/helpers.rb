@@ -11,7 +11,7 @@ if Dir.exist? dir
     end
     modules.compact!
     modules.each do |mod|
-      $logger&.debug "helper: #{mod}"
+      Shaf.log.debug "helper: #{mod}"
       BaseController.send(:class_eval, "helpers #{mod}")
     end
   end

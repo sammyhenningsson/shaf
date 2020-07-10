@@ -7,7 +7,7 @@ module Shaf
     end
 
     def log
-      $logger ||= Logger.new('/dev/nul')
+      Shaf.log
     end
   end
 
