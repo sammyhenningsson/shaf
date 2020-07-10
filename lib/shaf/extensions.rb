@@ -4,6 +4,7 @@ require 'shaf/extensions/controller_hooks'
 require 'shaf/extensions/current_user'
 require 'shaf/extensions/authorize'
 require 'shaf/extensions/symbolic_routes'
+require 'shaf/extensions/api_routes'
 
 module Shaf
   def self.extensions
@@ -13,7 +14,8 @@ module Shaf
       ControllerHooks,
       CurrentUser,
       Authorize,
-      SymbolicRoutes
+      SymbolicRoutes,
+      ApiRoutes # This extension must be registered after `SymbolicRoutes`!
     ]
   end
 end

@@ -39,23 +39,23 @@ module Shaf
       end
 
       def add_path_helpers(clazz, methods)
-        @path_helpers ||= {}
-        @path_helpers[clazz] ||= []
-        @path_helpers[clazz].concat Array(methods)
+        path_helpers[clazz].concat Array(methods)
       end
 
       def path_helpers_for(clazz = nil)
-        @path_helpers ||= {}
-        return @path_helpers unless clazz
-        return [] unless @path_helpers.key?(clazz)
-        @path_helpers[clazz] ||= []
+        return path_helpers unless clazz
+        path_helpers[clazz]
+      end
+
+      def path_helpers
+        @path_helpers ||= Hash.new { |hash, key| hash[key] = [] }
       end
 
       # For cleaning up after tests
       def remove_all
         helpers = instance_methods - [:path_helpers]
         remove_method(*helpers)
-        @path_helpers = {}
+        @path_helpers = Hash.new { |hash, key| hash[key] = [] }
       end
     end
 

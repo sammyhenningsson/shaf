@@ -2,19 +2,7 @@ module Shaf
   module SymbolicRoutes
     class UriHelperNotRegisterdError < Error; end
 
-    SUPPORTED_METHODS = [
-      :get,
-      :put,
-      :post,
-      :patch,
-      :delete,
-      :head,
-      :options,
-      :link,
-      :unlink
-    ].freeze
-
-    SUPPORTED_METHODS.each do |m|
+    Shaf::SUPPORTED_HTTP_METHODS.each do |m|
       define_method m do |path, collection: false, &block|
         super(rewrite_path(path, collection), &block)
       end
