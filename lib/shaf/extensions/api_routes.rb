@@ -11,15 +11,9 @@ module Shaf
         end
 
         def routes_for(controller)
-          sorted = routes[controller].keys.sort
+          sorted = routes[controller].keys.sort_by(&:to_s)
           sorted.each do |symbol|
-            methods = routes[controller][symbol]
-            template_method = "#{symbol}_template".to_sym
-            next unless controller.respond_to? template_method
-
-            template = controller.public_send(template_method)
-
-            yield [methods, template, symbol]
+            yield route_info(controller, symbol)
           end
         end
 
@@ -29,6 +23,20 @@ module Shaf
           @routes ||= Hash.new do |hash, key|
             hash[key] = Hash.new { |h, k| h[k] = [] }
           end
+        end
+
+        def route_info(controller, symbol)
+          methods = routes[controller][symbol]
+          template_method = :"#{symbol}_template"
+
+          if controller.respond_to? template_method
+            template = controller.public_send(template_method)
+          else
+            template = symbol
+            symbol = '-'
+          end
+
+          [methods, template, symbol]
         end
       end
     end
