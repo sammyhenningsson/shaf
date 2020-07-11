@@ -27,6 +27,7 @@ module Shaf
 
         def route_info(controller, symbol)
           methods = routes[controller][symbol]
+          symbol = ensure_path_suffix(symbol)
           template_method = :"#{symbol}_template"
 
           if controller.respond_to? template_method
@@ -37,6 +38,17 @@ module Shaf
           end
 
           [methods, template, symbol]
+        end
+
+        def ensure_path_suffix(symbol)
+          case symbol
+          when /_path\Z/
+            symbol
+          when /_uri\Z/
+            symbol.to_s.sub(/_uri\Z/, '_path').to_sym
+          else
+            :"#{symbol}_path"
+          end
         end
       end
     end

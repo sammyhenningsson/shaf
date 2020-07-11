@@ -14,6 +14,9 @@ module Shaf
       m = "#{path}_template"
       return send(m, collection) if respond_to? m
 
+      m = "#{path}_path_template"
+      return send(m, collection) if respond_to? m
+
       raise UriHelperNotRegisterdError, <<~RUBY
         Undefined method '#{m}'. Did you forget to register a uri helper for #{path}?
       RUBY
