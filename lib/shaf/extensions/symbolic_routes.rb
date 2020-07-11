@@ -3,8 +3,10 @@ module Shaf
     class UriHelperNotRegisterdError < Error; end
 
     Shaf::SUPPORTED_HTTP_METHODS.each do |m|
-      define_method m do |path, collection: false, &block|
-        super(rewrite_path(path, collection), &block)
+      define_method m do |path, **options, &block|
+        collection = options.delete(:collection)
+        path = rewrite_path(path, collection)
+        super(path, **options, &block)
       end
     end
 

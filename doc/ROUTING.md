@@ -2,7 +2,7 @@
 As usual with Sinatra applications routes are declared together with the controller code rather than in a separate file (as with Rails). All controllers should be subclasses of `BaseController` found in `api/controllers/base_controller.rb` (which was created along with the project).  
 Controllers generated with `shaf generate` uses a few Sinatra extensions, where the most important are `Shaf::ResourceUris`, `Shaf::ControllerHooks` and `Shaf::Authorize`.
 
-#### Shaf::ResourceUris
+### Shaf::ResourceUris
 This extension is used to create _uri_-/_path_ helpers. When registered with Sinatra (which is done in the generated `BaseController`) it adds two class methods, `resource_uris_for` and `register_uri`. The former adds four conventional uris (basically the CRUD actions). The later adds a single helper, for more custom actions.  
 Each helper, created by `resource_uris_for` or `register_uri`, will be added as an instance method and a module method to the module `Shaf::UriHelper`. This means that they can be accessed from any file in your API through the module. Or by including/extending `Shaf::UriHelper` into a class.  
 When included the module is also extended so all _uri_-/_path_ helpers will be available in the class as well. Also, the class that calls `resource_uris_for` or `register_uri` will automatically include `Shaf::UriHelper`, i.e. controllers registering new helpers will have access to the helper methods from instances and the class.  
@@ -97,7 +97,28 @@ class PostsController < BaseController
   end
 end
 ```
-#### Shaf::ControllerHooks
+
+#### Listing routes
+Use the `routes` rake task to list all routes in the api. E.g:
+```sh
+$ rake routes
+
+DocsController:
+  doc_curie_path                                    GET                           /doc/:resource/rels/{rel}
+  documentation_path                                GET                           /doc/:resource
+
+PostsController:
+  edit_post_path                                    GET                           /posts/:id/edit
+  new_post_path                                     GET                           /post/form
+  post_path                                         GET | PUT | DELETE            /posts/:id
+  posts_path                                        GET | POST                    /posts
+
+RootController:
+  root_path                                         GET                           /
+
+```
+
+### Shaf::ControllerHooks
 This extension adds a two hooks to run before or after a request. Sinatra already has the `before` and `after` filters, which are great if you want them to run before/after all routes. But if you want a filter to kick in for just some routes, then there are prettier ways of doing this. `Shaf::ControllerHooks` (which is registered in the generated `BaseController`) adds the `before_action` and `after_action` filters. They are used together with uri helpers so that we don't have to care about building some Regexp to make the filter apply only to a few routes. Example:
 ```sh
 class PostsController < BaseController
@@ -116,7 +137,7 @@ end
 ```
 These methods either take a symbol to an instance methods as first argument or a block as the action to be executed. The optional keyword arguments `:only` and `:except` may be used to target just certain routes. When both `:only` and `:exept` are left out, then the action applies to all routes within the given controller.
 
-#### Shaf::Authorize
+### Shaf::Authorize
 This extension adds the class method `authorize_with(policy)` and the instance method `authorize!(action, resource = nil)`. The class method is used to register a Policy class. The instance method is used to ensure that a certain action is authorized. The following policy class makes sure that a user is logged in to be able to see posts and that users may only edit their own posts. See [Policies](POLICIES.md) for more info.
 ```sh
 class PostPolicy < BasePolicy
@@ -161,7 +182,7 @@ end
 After a policy class has been registered with `::authorize_with` then a call to `#authorize!` will create an instance of the policy with `current_user` and `resource` as arguments. Thus in the controller above, when a `GET` request is made to `post_uri` a policy instance will be created with `PostPolicy.new(current_user, nil)`. The `PUT` action will create the instance `PostPolicy.new(current_user, post)`. Then the arguments first argument sent to `#authorize!` will be sent (with an appended question mark unless already present) to the policy instance together with an optional argument. Like `policy.show?` resp. `policy.edit?`. So it's important to think about which policy rules should apply to a specific resource or should be a general rule (e.g. viewing a collection) where a specific resource is not present. 
 Note: that the Policy instance methods must end with a question mark '?' while the symbol given to `authorize!` may or may not end with a question mark.  
 
-#### Rendering responses
+### Rendering responses
 Shaf controllers includes two helper methods that simplifies rendering responses:
 - `respond_with(resource, status: 200, serializer: nil)`
 - `respond_with_collection(resource, status: 200, serializer: nil)`
