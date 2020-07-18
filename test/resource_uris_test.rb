@@ -28,7 +28,6 @@ module Shaf
         assert_equal "#{base_uri}/foos", Shaf::UriHelper.foos_uri
         assert_equal "/foos", Shaf::UriHelper.foos_path
         assert_equal '/foos', Shaf::UriHelper.foos_path_template
-        assert_equal '/foos', Shaf::UriHelper.foos_uri_template # Deprecated
         assert_equal "#{base_uri}/foos?bar=5&baz=fem", Shaf::UriHelper.foos_uri(bar: 5, baz: "fem")
       end
 
@@ -162,15 +161,15 @@ module Shaf
         CreateUriMethods.new(:baz, plural_name: 'baz').call
       end
 
-      it "adds baz_uri method to Shaf::UriHelper" do
-        assert_methods_registered :baz_uri, :baz_path
-        assert_equal "#{base_uri}/baz", Shaf::UriHelper.baz_uri
-        assert_equal "/baz", Shaf::UriHelper.baz_path
-        assert_equal '/baz', Shaf::UriHelper.baz_path_template(true)
-        assert_equal "#{base_uri}/baz?bar=5&baz=fem", Shaf::UriHelper.baz_uri(bar: 5, baz: "fem")
+      it "adds collection methods, baz_uri, to Shaf::UriHelper" do
+        assert_methods_registered :baz_uri, :baz_path, :baz_collection_uri, :baz_collection_path
+        assert_equal "#{base_uri}/baz", Shaf::UriHelper.baz_collection_uri
+        assert_equal "/baz", Shaf::UriHelper.baz_collection_path
+        assert_equal '/baz', Shaf::UriHelper.baz_collection_path_template
+        assert_equal "#{base_uri}/baz?bar=5&baz=fem", Shaf::UriHelper.baz_collection_uri(bar: 5, baz: "fem")
       end
 
-      it "adds baz_uri(id) method to Shaf::UriHelper" do
+      it "adds resource methods, baz_uri(id), to Shaf::UriHelper" do
         assert_methods_registered :baz_uri, :baz_path
         assert_equal "#{base_uri}/baz/5", Shaf::UriHelper.baz_uri(resrc)
         assert_equal "/baz/5", Shaf::UriHelper.baz_path(resrc)
@@ -197,15 +196,15 @@ module Shaf
       it "adds path matcher methods" do
         assert_methods_registered(*%i[baz_path? new_baz_path? edit_baz_path?])
 
-        assert Shaf::UriHelper.baz_path? '/baz', collection: true
+        assert Shaf::UriHelper.baz_collection_path? '/baz'
         assert Shaf::UriHelper.baz_path? '/baz/5'
         assert Shaf::UriHelper.new_baz_path? '/baz/form'
         assert Shaf::UriHelper.edit_baz_path? '/baz/5/edit'
 
-        refute Shaf::UriHelper.baz_path? '/nested/baz', collection: true
-        refute Shaf::UriHelper.baz_path? '/nested/bazs', collection: true
-        refute Shaf::UriHelper.baz_path? '/baz/5', collection: true
-        refute Shaf::UriHelper.baz_path? '/baz', collection: false
+        refute Shaf::UriHelper.baz_collection_path? '/nested/baz'
+        refute Shaf::UriHelper.baz_collection_path? '/nested/bazs'
+        refute Shaf::UriHelper.baz_collection_path? '/baz/5'
+        refute Shaf::UriHelper.baz_path? '/baz'
       end
     end
 
@@ -239,8 +238,8 @@ module Shaf
 
       it 'does not register helper with optional parameters when resource is skipped' do
         controller.resource_uris_for :baz, plural_name: :baz, only: :collection
-        assert_equal(-1, controller.method(:baz_path).arity)
-        assert_equal [:baz_path], controller.path_helpers
+        refute controller.respond_to? :baz_path
+        assert_equal [:baz_collection_path], controller.path_helpers
       end
     end
 
