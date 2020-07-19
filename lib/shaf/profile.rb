@@ -26,12 +26,12 @@ module Shaf
         @relations ||= []
       end
 
-      def attribute(*args, &block)
-        evaluator.attribute(*args, &block)
+      def attribute(*args, **kwargs, &block)
+        evaluator.attribute(*args, **kwargs, &block)
       end
 
-      def rel(*args, &block)
-        evaluator.rel(*args, &block)
+      def rel(*args, **kwargs, &block)
+        evaluator.rel(*args, **kwargs, &block)
       end
 
       private
