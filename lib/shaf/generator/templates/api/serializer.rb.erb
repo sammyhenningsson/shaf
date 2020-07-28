@@ -6,9 +6,9 @@ class <%= class_name %> < BaseSerializer
   model <%= model_class_name %>
   policy <%= policy_class_name %>
 
-  <%= print_nested(attributes_with_doc) %>
+  <%= print(profile_with_doc) %>
 
-  <%= print_nested(curies_with_doc) %>
+  <%= print_nested(attributes_with_doc) %>
 
   <%= print_nested(links_with_doc) %>
 

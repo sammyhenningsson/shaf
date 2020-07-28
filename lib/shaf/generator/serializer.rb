@@ -72,24 +72,18 @@ module Shaf
         %w(collection self edit-form doc:delete)
       end
 
-      def curies_with_doc
-        [
-          <<~EOS.split("\n")
-            # Auto generated doc:  
-            # Link to the documentation for a given relation of the #{name} resource.
-            # This link is templated, which means that {rel} must be replaced by the
-            # appropriate relation name.  
-            # Method: GET  
-            # Example:
-            # ```
-            # curl -H "Accept: application/hal+json" \\
-            #      /doc/#{name}/rels/delete
-            #```
-            curie :doc do
-              doc_curie_uri('#{name}')
-            end
-          EOS
-        ]
+      def profile_with_doc
+        doc = <<~DOC
+          # Adds a link to the '#{name}' profile and a curie. By default the
+          # curie prefix is 'doc', use the `curie_prefix` keyword argument to
+          # change this.
+          # Note: the target of the profile link and the curie will be set to
+          # `profile_uri('#{name}')` resp. `doc_curie_uri('#{name}')`. To
+          # create links for external profiles or curies, use `::link` and/or
+          # `::curie` instead.
+        DOC
+
+        doc.split("\n") << %Q(profile #{Utils.symbol_string(name)})
       end
 
       def links_with_doc
@@ -205,9 +199,9 @@ module Shaf
           policy_class_name: policy_class_name,
           policy_name: "#{name}_policy",
           attributes: attributes,
+          profile_with_doc: profile_with_doc,
           links: links,
           attributes_with_doc: attributes_with_doc,
-          curies_with_doc: curies_with_doc,
           links_with_doc: links_with_doc,
           collection_with_doc: collection_with_doc
         }
