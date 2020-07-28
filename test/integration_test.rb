@@ -90,6 +90,26 @@ module Shaf
       @body = JSON.parse(body)
     end
 
+    def post(uri, data, expected_status: 201, **opts)
+      headers = {
+        'Accept' => 'application/hal+json',
+        'Content-Type' => 'application/json'
+      }.merge(opts.fetch(:headers, {}))
+
+      data = JSON.generate(data) if data.is_a? Hash
+      response = Faraday.post(uri, data, headers)
+      body = response.body
+
+      assert response.body, "POST request failed"
+      assert_equal expected_status, response.status, <<~MSG
+        Server responded with status #{response.status} (expected: #{expected_status})
+        Response: #{body}
+      MSG
+
+      @response = response
+      @body = JSON.parse(body)
+    end
+
     def get_root(port: 3030, **opts)
       get("http://localhost:#{port}/", **opts)
     end
@@ -98,6 +118,24 @@ module Shaf
       assert @body&.dig("_links", rel),
         "Response does not contain link with rel '#{rel}', #{@body}"
       get(@body["_links"][rel]["href"], **opts)
+    end
+
+    def create_resource(**opts)
+      get_link('create-form')
+      target = @body['href']
+      form = @body['fields'].each_with_object({}) do |field, values|
+        name = field['name'].to_sym
+        values[name] =
+          if opts.key? name
+             opts[name]
+          elsif field['type'] == 'string'
+            'lorem ipsum'
+          elsif field['type'] == 'integer'
+            5
+          end
+      end
+
+      post target, form
     end
 
     it "copies templates" do
@@ -167,7 +205,7 @@ module Shaf
         end
 
         exit_status =  Test.system("bundle exec shaf my_command") do |out, err|
-          # FIXME: remove these ruby 2.7 related warning when they have ben fixed in dependancies
+          # FIXME: remove these ruby 2.7 related warnings when they have ben fixed in dependancies
           err = String(err)
           err.gsub!(/^.*warning: The last argument is used as the keyword parameter.*$/, "")
           err.gsub!(/^.*warning: for .* defined here.*$/, "")&.strip!
@@ -269,7 +307,7 @@ module Shaf
       end
     end
 
-    it 'seed the db' do
+    it 'seeds the db' do
       Dir.chdir(@@project_path) do
         assert Test.system('shaf generate scaffold user name:string')
 
@@ -296,7 +334,7 @@ module Shaf
         assert Test.system('bundle exec rake db:seed')
 
         exit_status = Test.system('bundle exec shaf console', stdin: "User.count\n") do |out, err|
-          # FIXME: remove these ruby 2.7 related warning when they have ben fixed in dependancies
+          # FIXME: remove these ruby 2.7 related warnings when they have ben fixed in dependancies
           err = String(err)
           err.gsub!(/^.*warning: The last argument is used as the keyword parameter.*$/, "")
           err.gsub!(/^.*warning: for .* defined here.*$/, "")&.strip!
@@ -310,6 +348,24 @@ module Shaf
           assert_equal 3, user_count.to_i
         end
         assert exit_status
+      end
+    end
+
+    it 'adds links to the profile from the resource' do
+      Dir.chdir(@@project_path) do
+        assert Test.system(
+          "bundle exec shaf generate scaffold " \
+          "post message:string:Meddelande author:integer:Författare"
+        )
+        assert Test.system("bundle exec rake db:migrate")
+
+        with_server do |port|
+          get_root(port: port)
+          get_link('posts')
+          create_resource
+          get_link('self')
+          get_link('profile', headers: {'Accept' => 'application/alps+json'})
+        end
       end
     end
   end

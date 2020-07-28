@@ -10,7 +10,8 @@ module Shaf
 
       def print(lines, indent_level = 2)
         strip_blank(lines).inject do |result, line|
-          result + "\n#{i(indent_level) unless line.empty?}#{line}"
+          indent = i(indent_level) unless line.empty?
+          result + "\n#{indent}#{line}"
         end.chomp
       end
 
