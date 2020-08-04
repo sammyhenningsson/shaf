@@ -103,7 +103,7 @@ module Shaf
           method: "GET or POST",
           uri: "/#{plural_name}",
           uri_helper: "#{plural_name}_uri",
-          kwargs: ', embed_depth: 0'
+          kwargs: {embed_depth: 0}
         )
       end
 
@@ -132,7 +132,7 @@ module Shaf
           method: "DELETE",
           uri: "/#{plural_name}/5",
           uri_helper: "#{name}_uri(resource)",
-          kwargs: ", curie: :doc"
+          kwargs: {curie: :doc}
         )
       end
 
@@ -145,13 +145,17 @@ module Shaf
         )
       end
 
-      def link(rel:, method: "GET", desc:, uri:, uri_helper:, kwargs: "")
+      def link(rel:, method: "GET", desc:, uri:, uri_helper:, kwargs: {})
+        kwargs_str = kwargs.inject('') do |s, (k,v)|
+          "#{s}, #{k}: #{Utils.symbol_or_quoted_string(v)}"
+        end
+
         <<~EOS.split("\n")
           # Auto generated doc:  
           # #{desc}.  
           # Method: #{method}  
           #{example(method, uri)}
-          link #{Utils.symbol_string(rel)}#{kwargs} do
+          link #{Utils.symbol_string(rel)}#{kwargs_str} do
             #{uri_helper}
           end
         EOS

@@ -41,6 +41,17 @@ module Shaf
         str.to_sym.inspect
       end
 
+      def symbol_or_quoted_string(obj)
+        case obj
+        when Symbol
+          obj.inspect
+        when Numeric
+          obj
+        else
+          "'#{obj.to_s}'"
+        end
+      end
+
       def environment
         require 'sinatra/base'
         Sinatra::Application.settings.environment
