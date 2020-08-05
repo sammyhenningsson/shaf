@@ -37,5 +37,5 @@ Gem::Specification.new do |gem|
   gem.add_development_dependency 'faraday', '~> 0.17'
   gem.add_development_dependency 'git', '~> 1.5'
   gem.add_development_dependency 'bundler', '~> 2.1'
-  gem.add_development_dependency 'hal_presenter', '~> 1.5'
+  gem.add_development_dependency 'hal_presenter', '~> 1.6'
 end
