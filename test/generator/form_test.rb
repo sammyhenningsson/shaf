@@ -1,23 +1,10 @@
 require 'test_helper'
+require 'generator/stubbed_output'
 
 module Shaf
   module Generator
     describe Forms do
-      let(:output) { {} }
-
-      let(:write_stub) do
-        lambda do |file, content|
-          output[file] = content
-        end
-      end
-
-      before do
-        File.stub :write, write_stub do
-          Dir.stub :exist?, true do
-            Mutable.suppress_output { generator.call }
-          end
-        end
-      end
+      extend StubbedOutput
 
       describe 'the forms file' do
         let(:generator) do
