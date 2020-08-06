@@ -1,26 +1,14 @@
 require 'test_helper'
+require 'generator/stubbed_output'
 
 module Shaf
   module Generator
     describe Policy do
-      let(:output) { {} }
+      extend StubbedOutput
 
-      let(:write_stub) do
-        lambda do |file, content|
-          output[file] = content
-        end
-      end
-
-      before do
-        File.stub :write, write_stub do
-          Dir.stub :exist?, true do
-            Mutable.suppress_output { generator.call }
-          end
-        end
-      end
+      let(:file) { "api/policies/blog_policy.rb" }
 
       describe "empty policy" do
-        let(:file) { "api/policies/blog_policy.rb" }
         let(:generator) do
           Factory.create(*%w(policy blog))
         end
@@ -34,12 +22,11 @@ module Shaf
         end
 
         it "requires base_policy" do
-          assert_match %r(^\s*require 'policies/base_policy'), output["api/policies/blog_policy.rb"]
+          assert_match %r(^\s*require 'policies/base_policy'), output[file]
         end
       end
 
       describe "model with properties" do
-        let(:file) { "api/policies/blog_policy.rb" }
         let(:generator) do
           Factory.create(*%w(policy blog user_id message))
         end
