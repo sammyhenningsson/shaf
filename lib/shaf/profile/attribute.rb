@@ -7,12 +7,13 @@ module Shaf
     class Attribute
       include UniqueId
 
-      attr_reader :name, :doc, :type, :parent
+      attr_reader :name, :doc, :href, :type, :parent
 
-      def initialize(name, doc:, type:, **opts)
+      def initialize(name, **opts)
         @name = name.to_sym
-        @doc = doc.freeze
-        @type = type.to_sym
+        @doc = opts[:doc].freeze
+        @href = opts[:href].freeze
+        @type = opts[:type]&.to_sym
         @parent = opts[:parent]
       end
 

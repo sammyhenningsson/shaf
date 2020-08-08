@@ -7,15 +7,17 @@ module Shaf
     class Relation
       include UniqueId
 
-      attr_reader :name, :doc, :http_methods, :payload_type, :content_type, :parent
+      attr_reader :name, :doc, :href, :http_methods, :payload_type, :content_type, :parent
 
-      def initialize(name, doc:, http_methods: nil, payload_type: nil, content_type: nil, **opts)
+      def initialize(name, **opts)
         @name = name.to_sym
-        @doc = doc.freeze
-        http_methods = Array(http_methods).tap { |a| a << 'GET' if a.empty? }
-        @http_methods = http_methods.map { |m| m.to_s.upcase }.freeze
-        @payload_type = payload_type.freeze
-        @content_type = content_type.freeze
+        @doc = opts[:doc].freeze
+        @href = opts[:href].freeze
+        http_methods = Array(opts[:http_method]) + Array(opts[:http_methods])
+        http_methods  << 'GET' if http_methods.empty?
+        @http_methods = http_methods.map { |m| m.to_s.upcase }.uniq.freeze
+        @payload_type = opts[:payload_type].freeze
+        @content_type = opts[:content_type].freeze
         @parent = opts[:parent]
       end
 

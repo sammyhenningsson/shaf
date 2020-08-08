@@ -46,7 +46,7 @@ module Shaf
       profile.rel(
         'rel1',
         doc: 'doc for rel1',
-        http_methods: 'GET',
+        http_method: 'GET',
         content_type: 'application/hal+json'
       )
 
