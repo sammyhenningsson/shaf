@@ -4,8 +4,7 @@ module Shaf
   module ApiRoutes
     class Registry
       class << self
-        def register(controller, method, symbol, collection)
-          symbol = :"#{symbol}__collection__" if collection
+        def register(controller, method, symbol)
           routes[controller][symbol] << method.to_s.upcase
         end
 
@@ -16,8 +15,7 @@ module Shaf
         def routes_for(controller)
           sorted = routes[controller].keys.sort_by(&:to_s)
           sorted.each do |symbol|
-            collection = symbol.match?(/__collection__\Z/)
-            yield route_info(controller, symbol, collection)
+            yield route_info(controller, symbol)
           end
         end
 
@@ -32,42 +30,29 @@ module Shaf
           end
         end
 
-        def route_info(controller, symbol, collection)
+        def route_info(controller, symbol)
           methods = routes[controller][symbol].to_a
-          symbol = ensure_path_suffix(symbol)
           template_method = :"#{symbol}_template"
 
           if controller.respond_to? template_method
-            template = controller.public_send(template_method, collection)
+            template = controller.public_send(template_method)
           else
             template = symbol
             symbol = '-'
           end
 
-          symbol = "#{symbol} (collection)" if collection
-
           [methods, template, symbol]
-        end
-
-        def ensure_path_suffix(symbol)
-          symbol = symbol.to_s.delete_suffix '__collection__'
-
-          case symbol
-          when /_path\Z/
-            symbol
-          when /_uri\Z/
-            symbol.to_s.sub(/_uri\Z/, '_path')
-          else
-            "#{symbol}_path"
-          end
         end
       end
     end
 
     Shaf::SUPPORTED_HTTP_METHODS.each do |method|
       define_method method do |path, **options, &block|
-        collection = options[:collection]
-        Registry.register(self, method, path, collection)
+        path_str = path.to_s
+        path_str.sub!(/_uri/, '_path')
+        path_str = "#{path_str}_path" unless path_str.end_with? '_path'
+        path_str.sub!(/_path/, '_collection_path') if options[:collection]
+        Registry.register(self, method, path_str.to_sym)
         super(path, **options, &block)
       end
     end
