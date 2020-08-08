@@ -8,6 +8,7 @@ module Shaf
         create_serializer
         create_serializer_spec if options[:specs]
         create_policy
+        create_profile
       end
 
       def name
@@ -214,6 +215,11 @@ module Shaf
       def create_policy
         policy_args = ["policy", name, *args[1..-1]]
         Generator::Factory.create(*policy_args, **options).call
+      end
+
+      def create_profile
+        profile_args = ["profile", name]
+        Generator::Factory.create(*profile_args, **options).call
       end
     end
   end
