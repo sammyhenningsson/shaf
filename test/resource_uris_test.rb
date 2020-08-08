@@ -55,6 +55,12 @@ module Shaf
         assert_equal "#{base_uri}/foos/5/edit?bar=5&baz=fem", Shaf::UriHelper.edit_foo_uri(resrc, bar: 5, baz: "fem")
       end
 
+      it "is possible to specify a fragment id" do
+        assert_equal "/foos#hello", Shaf::UriHelper.foos_path(fragment_id: 'hello')
+        assert_equal "/foos/5#world", Shaf::UriHelper.foo_path(resrc, fragment_id: 'world')
+        assert_equal "/foos?active=true#hello", Shaf::UriHelper.foos_path(active: true, fragment_id: 'hello')
+      end
+
       it "adds path matcher methods" do
         assert_methods_registered(*%i[foos_path? foo_path? new_foo_path? edit_foo_path?])
 
