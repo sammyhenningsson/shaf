@@ -190,8 +190,15 @@ module Shaf
     NO_GIVEN_VALUE = Object.new
 
     def self.query_string(query)
-      return '' unless query.any?
-      "?#{query.map { |key, value| "#{key}=#{value}" }.join('&')}"
+      return '' unless query&.any?
+
+      fragment_id = query.delete(:fragment_id)
+      fragment_str = "##{fragment_id}" if fragment_id
+
+      query_str = query.map { |a| a.join('=') }.join('&')
+      query_str = "?#{query_str}" unless query_str.empty?
+
+      [query_str, fragment_str].join
     end
 
     def initialize(name, uri, alt_uri: nil)
@@ -264,11 +271,9 @@ module Shaf
     end
 
     def signature(method_name, uri, optional_args: 0)
-      symbols = extract_symbols(uri).size.times.map { |i| "arg#{i}" }
-      sym_count = symbols.size
+      args = extract_symbols(uri).size.times.map { |i| "arg#{i}" }
+      sym_count = args.size
 
-      args = []
-      symbols.each_with_index { |_arg, i| args << "arg#{i}" }
       optional_args.times { |i| args << "arg#{sym_count + i} = nil" }
       args << '**query'
 
