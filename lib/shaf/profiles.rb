@@ -38,3 +38,4 @@ end
 
 require 'shaf/profile'
 require 'shaf/profiles/shaf_form'
+require 'shaf/profiles/shaf_basic'

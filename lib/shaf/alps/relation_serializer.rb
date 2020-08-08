@@ -21,9 +21,6 @@ module Shaf
         {
           id: rel.id,
           type: type,
-          doc: {
-            value: rel.doc
-          },
         }.merge(optional_properties)
       end
 
@@ -32,6 +29,8 @@ module Shaf
       def optional_properties
         descriptors = serialized_descriptors
         hash = {}
+        hash[:href] = rel.href if rel.href
+        hash[:doc] = { value: rel.doc } if rel.doc
         hash[:name] = rel.name.to_s if rel.name
         hash[:rt] = rel.content_type if rel.content_type
         hash[:descriptor] = descriptors unless descriptors.empty?

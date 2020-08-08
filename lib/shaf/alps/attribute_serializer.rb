@@ -17,9 +17,6 @@ module Shaf
         {
           id: attribute.id,
           type: 'semantic',
-          doc: {
-            value: attribute.doc
-          },
         }.merge(optional_properties)
       end
 
@@ -28,6 +25,8 @@ module Shaf
       def optional_properties
         descriptors = serialized_descriptors
         hash = {}
+        hash[:href] = attribute.href if attribute.href
+        hash[:doc] = { value: attribute.doc } if attribute.doc
         hash[:name] = attribute.name.to_s if attribute.name
         hash[:descriptor] = descriptors unless descriptors.empty?
         hash
