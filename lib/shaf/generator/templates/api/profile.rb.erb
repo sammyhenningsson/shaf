@@ -1,0 +1,9 @@
+module Profiles
+  class <%= profile_class_name %> < Shaf::Profile
+    name '<%= profile_name %>'
+
+    # Auto generated profile: Update this file to suite your API!
+
+    use :delete, from: Shaf::Profiles::ShafBasic
+  end
+end
