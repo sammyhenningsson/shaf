@@ -311,7 +311,7 @@ module Shaf
               Deprecated use of collection uri helper:
               To get the collection uri use ##{name}_collection_uri instead of ##{uri_method_name}.
               Or pass an argument to ##{uri_method_name} to get the uri to a resource.
-              \#{caller.find { |s| !s.match? %r{lib/shaf/extensions/resource_uris.rb} }}
+                \#{caller.find { |s| !s.match? %r{lib/shaf/extensions/resource_uris.rb} }}
 
             DEPRECATION
 
@@ -334,7 +334,7 @@ module Shaf
               Deprecated use of collection path helper:
               To get the collection path use ##{name}_collection_path instead of ##{path_method_name}.
               Or pass an argument to ##{path_method_name} to get the path to a resource.
-              \#{caller.find { |s| !s.match? %r{lib/shaf/extensions/resource_uris.rb} }}
+                \#{caller.find { |s| !s.match? %r{lib/shaf/extensions} }}
 
             DEPRECATION
 
@@ -383,7 +383,7 @@ module Shaf
 
               Deprecated use of uri template helper with `collection` argument:
               Use #{replacing_method} instead of #{deprecated_method}"
-              #{caller.find { |s| !s.match? %r{lib/shaf/extensions/resource_uris.rb} }}
+                #{caller.find { |s| !s.match? %r{lib/shaf/extensions} }}
 
             DEPRECATION
           else
@@ -414,7 +414,7 @@ module Shaf
 
             Deprecated use of uri predicate helper with `collection` argument:
             Use #{replacing_method} instead of #{deprecated_method}(collection: true)
-            #{caller.find { |s| !s.match? %r{lib/shaf/extensions/resource_uris.rb} }}
+              #{caller.find { |s| !s.match? %r{lib/shaf/extensions} }}
 
           DEPRECATION
         else
