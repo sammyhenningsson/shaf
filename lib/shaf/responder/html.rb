@@ -1,5 +1,3 @@
-require 'shaf/responder/hal_serializable'
-
 module Shaf
   module Responder
     class Html < Base
