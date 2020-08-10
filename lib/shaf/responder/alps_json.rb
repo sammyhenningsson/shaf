@@ -6,7 +6,7 @@ module Shaf
       mime_type :alps_json, 'application/alps+json'
 
       def self.can_handle?(resource)
-        return false unless resource.respond_to? :<=
+        return false unless resource.is_a? Class
         resource <= Shaf::Profile
       end
 

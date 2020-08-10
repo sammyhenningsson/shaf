@@ -7,7 +7,7 @@ module Shaf
       def self.can_handle?(resource)
         return false if resource.is_a? StandardError
 
-        if resource.respond_to? :<=
+        if resource.is_a? Class
           return false if resource <= Shaf::Profile
         end
 
