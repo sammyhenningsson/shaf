@@ -8,6 +8,16 @@ module Shaf
       use_as_default!
       mime_type :hal, 'application/hal+json'
 
+      def self.can_handle?(resource)
+        return false if resource.is_a? StandardError
+
+        if resource.respond_to? :<=
+          return false if resource <= Shaf::Profile
+        end
+
+        true
+      end
+
       def body
         @body ||= generate_json
       end

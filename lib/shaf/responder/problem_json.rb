@@ -4,7 +4,7 @@ module Shaf
       mime_type :problem_json, 'application/problem+json'
 
       def self.can_handle?(resource)
-        klass = resource.is_a?(Class) ? resource: resource.class
+        klass = resource.is_a?(Class) ? resource : resource.class
         klass <= StandardError
       end
 

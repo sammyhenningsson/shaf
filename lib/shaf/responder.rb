@@ -16,12 +16,17 @@ module Shaf
 
       def for(request, resource)
         types = supported_responders_for(resource).map(&:mime_type)
+        types = move_html_to_last(types)
         mime = request.preferred_type(types)
         responders[mime]
       end
 
       def default=(responder)
         responders.default = responder
+      end
+
+      def default
+        responders.default
       end
 
       private
@@ -56,6 +61,16 @@ module Shaf
         (@responders ||= {}).tap do
           init_responders!
         end
+      end
+
+      # We want to always be able to respond with text/html, but only when
+      # asked for (Accept header) to be able to let other more specific mime
+      # types take precedence we need to move text/html to the end of the
+      # array.
+      def move_html_to_last(types)
+        return types unless types.include? Html.mime_type
+
+        (types - [Html.mime_type]) << Html.mime_type
       end
     end
   end
