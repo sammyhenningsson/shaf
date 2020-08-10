@@ -1,5 +1,7 @@
 # frozen_string_literal: true
 
+require 'hal_presenter'
+
 module Shaf
   # A base class used for serializing objects into a HAL representations.
   class Serializer
