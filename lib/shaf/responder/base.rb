@@ -2,12 +2,14 @@ module Shaf
   module Responder
     class Response
       attr_reader :content_type, :body, :serialized_hash, :resource
+      attr_accessor :preload_links
 
       def initialize(content_type:, body:, serialized_hash: {}, resource: nil)
         @content_type = content_type
         @body = body
         @serialized_hash = serialized_hash
         @resource = resource
+        @preload_links = []
       end
 
       def log_entry
@@ -36,11 +38,10 @@ module Shaf
         end
 
         def call(controller, resource, preload: [], **kwargs)
-          responder = new(controller, resource, **kwargs)
+          responder = new(controller, resource, preload_rels: preload, **kwargs)
           response = responder.build_response
           log_response(controller, response)
-          preload_links = preload_links(preload, responder, response, controller)
-          write_response(controller, response, preload_links)
+          write_response(controller, response)
         end
 
         def can_handle?(_obj)
@@ -58,23 +59,14 @@ module Shaf
           controller.log.send(type, msg)
         end
 
-        def preload_links(rels, responder, response, controller = nil)
-          Array(rels).map do |rel|
-            links = responder.lookup_rel(rel, response)
-            links = [links].compact unless links.is_a? Array
-            log(controller, PRELOAD_FAILED_MSG % rel) if links.empty?
-            links
-          end
-        end
-
-        def write_response(controller, response, preload_links)
+        def write_response(controller, response)
           controller.content_type(response.content_type)
-          add_preload_links(controller, response, preload_links)
+          add_preload_links(controller, response)
           controller.body(response.body)
         end
 
-        def add_preload_links(controller, response, preload_links)
-          preload_links.each do |links|
+        def add_preload_links(controller, response)
+          response.preload_links.each do |links|
             links.each do |link|
               next unless link[:href]
               # Nginx http2_push_preload only processes relative URIs with absolute path
@@ -111,8 +103,19 @@ module Shaf
           body: body,
           serialized_hash: serialized_hash,
           resource: resource
-        )
+        ).tap do |response|
+          response.preload_links = preload_links(response)
+        end
       end
+
+        def preload_links(response)
+          Array(options[:preload_rels]).map do |rel|
+            links = lookup_rel(rel, response)
+            links = [links].compact unless links.is_a? Array
+            log(controller, PRELOAD_FAILED_MSG % rel) if links.empty?
+            links
+          end
+        end
 
       def lookup_rel(_rel, _response)
         []
