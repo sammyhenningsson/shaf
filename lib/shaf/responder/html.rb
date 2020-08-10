@@ -3,12 +3,50 @@ require 'shaf/responder/hal_serializable'
 module Shaf
   module Responder
     class Html < Base
-      include HalSerializable
-
       mime_type :html
 
+      class << self
+        def call(controller, resource, preload: [], **kwargs)
+          responder = responder_for(resource, controller, **kwargs)
+          response = responder.build_response
+
+          html_responder = new(controller, resource, response: response)
+          html_response = html_responder.build_response
+          log_response(controller, response)
+
+          preload_links = preload_links(preload, responder, response, controller)
+          write_response(controller, html_response, preload_links)
+        end
+
+
+        # Returns the "original" (non-html) responder
+        def responder_for(resource, controller, **kwargs)
+          responders = Responder.send(:supported_responders_for, resource)
+          responder_class = (responders - [self]).first || Responder.default
+          responder_class.new(controller, resource, **kwargs)
+        end
+      end
+
       def body
-        locals = variables
+        response = options[:response]
+        serialized = response.serialized_hash
+        if serialized.empty?
+          serialized = begin
+                         JSON.parse(response.body)
+                       rescue StandardError
+                         response.body
+                       end
+        end
+
+        render serialized
+      end
+
+      def render(serialized)
+        locals = {
+          request_headers: request_headers,
+          response_headers: response_headers,
+          serialized: serialized
+        }
 
         template =
           case resource
@@ -22,25 +60,16 @@ module Shaf
         controller.erb(template, locals: locals)
       end
 
-      def variables
-        {
-          request_headers: request_headers,
-          response_headers: response_headers,
-          serialized: serialized_hash
-        }
-      end
-
       def request_headers
         controller.request_headers
       end
 
       def response_headers
-        etag, kind = controller.send(:etag_for, generate_json)
+        etag, kind = controller.send(:etag_for, options[:response].body)
         prefix = kind == :weak ? 'W/' : ''
         etag = %Q{#{prefix}"#{etag}"}
 
-        type = Hal.mime_type
-        type = "#{type};profile=#{profile}" if profile
+        type = options[:response].content_type
 
         controller.headers.merge('Content-Type' => type, 'ETag' => etag)
       end
