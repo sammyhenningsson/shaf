@@ -5,15 +5,15 @@ module Shaf
 
       class << self
         def call(controller, resource, preload: [], **kwargs)
-          responder = responder_for(resource, controller, **kwargs)
+          responder = responder_for(resource, controller, preload_rels: preload, **kwargs)
           response = responder.build_response
+          add_preload_links(controller, response)
 
           html_responder = new(controller, resource, response: response)
           html_response = html_responder.build_response
           log_response(controller, response)
 
-          preload_links = preload_links(preload, responder, response, controller)
-          write_response(controller, html_response, preload_links)
+          write_response(controller, html_response)
         end
 
 
