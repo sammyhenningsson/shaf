@@ -3,7 +3,7 @@ require 'shaf/formable'
 
 class FormSerializer < BaseSerializer
   model Shaf::Formable::Form
-  profile Shaf::Settings.form_profile_name
+  profile 'shaf-form'
 
   attribute :method do
     (options[:method] || resource&.method || 'POST').to_s.upcase
@@ -17,10 +17,6 @@ class FormSerializer < BaseSerializer
 
   link :self do
     options[:self_link] || resource&.self_link
-  end
-
-  link :profile do
-    Shaf::Settings.form_profile_uri
   end
 
   post_serialize do |hash|
