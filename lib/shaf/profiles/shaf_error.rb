@@ -5,25 +5,25 @@ module Shaf
     class ShafError < Shaf::Profile
       name 'shaf-error'
 
-      # doc  'This profile describes a set of descriptors for generic error messages.'
-      # example <<~EXAMPLE
-      # {
-      #   "title": "Invalid entity",
-      #   "message": "The user could not be saved, due to unfulfilled requirements",
-      #   "code": "VALIDATION_ERROR",
-      #   "fields": {
-      #     "email": ["cannot be empty"]
-      #   }
-      # }
-      # EXAMPLE
+      doc  'This profile describes a set of descriptors for generic error messages.'
+      example <<~EXAMPLE
+      {
+        "title": "Invalid entity",
+        "message": "The user could not be saved, due to unfulfilled requirements",
+        "code": "VALIDATION_ERROR",
+        "fields": {
+          "email": ["cannot be empty"]
+        }
+      }
+      EXAMPLE
 
-      # example <<~EXAMPLE
-      # {
-      #   "title": "Unpermitted action",
-      #   "message": "User is not allowed to edit this resource",
-      #   "code": "FORBIDDEN_ERROR",
-      # }
-      # EXAMPLE
+      example <<~EXAMPLE
+      {
+        "title": "Unpermitted action",
+        "message": "User is not allowed to edit this resource",
+        "code": "FORBIDDEN_ERROR",
+      }
+      EXAMPLE
 
       attribute :code,
         type: :string,

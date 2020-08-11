@@ -22,9 +22,9 @@ module Shaf
         {
           alps: {
             version: ALPS_VERSION,
-            # doc: profile.doc, # FIXME add toplevel profile documentation
+            doc: profile.doc,
             descriptor: descriptors,
-          }
+          }.compact
         }
       end
 
