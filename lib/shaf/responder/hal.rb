@@ -49,7 +49,7 @@ module Shaf
       end
 
       def serialized_hash
-        return {} unless serializer
+        raise Errors::NotAcceptableError unless serializer
 
         @serialized_hash ||=
           if collection?
