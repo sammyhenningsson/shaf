@@ -72,6 +72,8 @@ module Shaf
       if status == 500
         content_type mime_type(:json)
         body JSON.generate(failure: err.message)
+      elsif err.is_a? Errors::ServerError
+        respond_with(err)
       else
         respond_with(Errors::ServerError.new(err.message))
       end

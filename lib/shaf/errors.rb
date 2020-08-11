@@ -64,6 +64,17 @@ module Shaf
       end
     end
 
+    class NotAcceptableError < ServerError
+      def http_status
+        406
+      end
+
+      def initialize(msg = nil)
+        msg ||= 'Resource found, but a suitable representation could not be generated'
+        super(msg, code: 'NOT_ACCEPTABLE', title: 'Content negotiation failed')
+      end
+    end
+
     class ConflictError < ServerError
       def http_status
         409
