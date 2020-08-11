@@ -14,7 +14,16 @@ module Shaf
 
       def name(str = nil)
         @name = str if str
-        @name if defined? @name # prevent uninitialized warning
+        @name if defined? @name
+      end
+
+      def doc(str = nil)
+        @doc = str if str
+        @doc if defined? @doc
+      end
+
+      def example(str)
+        examples << str
       end
 
       def match?(str)
@@ -27,6 +36,10 @@ module Shaf
 
       def relations
         @relations ||= []
+      end
+
+      def examples
+        @examples ||= []
       end
 
       def attribute(*args, **kwargs, &block)

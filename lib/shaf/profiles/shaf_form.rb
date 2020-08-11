@@ -5,6 +5,52 @@ module Shaf
     class ShafForm < Shaf::Profile
       name 'shaf-form'
 
+      doc 'This profile describes how a set of descriptors should be interpreted to ' \
+          'turn a generic media type into a form (similar to HTML forms). For ' \
+          'example, the HAL media type (application/hal+json) does not specify any ' \
+          'semantics about forms, however we can add semantics about forms to a HAL ' \
+          'document using this profile.'
+
+      example <<~EXAMPLE
+        Given the following form:
+
+        ```json
+          "create-form": {
+            "method": "POST",
+            "name": "create-post",
+            "title": "Create Post",
+            "href": "/posts",
+            "type": "application/json",
+            "_links": {
+              "self": {
+                "href": "http://localhost:3000/posts/form"
+              }
+            },
+            "fields": [
+              {
+                "name": "title",
+                "type": "string",
+              },
+              {
+                "name": "message",
+                "type": "string",
+              }
+            ]
+          }
+        ```
+
+        A client should then present a user interface with the possiblity to fill in two fields accepting string values (if applicable the interface should be titled "Create Post"). The entered values should be mapped to the keys title resp. message. (The client may of course fill in the details itself whenever possible). When the form is to be submitted, the client constructs a json string with the keys and values and makes a POST request to http://localhost:3000/posts/form with the header Content-Type header set to application/json and the json string as body.
+
+        Using Curl, the form above could be submitted using:
+
+        ```sh
+          curl -H "Content-Type: application/json" \
+               -X POST \
+               -d '{"title": "hello", "message": "world"}' \
+               localhost:3000/posts
+        ```
+      EXAMPLE
+
       attribute :method,
         type: :string,
         doc: 'The HTTP method used for submitting the form'
