@@ -363,8 +363,13 @@ module Shaf
       return uri if uri == '/'
 
       transform_symbols(uri) do |segment, i|
-        sym = segment[1..-1]
-        "\#{arg#{i}.respond_to?(#{segment}) ? arg#{i}.#{sym} : arg#{i}}"
+        # if the uri is templated (starting with a '{'), then we need to
+        # exclude it from the interpolated string but add it back to the end of
+        # the segment.
+        last = (segment.index('{') || 0) - 1
+        sym = segment[1..last]
+        template = segment[(last + 1)..-1] unless last == -1
+        "\#{arg#{i}.respond_to?(:#{sym}) ? arg#{i}.#{sym} : arg#{i}}#{template}"
       end
     end
 
