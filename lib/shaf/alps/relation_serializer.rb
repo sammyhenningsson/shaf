@@ -34,6 +34,7 @@ module Shaf
         hash[:name] = rel.name.to_s if rel.name
         hash[:rt] = rel.content_type if rel.content_type
         hash[:descriptor] = descriptors unless descriptors.empty?
+        hash[:ext] = extension if extension
         hash
       end
 
@@ -46,6 +47,19 @@ module Shaf
         else
           'unsafe'
         end
+      end
+
+      def extension
+        methods = rel.http_methods
+        return unless methods
+
+        [
+          {
+            id: :http_method,
+            href: 'https://gist.github.com/sammyhenningsson/2103d839eb79a7baf8854bfb96bda7ae',
+            value: methods,
+          }
+        ]
       end
 
       def serialized_descriptors

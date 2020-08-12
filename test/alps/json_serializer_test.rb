@@ -5,6 +5,7 @@ require 'test_helper'
 module Shaf
   module ALPS
     describe JsonSerializer do
+      let(:ext_href) { 'https://gist.github.com/sammyhenningsson/2103d839eb79a7baf8854bfb96bda7ae' }
       let(:profile) do
 	Class.new(Profile) do
 	  name 'test-profile'
@@ -52,6 +53,13 @@ module Shaf
 	    doc: {
 	      value: 'toplevel relation'
 	    },
+	    ext: [
+	      {
+		id: :http_method,
+		href: ext_href,
+		value: ["GET"]
+	      }
+	    ],
 	    descriptor: [
 	      {
 		id: 'rel_attr',
@@ -94,6 +102,13 @@ module Shaf
 	    doc: {
 	      value: 'nested rel1'
 	    },
+	    ext: [
+	      {
+		id: :http_method,
+		href: ext_href,
+		value: ["GET", "PUT"]
+	      }
+	    ]
 	  }
 	)
 
@@ -121,6 +136,13 @@ module Shaf
 		doc: {
 		  value: 'nested rel2'
 		},
+		ext: [
+		  {
+		    id: :http_method,
+		    href: ext_href,
+		    value: ["PUT", "POST"]
+		  }
+		]
 	      }
 	    ]
 	  }
