@@ -19,7 +19,7 @@ module Shaf
       end
 
       def object
-        raise NotImplementedError, "#{self} must implement .object"
+        raise NotImplementedError, "#{self} must implement #object"
       end
 
       def serializer_namespace
