@@ -1,8 +1,8 @@
 <div class="serializer list">
   <ul>
-    <% @serializers.each do |serializer| %>
+    <% @serializers.each do |name:, path:| %>
       <li>
-        <%= serializer %>
+        <a href=<%= path %>><%= name%></a>
       </li>
     <% end %>
 </div>

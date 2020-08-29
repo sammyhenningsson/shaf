@@ -8,11 +8,18 @@ def init
   @serializers = serializers
   @profiles = profiles
 
-  sections %i[search serializer_list profile_list]
+  sections :sidebar, %i[search serializer_list profile_list]
 end
 
 def serializers
-  options.resources.map(&:resource_name)
+  options.resources.map do |resource|
+    path = resource.path.sub(/Serializers::/, '')
+
+    {
+      name: resource.resource_name,
+      path: "/doc/#{path}.html"
+    }
+  end.sort_by { |h| h[:name] }
 end
 
 def profiles

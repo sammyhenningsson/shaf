@@ -13,10 +13,12 @@ module Shaf
 
       def attributes
         children.select { |child| child.type == :attribute }
+                .sort_by(&:name)
       end
 
       def links
         children.select { |child| child.type == :link }
+                .sort_by(&:name)
       end
 
       def resource_name
@@ -36,6 +38,11 @@ module Shaf
         return '' unless profile?
 
         profile.name
+      end
+
+      def description
+        # TODO: How to add description? @description tag in serializer?
+        ''
       end
     end
   end

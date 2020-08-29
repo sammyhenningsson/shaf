@@ -6,25 +6,24 @@ module Shaf
       attr_accessor :name
 
       def documentation
-        description || profile_doc || 'Not documented'
+        profile_doc || 'Not documented'
+      end
+
+      def profile
+        return unless namespace.respond_to? :profile
+        @profile ||= namespace.profile
+      end
+
+      def value_types
+        Array(descriptor&.type).compact.map(&:to_s)
       end
 
       def profile_doc
-        return unless namespace&.respond_to? :profile
-
-        profile = namespace.profile
-        return unless profile
-
-        attribute = profile.attributes.find { |attr| attr.name.to_sym == name.to_sym }
-        attribute&.doc
+        descriptor&.doc
       end
 
-      def value_type
-        tags(:type).first&.types&.join(', ')
-      end
-
-      def description
-        tags(:description).first&.text
+      def descriptor
+        profile&.find_attribute(name)
       end
     end
   end

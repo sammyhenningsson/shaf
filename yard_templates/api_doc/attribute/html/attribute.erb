@@ -1,2 +1,7 @@
-<h4><strong><%= object.name %></strong> <span class="attribute-type">[<%= object.value_type %>]</span></h4>
-    <p><%= object.documentation %></p>
+<h4 class=description-list>
+    <% value_types.each do |type:, class_name:| %>
+        <span class="property-source <%= class_name %>"><%= type %></span>
+    <% end %>
+    <strong> <%= object.name %></strong>
+</h4>
+<p><%= object.documentation %></p>

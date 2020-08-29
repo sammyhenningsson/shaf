@@ -1,8 +1,10 @@
-<h2>Attributes</h2>
-<ul>
-<% @attributes.each do |attribute| %>
-  <li>
-    <%= attribute %>
-  </li>
-<% end %>
-</ul>
+<div class="resource-section attributes">
+  <h3>Attributes</h3>
+  <ul>
+    <% serialized_attributes.each do |attribute| %>
+      <li class="description-item">
+        <%= attribute %>
+      </li>
+    <% end %>
+  </ul>
+</div>

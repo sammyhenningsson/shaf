@@ -2,10 +2,7 @@
 
 def init
   super
-  @attributes = serialized_attributes
-  @relations = serialized_relations
-
-  sections %i[main attributes relations]
+  sections :resource, %i[profile attributes relations]
 end
 
 def serialized_attributes
@@ -28,4 +25,16 @@ def options_for(type, **opts)
     type: type,
     **opts
   )
+end
+
+def name
+  object.resource_name
+end
+
+def description
+  object.description
+end
+
+def profile_name
+  object.profile_name
 end

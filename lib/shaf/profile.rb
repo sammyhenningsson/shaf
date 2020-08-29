@@ -71,10 +71,12 @@ module Shaf
           when Relation
             relation id,
               http_methods: desc.http_methods,
-              href: profile_path(from.name, fragment_id: id)
+              href: profile_path(from.name, fragment_id: id),
+              doc: desc.doc
           when Attribute
             attribute id,
-              href: profile_path(from.name, fragment_id: id)
+              href: profile_path(from.name, fragment_id: id),
+              doc: desc.doc
           when NilClass
             raise "#{from.name} does not have a descriptor with id #{id}"
           else

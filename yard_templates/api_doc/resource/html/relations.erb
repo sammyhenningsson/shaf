@@ -1,8 +1,10 @@
-<h2>Link relations</h2>
-<ul>
-<% @relations.each do |rel| %>
-  <li>
-    <%= rel %>
-  </li>
-<% end %>
-</ul>
+<div class="resource-section relations">
+  <h3>Link relations</h3>
+  <ul>
+    <% serialized_relations.each do |rel| %>
+      <li class="description-item">
+        <%= rel %>
+      </li>
+    <% end %>
+  </ul>
+</div>

@@ -13,7 +13,7 @@ module Shaf
         @name = name.to_sym
         @doc = opts[:doc].freeze
         @href = opts[:href].freeze
-        @type = opts[:type]&.to_sym
+        @type = opts[:type]&.to_s
         @parent = opts[:parent]
       end
 

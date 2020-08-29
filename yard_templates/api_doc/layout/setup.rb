@@ -4,7 +4,8 @@ def init
   super
 
   options.delete(:serializer)
-  sections %i[header sidebar resource footer]
+  # sections :layout, %i[header sidebar resource footer]
+  sections :layout, %i[header sidebar resource]
 end
 
 def sidebar
@@ -13,4 +14,12 @@ end
 
 def resource
   Templates::Engine.render options
+end
+
+def project_name
+  'Foobar'
+end
+
+def title
+  "#{project_name} API Documentation"
 end
