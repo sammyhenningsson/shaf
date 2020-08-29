@@ -112,7 +112,7 @@ module Shaf
       end
 
       def submit_element
-        %Q(<div class="form--input-group"><input type="submit" class="button" value="Submit"</div>)
+        %Q(<div class="form--input-group"><input type="submit" class="button" value="#{submit}"</div>)
       end
     end
   end
