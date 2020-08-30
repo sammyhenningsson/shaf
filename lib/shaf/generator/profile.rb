@@ -2,7 +2,7 @@ module Shaf
   module Generator
     class Profile < Base
       identifier :profile
-      usage 'generate profile MODEL_NAME'
+      usage 'generate profile NAME [attribute:type] [..]'
 
       def call
         create_profile
@@ -27,13 +27,17 @@ module Shaf
         "api/profiles/#{profile_name}.rb"
       end
 
+      def attributes
+        args[1..-1].map do |attr|
+          name, type = attr.split(':')
+          type ||= 'String'
+          [name, type.capitalize]
+        end
+      end
+
       def create_profile
         content = render(template, opts)
         write_output(target, content)
-      end
-
-      def attributes
-        args[1..-1].map { |attr| "attribute :#{attr}" }
       end
 
       def opts

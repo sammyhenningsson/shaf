@@ -2,7 +2,7 @@ module Shaf
   module Generator
     class Serializer < Base
       identifier :serializer
-      usage 'generate serializer MODEL_NAME [attribute] [..]'
+      usage 'generate serializer MODEL_NAME [attribute[:type]] [..]'
 
       def call
         create_serializer
@@ -57,16 +57,15 @@ module Shaf
       end
 
       def attributes
-        args[1..-1].map { |attr| ":#{attr}" }
+        args[1..-1]
+      end
+
+      def attribute_names
+        attributes.map { |arg| arg.split(':').first }
       end
 
       def attributes_with_doc
-        attributes.map do |attr|
-          [
-            "# FIXME: Write documentation for attribute #{attr}",
-            "attribute #{attr}"
-          ]
-        end
+        attribute_names.map { |attr| ["attribute :#{attr}"] }
       end
 
       def links
@@ -203,7 +202,7 @@ module Shaf
           model_class_name: model_class_name,
           policy_class_name: policy_class_name,
           policy_name: "#{name}_policy",
-          attributes: attributes,
+          attribute_names: attribute_names,
           profile_with_doc: profile_with_doc,
           links: links,
           attributes_with_doc: attributes_with_doc,
@@ -213,12 +212,12 @@ module Shaf
       end
 
       def create_policy
-        policy_args = ["policy", name, *args[1..-1]]
+        policy_args = ["policy", name, *attribute_names]
         Generator::Factory.create(*policy_args, **options).call
       end
 
       def create_profile
-        profile_args = ["profile", name]
+        profile_args = ["profile", name, *attributes]
         Generator::Factory.create(*profile_args, **options).call
       end
     end

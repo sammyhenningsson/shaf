@@ -52,9 +52,14 @@ module Shaf
       alias rel relation
 
       def descriptor(id)
-        attribute = attributes.find { |attr| attr.id.to_sym == id.to_sym }
-        return attribute if attribute
+        find_attribute(id) || find_relation(id)
+      end
 
+      def find_attribute(id)
+        attributes.find { |attr| attr.id.to_sym == id.to_sym }
+      end
+
+      def find_relation(id)
         relations.find { |rel| rel.id.to_sym == id.to_sym }
       end
 

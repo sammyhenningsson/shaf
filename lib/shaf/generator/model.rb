@@ -52,8 +52,7 @@ module Shaf
       end
 
       def create_serializer
-        serializer_args = %W(serializer #{model_name})
-        serializer_args += args[1..-1].map { |arg| arg.split(':').first }
+        serializer_args = %W(serializer #{model_name}) + args[1..-1]
         Generator::Factory.create(*serializer_args, **options).call
       end
 

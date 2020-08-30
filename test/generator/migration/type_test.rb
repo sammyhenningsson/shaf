@@ -20,11 +20,11 @@ module Shaf
         end
 
         it 'can find a type' do
-          assert Type.find('integer')
+          assert Types.find('integer')
         end
 
         it '#find returns nil when type not found' do
-          assert_nil Type.find('foobar')
+          assert_nil Types.find('foobar')
         end
 
         it 'returns a formatted create string' do

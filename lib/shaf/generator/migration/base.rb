@@ -42,9 +42,13 @@ module Shaf
 
         def column_def(str, create: true)
           _, col_type = str.split(':')
-          type = Type.find(col_type)
-          raise "No supported DB column types for: #{col_type}" unless type
-          type.build(str, create: create, alter: !create)
+          type = Types.find(col_type)
+          return type.build(str, create: create, alter: !create) if type
+
+          raise <<~ERR
+            No supported DB column types for: #{col_type}
+            Supported types: #{Types.all.map(&:name).join(', ')}
+          ERR
         end
 
         def target(name)

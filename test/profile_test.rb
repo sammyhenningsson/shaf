@@ -29,17 +29,17 @@ module Shaf
     end
 
     it 'can add attributes' do
-      profile.attribute('attr1', doc: 'doc for attr1', type: :string)
-      profile.attribute(:attr2, doc: 'doc for attr2', type: :integer)
+      profile.attribute('attr1', doc: 'doc for attr1', type: 'String')
+      profile.attribute(:attr2, doc: 'doc for attr2', type: 'Integer')
 
       attr1, attr2 = profile.attributes
 
       _(attr1.name).must_equal :attr1
       _(attr1.doc).must_equal 'doc for attr1'
-      _(attr1.type).must_equal :string
+      _(attr1.type).must_equal 'String'
       _(attr2.name).must_equal :attr2
       _(attr2.doc).must_equal 'doc for attr2'
-      _(attr2.type).must_equal :integer
+      _(attr2.type).must_equal 'Integer'
     end
 
     it 'can add rels' do
@@ -74,11 +74,11 @@ module Shaf
     end
 
     it 'can add nested attributes' do
-      profile.attribute('attr', doc: 'toplevel attribute', type: :array) do
+      profile.attribute('attr', doc: 'toplevel attribute', type: 'Array') do
         rel 'rel1', doc: 'nested rel1'
-        attribute :attr1, doc: 'nested attribute1', type: :hash do
+        attribute :attr1, doc: 'nested attribute1', type: 'Object' do
           rel 'rel2', doc: 'nested rel2'
-          attribute :attr2, doc: 'nested attribute2', type: :string
+          attribute :attr2, doc: 'nested attribute2', type: 'String'
         end
       end
 
@@ -86,13 +86,13 @@ module Shaf
 
       _(attr.name).must_equal :attr
       _(attr.doc).must_equal 'toplevel attribute'
-      _(attr.type).must_equal :array
+      _(attr.type).must_equal 'Array'
 
       attr1 = attr.attributes.first
 
       _(attr1.name).must_equal :attr1
       _(attr1.doc).must_equal 'nested attribute1'
-      _(attr1.type).must_equal :hash
+      _(attr1.type).must_equal 'Object'
 
       rel1 = attr.relations.first
 
@@ -103,7 +103,7 @@ module Shaf
 
       _(attr2.name).must_equal :attr2
       _(attr2.doc).must_equal 'nested attribute2'
-      _(attr2.type).must_equal :string
+      _(attr2.type).must_equal 'String'
 
       rel2 = attr1.relations.first
 
@@ -114,9 +114,9 @@ module Shaf
     it 'can nest attributes inside relations' do
       profile.rel('rel', doc: 'toplevel rel') do
         rel 'rel1', doc: 'nested rel1'
-        attribute :attr1, doc: 'nested attribute1', type: :hash do
+        attribute :attr1, doc: 'nested attribute1', type: 'Object' do
           rel 'rel2', doc: 'nested rel2'
-          attribute :attr2, doc: 'nested attribute2', type: :string
+          attribute :attr2, doc: 'nested attribute2', type: 'String'
         end
       end
 
@@ -129,14 +129,14 @@ module Shaf
 
       _(attr1.name).must_equal :attr1
       _(attr1.doc).must_equal 'nested attribute1'
-      _(attr1.type).must_equal :hash
+      _(attr1.type).must_equal 'Object'
       _(attr1.relations).must_be_empty
 
       attr2 = attr1.attributes.first
 
       _(attr2.name).must_equal :attr2
       _(attr2.doc).must_equal 'nested attribute2'
-      _(attr2.type).must_equal :string
+      _(attr2.type).must_equal 'String'
 
       logger.verify
     end

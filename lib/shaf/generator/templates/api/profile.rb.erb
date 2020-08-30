@@ -5,5 +5,12 @@ module Profiles
     # Auto generated profile: Update this file to suite your API!
 
     use :delete, from: Shaf::Profiles::ShafBasic
+
+  <% attributes.each do |name, type| %>
+    attribute :<%= name %>,
+              type: '<%= type %>',
+              doc: 'FIXME: Write documentation for <%= name %>'
+
+  <% end %>
   end
 end

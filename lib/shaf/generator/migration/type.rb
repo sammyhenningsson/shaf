@@ -4,34 +4,12 @@ module Shaf
       class Type
         attr_reader :name, :create_template, :alter_template, :validator
 
-        class << self
-          def add(name, **kwargs)
-            new(name, **kwargs).tap do |type|
-              types[type.name] = type
-            end
-          end
-
-          def find(str)
-            name, _ = str.to_s.split(',', 2)
-            types[name.to_sym]
-          end
-
-          private
-
-          def types
-            @types ||= {}
-          end
-
-          def clear
-            @types.clear if defined? @types
-          end
-        end
-
         def initialize(str, create_template:, alter_template:, validator: nil)
           @name = str.downcase.to_sym
-          @create_template = create_template
-          @alter_template = alter_template
-          @validator = validator
+          @create_template = create_template.freeze
+          @alter_template = alter_template.freeze
+          @validator = validator.freeze
+          freeze
         end
 
         def build(str, create: false, alter: false)

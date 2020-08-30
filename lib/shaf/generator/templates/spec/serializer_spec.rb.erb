@@ -15,8 +15,8 @@ describe <%= class_name %> do
     end
 
     it "serializes attributes" do
-<% attributes.each do |attr| -%>
-      _(attributes.keys).must_include(<%= attr %>)
+<% attribute_names.each do |attr| -%>
+      _(attributes.keys).must_include(:<%= attr %>)
 <% end -%>
     end
 
@@ -33,8 +33,8 @@ describe <%= class_name %> do
     end
 
     it "serializes attributes" do
-<% attributes.each do |attr| -%>
-      _(attributes.keys).must_include(<%= attr %>)
+<% attribute_names.each do |attr| -%>
+      _(attributes.keys).must_include(:<%= attr %>)
 <% end -%>
     end
 
