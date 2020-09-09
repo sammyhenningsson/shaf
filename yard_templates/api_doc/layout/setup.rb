@@ -3,10 +3,11 @@
 def init
   super
 
-  options.delete(:serializer)
-  # sections :layout, %i[header sidebar resource footer]
+  serializer = options.delete(:serializer)
+
   sections :layout, %i[header sidebar resource]
 end
+
 
 def sidebar
   Templates::Engine.render options.merge(type: :sidebar)

@@ -43,11 +43,42 @@ pre {
 
 .sidebar {
   grid-area: sidebar;
-  padding: 2em;
-  /* background-color: #ffcccc; */ 
-  background-color: #ffffff; 
   border-right: 1px solid;
   border-color: #dddddd;
+}
+
+.sidebar-tabs {
+  overflow: hidden;
+  background-color: #f5f5f5;
+  border-bottom: 1px solid;
+  border-color: #dddddd;
+}
+
+.sidebar-tabs button {
+  background-color: inherit;
+  border: none;
+  cursor: pointer;
+  padding: 1em;
+  transition: 0.5s;
+}
+
+.sidebar-tabs button:hover {
+  background-color: #ddddee;
+}
+
+.sidebar-tabs button.active {
+  text-decoration: underline;
+  text-decoration-color: #ff9e22;
+}
+
+.sidebar-search {
+  padding: 1em 2em 0 2em;
+}
+
+.sidebar-content {
+  /* margin-top: 2em; */
+  padding: 1em 2em 0 2em;
+  background-color: #ffffff; 
 }
 
 .resource {

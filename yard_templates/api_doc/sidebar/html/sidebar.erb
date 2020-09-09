@@ -1,3 +1,13 @@
 <div class="sidebar">
-  <%= yieldall %>
+  <div class="sidebar-tabs">
+    <button class="sidebar-tab-btn active" onclick="openTab(event, 'serializer-list')">
+      Resources
+    </button>
+    <button class="sidebar-tab-btn" onclick="openTab(event, 'profile-list')">
+      Profiles
+    </button>
+  </div>
+  <div class="sidebar-container">
+    <%= yieldall %>
+  </div>
 </div>
