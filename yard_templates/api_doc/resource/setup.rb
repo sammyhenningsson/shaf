@@ -2,28 +2,28 @@
 
 def init
   super
+
+  @attributes = options.object.attributes
+  @relations = options.object.links
+
   sections :resource, %i[profile attributes relations]
 end
 
-def serialized_attributes
-  options.object.attributes.map do |attribute|
-    options = options_for(:attribute, object: attribute)
-    Templates::Engine.render options
-  end
-end
-
-def serialized_relations
-  options.object.links.map do |link|
-    options = options_for(:link, object: link)
-    Templates::Engine.render options
-  end
-end
-
-def options_for(type, **opts)
-  options.merge(
+def serialize_attribute(attr)
+  Templates::Engine.render(
     template: :api_doc,
-    type: type,
-    **opts
+    type: :resource_attribute,
+    object: attr,
+    format: options.format
+  )
+end
+
+def serialize_relation(rel)
+  Templates::Engine.render(
+    template: :api_doc,
+    type: :resource_relation,
+    object: rel,
+    format: options.format
   )
 end
 
@@ -35,6 +35,22 @@ def description
   object.description
 end
 
-def profile_name
-  object.profile_name
+def profile_links
+  object.profile_objects.map do |profile_object|
+
+    if profile_object.profile
+      path = profile_object.path.sub(/Profiles::/, '')
+      href = "/api_doc/#{path}.html"
+      css_classes = 'profile'
+    else
+      href = nil
+      css_classes = 'unknown'
+    end
+
+    {
+      name: profile_object.profile_name,
+      href: href,
+      css_classes: css_classes
+    }
+  end
 end

@@ -1,0 +1,30 @@
+<h4 class=description-list>
+    <strong> <%= object.name %></strong>
+</h4>
+<p><%= object.documentation %></p>
+
+<p>Source:
+    <% if source.href %>
+        <span class="property-source <%= source.type %>">
+            <a href="<%= source.href %>"><%= source.name %></a>
+        </span>
+    <% else %>
+        <span class="property-source <%= source.type %>"><%= source.name %></span>
+    <% end %>
+</p>
+
+<% if href %>
+    <p>Reference: <a href="<%= href %>"><%= href %></a></p>
+<% end %>
+
+<% unless http_methods.empty? %>
+    <p>Supported HTTP Methods: <% http_methods.each do |method| %>
+        <span class="<%= css_classes_for(http_method: method) %>"><%= method %></span>
+        <%= %>
+    <% end %>
+    </p>
+<% end %>
+
+<% if content_type %>
+    <p>Response type: <%= content_type %></p>
+<% end %>

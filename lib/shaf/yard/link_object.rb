@@ -5,8 +5,6 @@ require 'shaf/api_doc/link_relations'
 module Shaf
   module Yard
     class LinkObject < ::YARD::CodeObjects::Base
-      SOURCE_IANA = 'iana'
-
       attr_accessor :rel, :curie
 
       def curie?
@@ -17,9 +15,20 @@ module Shaf
         profile_doc || iana_doc || 'Undocumented'
       end
 
+      def profile_object
+        return unless profile
+        return unless namespace.respond_to? :profile_objects
+
+        namespace.profile_objects.find do |po|
+          po.profile == profile
+        end
+      end
+
       def profile
+        return @profile if defined? @profile
         return unless namespace.respond_to? :profile
-        @profile ||= namespace.profile
+        profile = namespace.profile
+        @profile = profile&.find_relation(name) && profile
       end
 
       def descriptor
@@ -45,14 +54,6 @@ module Shaf
       def iana_doc
         ApiDoc::LinkRelations.load_iana
         ApiDoc::LinkRelations[name.to_sym]&.description
-      end
-
-      def source
-        if descriptor
-          profile.name
-        elsif iana_doc
-          SOURCE_IANA
-        end
       end
     end
   end

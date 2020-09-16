@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 module Shaf
   module Yard
     class ResourceObject < ::YARD::CodeObjects::ClassObject
@@ -38,6 +40,10 @@ module Shaf
         return '' unless profile?
 
         profile.name
+      end
+
+      def profile_objects
+        @profile_objects ||= []
       end
 
       def description

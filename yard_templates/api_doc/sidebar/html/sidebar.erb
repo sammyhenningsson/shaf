@@ -1,9 +1,9 @@
 <div class="sidebar">
   <div class="sidebar-tabs">
-    <button class="sidebar-tab-btn active" onclick="openTab(event, 'serializer-list')">
+    <button class="sidebar-tab-btn <%= 'active' if resource? %>" onclick="openTab(event, 'serializer-list')">
       Resources
     </button>
-    <button class="sidebar-tab-btn" onclick="openTab(event, 'profile-list')">
+    <button class="sidebar-tab-btn <%= 'active' if profile? %>" onclick="openTab(event, 'profile-list')">
       Profiles
     </button>
   </div>

@@ -1,56 +1,50 @@
 # frozen_string_literal: true
 
+require 'shaf/yard/profile_object'
+
 def init
   super
 
-  setup_options
-
   generate_index
   generate_assets
-
-  options.resources.each do |resource|
-    serialize(resource)
-  end
+  generate_resources
+  generate_profiles
 end
 
-
-def setup_options
-  options.resources = YARD::Registry.all(:resource)
-  options.serializer ||= serializer
-end
 
 def generate_index
   puts 'TODO: generate index.html'
 end
 
 def generate_assets
-  serializer = options.serializer.dup
-  serializer.basepath = asset_base_path
-
-  assets.each do |asset|
+  Array(assets).each do |asset|
     content = file(asset)
-    serializer.serialize(asset, content)
+    serializer(base_path: public_path).serialize(asset, content)
+  end
+end
+
+def generate_resources
+  options.resources.each do |resource|
+    serialize(resource)
+  end
+end
+
+def generate_profiles
+  options.profiles.each do |profile|
+    serialize(profile)
   end
 end
 
 def serialize(object)
   options.object = object
-  Templates::Engine.with_serializer(object, options.serializer) do
+  Templates::Engine.with_serializer(object, serializer) do
     T('layout').run(options)
   end
 end
 
-def serializer
-  YARD::Serializers::FileSystemSerializer.new
-end
-
 def assets
   [
-    'js/switch_tab.js',
     'css/api-doc.css',
+    'js/switch_tab.js',
   ]
-end
-
-def asset_base_path
-  'frontend/assets'
 end

@@ -1,8 +1,8 @@
-<div id="profile-list" class="serializer list sidebar-content">
+<div id="profile-list" class="list sidebar-content <%= 'active' if profile? %>">
   <ul>
-    <% @profiles.each do |profile| %>
-      <li>
-        <%= profile %>
+    <% @profiles.each do |name:, path:| %>
+      <li class="sidebar-link <%= 'active' if profile_active?(name) %>">
+        <a href=<%= path %> class="<%= 'active' if profile_active?(name) %>"><%= name%></a>
       </li>
     <% end %>
 </div>

@@ -2,25 +2,23 @@
 
 def init
   super
+  return unless options.object
 
-  serializer = options.delete(:serializer)
-
-  sections :layout, %i[header sidebar resource]
+  sections :layout, %i[header sidebar main]
 end
-
 
 def sidebar
   Templates::Engine.render options.merge(type: :sidebar)
 end
 
-def resource
+def main
   Templates::Engine.render options
 end
 
-def project_name
-  'Foobar'
+def sub_title
+  'API documentation'
 end
 
 def title
-  "#{project_name} API Documentation"
+  Shaf::Settings.project_name
 end

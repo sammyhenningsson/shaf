@@ -1,17 +1,18 @@
 <h4 class=description-list>
-    <% sources.each do |source:, class_name:| %>
-        <span class="property-source <%= class_name %>"><%= source %></span>
-    <% end %>
     <strong> <%= object.name %></strong>
 </h4>
-<p><%= object.documentation %></p>
+<p><%= object.doc %></p>
 
 <% if href %>
     <p>Reference: <a href="<%= href %>"><%= href %></a></p>
 <% end %>
 
 <% unless http_methods.empty? %>
-    <p>Supported HTTP Methods: <%= http_methods %></p>
+    <p>Supported HTTP Methods: <% http_methods.each do |method| %>
+        <span class="<%= css_classes_for(http_method: method) %>"><%= method %></span>
+        <%= %>
+    <% end %>
+    </p>
 <% end %>
 
 <% if content_type %>

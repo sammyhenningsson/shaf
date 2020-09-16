@@ -1,8 +1,8 @@
-<div id="serializer-list" class="serializer list sidebar-content">
+<div id="serializer-list" class="list sidebar-content <%= 'active' if resource? %>">
   <ul>
-    <% @serializers.each do |name:, path:| %>
-      <li>
-        <a href=<%= path %>><%= name%></a>
+    <% @resources.each do |name:, path:| %>
+      <li class="sidebar-link <%= 'active' if resource_active?(name) %>">
+        <a href=<%= path %> class="<%= 'active' if resource_active?(name) %>"><%= name%></a>
       </li>
     <% end %>
 </div>

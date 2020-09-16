@@ -1,6 +1,14 @@
 <div class="resource-section media-type-profile">
   <h3>Media type profile</h3>
-  <% unless profile_name.empty? %>
-    <p><span class="property-source profile"><%= profile_name %></span></p>
-  <% end %>
+  <p>
+    <% profile_links.each do |profile_link| %>
+      <span class="property-source <%= profile_link[:css_classes] %>">
+        <% if profile_link[:href] %>
+        <a href="<%= profile_link[:href] %>"><%= profile_link[:name] %></a>
+        <% else %>
+        <span><%= profile_link[:name] %></span>
+        <% end %>
+      </span>
+    <% end %>
+  </p>
 </div>
