@@ -3,6 +3,7 @@
 require 'forwardable'
 
 extend Forwardable
+include Shaf::Yard::NestedAttributes
 
 def_delegators :object, :name, :http_methods, :href, :content_type
 
@@ -11,7 +12,8 @@ HTTP_METHODS = %w(head options get put patch post delete).freeze
 def init
   super
 
-  @relation = options.object
+  @relation = object
+  @nested_attributes = nested_attributes_for(object)
 
   sections %i[relation]
 end

@@ -34,19 +34,19 @@ def profiles
 end
 
 def profile?
-  options.object.is_a? Shaf::Yard::ProfileObject
+  object.is_a? Shaf::Yard::ProfileObject
 end
 
 def resource?
-  options.object.is_a? Shaf::Yard::ResourceObject
+  object.is_a? Shaf::Yard::ResourceObject
 end
 
 def resource_active?(name)
   return false unless resource?
-  options.object.resource_name == name
+  object.resource_name == name
 end
 
 def profile_active?(name)
   return false unless profile?
-  options.object.profile_name == name
+  object.profile_name == name
 end

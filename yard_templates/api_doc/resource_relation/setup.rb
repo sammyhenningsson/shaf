@@ -3,6 +3,7 @@
 require 'forwardable'
 
 extend Forwardable
+include Shaf::Yard::NestedAttributes
 
 def_delegators :object, :name, :http_methods, :href, :content_type
 
@@ -19,6 +20,8 @@ end
 
 def init
   super
+
+  @nested_attributes = nested_attributes_for(object.descriptor)
 
   sections %i[relation]
 end

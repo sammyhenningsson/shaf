@@ -2,7 +2,7 @@
 
 def init
   super
-  return unless options.object
+  return unless object
 
   sections :layout, %i[header sidebar main]
 end

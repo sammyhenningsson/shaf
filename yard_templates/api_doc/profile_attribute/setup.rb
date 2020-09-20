@@ -1,9 +1,12 @@
 # frozen_string_literal: true
 
+include Shaf::Yard::NestedAttributes
+
 def init
   super
 
-  @attribute = options.object
+  @attribute = object
+  @nested_attributes = nested_attributes_for(object)
 
   sections %i[attribute]
 end

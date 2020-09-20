@@ -5,3 +5,19 @@
     <% end %>
 </h4>
 <p><%= object.doc %></p>
+<% unless @nested_attributes.empty? %>
+    <div class="nested-attributes">
+        <h5>Nested attributes</h5>
+        <ul>
+        <% @nested_attributes.each do |key, attr| %>
+            <li>
+                <h6>
+                    <strong> <%= key %></strong>
+                    <span class="property-source profile"><%= attr.type %></span>
+                </h6>
+                <p><%= attr.doc %></p>
+            </li>
+        <% end %>
+        </ul>
+    </div>
+<% end %>

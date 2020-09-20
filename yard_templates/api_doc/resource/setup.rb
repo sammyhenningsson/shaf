@@ -3,8 +3,8 @@
 def init
   super
 
-  @attributes = options.object.attributes
-  @relations = options.object.links
+  @attributes = object.attributes
+  @relations = object.links
 
   sections :resource, %i[profile attributes relations]
 end

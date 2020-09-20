@@ -167,6 +167,14 @@ span.resource-title {
   background-color: #ef5350;
 }
 
+.nested-attributes {
+  padding-left: 2em;
+}
+
+.nested-attributes h5, h6 {
+  font-size: 1.0em;
+}
+
 h4.description-list {
   margin-bottom: 8px;
 }

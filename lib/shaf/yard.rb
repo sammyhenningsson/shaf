@@ -9,6 +9,7 @@ require 'shaf/yard/resource_object'
 require 'shaf/yard/profile_object'
 require 'shaf/yard/attribute_object'
 require 'shaf/yard/link_object'
+require 'shaf/yard/nested_attributes'
 require 'shaf/yard/parser'
 
 module Shaf

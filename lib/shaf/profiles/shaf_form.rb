@@ -75,8 +75,7 @@ module Shaf
         type: :string,
         doc: 'A string used as label for the CallToAction (e.g. the submit button text)'
 
-      FIELD_DOC = 'A list of field descriptors'
-      attribute :fields, doc: FIELD_DOC do
+      attribute :fields, doc: 'A list of field descriptors' do
 
         attribute :name,
                   type: :string,
