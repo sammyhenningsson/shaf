@@ -2,48 +2,29 @@
 
 require 'set'
 require 'shaf/responder'
+require 'shaf/parser'
 
 module Shaf
   module Payload
-    EXCLUDED_FORM_PARAMS = ['captures', 'splat'].freeze
     NO_VALUE = Object.new.freeze
 
     private
 
     def payload
-      @payload ||= parse_payload
-    end
-
-    def read_input
-      request.body.rewind
-      request.body.read
-    ensure
-      request.body.rewind
+      return @payload if defined? @payload
+      @payload = parse_payload
     end
 
     def parse_payload
-      if request.env['CONTENT_TYPE'] == 'application/x-www-form-urlencoded'
-        return params.reject { |key, _| EXCLUDED_FORM_PARAMS.include? key }
-      end
+      return unless Parser.input? request
 
-      input = read_input
-      return {} if input.empty?
+      parser = Parser.for(request)
+      raise Errors::UnsupportedMediaTypeError.new(request: request) unless parser
 
-      raise raise_unsupported_media_type_error(request) unless suported_media_type?
-
-      JSON.parse(input, symbolize_names: true)
-    rescue Errors::UnsupportedMediaTypeError
-      raise
-    rescue StandardError => e
+      log.debug "Parsing input using: #{parser.class}"
+      parser.call
+    rescue Parser::Error => e
       raise Errors::BadRequestError, "Failed to parse input payload: #{e.message}"
-    end
-
-    def suported_media_type?
-      request.env['CONTENT_TYPE'].match? %r{\Aapplication/(hal\+)?json}
-    end
-
-    def raise_unsupported_media_type_error(request)
-      raise Errors::UnsupportedMediaTypeError.new(request: request)
     end
 
     def safe_params(*fields)
@@ -56,10 +37,6 @@ module Shaf
         allowed[f] = payload[f] if payload.key? f
         allowed[f] ||= payload[f.to_s] if payload.key? f.to_s
       end
-    end
-
-    def ignore_form_input?(name)
-      name == '_method'
     end
 
     def profile(value = NO_VALUE)
