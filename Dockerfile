@@ -1,7 +1,8 @@
-FROM ruby:2.5
+FROM ruby:2.7
 ARG build
+ARG verbose
 
-RUN apt update && apt install -y vim sudo
+RUN apt-get update && apt-get install -y vim sudo
 
 ENV APP_HOME /app
 
@@ -18,6 +19,7 @@ RUN bundle install
 
 # Configure production environment variables
 ENV RACK_ENV=test
+ENV VERBOSE=$verbose
 
 EXPOSE 3000
 
