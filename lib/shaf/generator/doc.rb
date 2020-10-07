@@ -1,7 +1,5 @@
 # frozen_string_literal: true
 
-require 'shaf/yard'
-
 module Shaf
   module Generator
     class Doc < Base
@@ -9,6 +7,7 @@ module Shaf
       usage 'generate doc [SERIALIZER_NAME] [..]'
 
       def call
+        require 'shaf/yard'
         name = String(args[0]).strip
         Shaf::Yard::Parser.call(name: name)
         YARD::Templates::Engine.render(template: :api_doc, format: :html)
