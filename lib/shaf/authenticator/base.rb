@@ -92,14 +92,26 @@ module Shaf
         end
 
         def validate!(parameters)
-          errors = required_params.each_with_object([]) do |param, errors|
+          validate_required(parameters)
+          validate_params(parameters)
+        end
+
+        def validate_required(parameters)
+          errors = []
+
+          required_params.each do |param|
             next if parameters.key? param.name
             next if param.default
             errors << param.name
           end
-          raise MissingParametersError.new(self, *errors) unless errors.empty?
 
-          errors = parameters.each_with_object([]) do |(key, value), errors|
+          raise MissingParametersError.new(self, *errors) unless errors.empty?
+        end
+
+        def validate_params(parameters)
+          errors = []
+
+          parameters.each do |key, value|
             if params.key? key
               errors << [key, value] unless params[key].valid? value
             else
@@ -108,6 +120,7 @@ module Shaf
               parameters.delete(key)
             end
           end
+
           raise InvalidParameterError.new(self, *errors) unless errors.empty?
         end
 

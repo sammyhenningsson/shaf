@@ -35,9 +35,7 @@ module Shaf
 
       def authenticator_for(request)
         scheme = request.scheme
-        authenticator = authenticators.find do |authenticator|
-          authenticator.scheme? scheme
-        end
+        authenticator = authenticators.find { |auth| auth.scheme? scheme }
 
         logger.warn(
           "Client tried to authenticate with an unsupported " \
