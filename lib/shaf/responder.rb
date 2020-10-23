@@ -1,7 +1,10 @@
 require 'set'
+require 'shaf/errors'
 
 module Shaf
   module Responder
+    MEDIA_TYPE_SUFFIX_PATTERN = %r{(.*)/([^+]+)\+(.*)}.freeze
+
     class << self
       def register(responder)
         uninitialized << responder
@@ -15,10 +18,13 @@ module Shaf
       end
 
       def for(request, resource)
+        return Responder::ProblemJson if resource.is_a?(Errors::NotAcceptableError)
+
         types = supported_responders_for(resource).map(&:mime_type)
         types = move_html_to_last(types)
-        mime = request.preferred_type(types)
-        responders[mime]
+
+        mime = preferred_type(request, types)
+        responders[mime] or raise Errors::NotAcceptableError
       end
 
       def default=(responder)
@@ -44,6 +50,23 @@ module Shaf
 
       def supported_responders
         @supported_responders ||= Hash.new { |hash, key| hash[key] = Set.new }
+      end
+
+      def preferred_type(request, types)
+        mime = request.preferred_type(types)
+        return mime if mime
+
+        request.accept.find do |accept|
+          next if accept.match? MEDIA_TYPE_SUFFIX_PATTERN
+
+          types.find do |type|
+            m = type.match MEDIA_TYPE_SUFFIX_PATTERN
+            next unless m
+
+            format = "#{m[1]}/#{m[3]}"
+            return type if accept.to_str == format
+          end
+        end
       end
 
       def uninitialized

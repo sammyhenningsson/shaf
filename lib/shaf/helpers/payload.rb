@@ -3,6 +3,7 @@
 require 'set'
 require 'shaf/responder'
 require 'shaf/parser'
+require 'shaf/errors'
 
 module Shaf
   module Payload
@@ -63,9 +64,9 @@ module Shaf
       kwargs[:profile] ||= profile
 
       log.info "#{request.request_method} #{request.path_info} => #{status}"
-      payload = Responder.for(request, resource).call(self, resource, preload: preload, **kwargs)
+      responder = Responder.for(request, resource)
+      payload = responder.call(self, resource, preload: preload, **kwargs)
       add_cache_headers(payload, kwargs)
-
       payload
     rescue StandardError => err
       log.error "Failure: #{err.message}\n#{err.backtrace}"
