@@ -67,15 +67,31 @@ end
 ```
 This would require the file `generator_templates/foo_service.erb` to exist in the project root. Executing `shaf generate foo` would then read that template, process it through erb (utilizing any local variables given to `render`) and then create the output file `api/services/foo_service.rb`.
 
+#### Parsers
+Shaf parses request payloads using a Parser. It ships with two parsers - one for form data and one for json payloads. The former handles the mediatypes "application/x-www-form-urlencoded" and "multipart/form-data". The latter handles json formatted payloads, e.g. "application/json", and "application/foobar+json".  
+All Parsers should inherit from `Shaf::Parser::Base` and must either call `::mime_type(key, mime_type)` (where `key` is `Symbol` and `mime_type` is a `String`) or implement `::can_handle?(request)` (where `request` is a `Sinatra::Request` instance). Parsers have `attr_reader`s for `request` and `body` (the input String). All Parsers must also respond to `#call` and the value returned from `#call` will be available in controllers through the `payload` helper. An example Parser that handles xml could look like this:
+```ruby
+require 'active_support/core_ext/hash'
+
+class XmlParser < Shaf::Parser::Base
+
+  mime_type :xml, 'application/xml'
+
+  def call
+    Hash.from_xml(body)
+  end
+end
+```
+
 #### Responders
 When `#respond_with` is used, the serialization is delegated to the best matching `Responder`. Each `Responder` manages a specific media type. Thus the "best" `Responder` is the one that best matches the request's `Accept` header.
 Shaf ships with three responders. They support the mediatypes `application/hal+json`, `application/problem+json` and `text/html`. (If the `Accept` header does not match any of those, the default response format will be `application/hal+json`).  
 Each responder is a subclass of `Shaf::Responder::Base`. To add more responders, simply define new subclasses of `Shaf::Responder::Base`.  
-All responders must implement `#body` and the must call `::mime_type(key, mime_type)` (where `key` is `Symbol` and `mime_type` is a `String`).  
+All responders must implement `#body` and they must call `::mime_type(key, mime_type)` (where `key` is `Symbol` and `mime_type` is a `String`).  
 `#body` must return the serialized response.
-Responders are instantiated with `new(controller, resource, **options)` and they have `attr_readers` for each of those arguments.  
+Responders are instantiated with `new(controller, resource, **options)` and they have `attr_reader`s for each of those arguments.  
 Responders may override `::can_handle?(resource)`, which is used to decide whether or not a responder is able to process a given object.  
-Say that you would like to be able to return siren payloads. And you happen to have a `MyCustomSirenSerializer` class that can turn any object into a proper siren payload. Then adding a Siren responder would look like this.
+Say that you would like to be able to return Siren payloads. And you happen to have a `MyCustomSirenSerializer` class that can turn any object into a proper siren payload. Then adding a Siren responder would look like this.
 ```ruby
 class SirenResponder < Shaf::Responder::Base
   mime_type :siren, 'application/vnd.siren+json'
@@ -87,3 +103,10 @@ end
 ```
 
 Then, when your controller actions are using `respond_with some_resource_object`. Your client's will be able to choose if they would like the response to be formatted as `application/hal+json` or `application/vnd.siren+json` (by setting the `Accept` header correspondingly).
+
+#### Authenticators
+##### The HTTP authentication framework
+Authentication with HTTP works by using the _Authorization_ header. It's value is made up of two parts - a scheme and credentials.
+
+All authenticators must be subclasses of `Shaf::Authenticator::Base`  
+TODO

@@ -1,13 +1,12 @@
 # Shaf (Sinatra Hypermedia API Framework)
 [![Gem Version](https://badge.fury.io/rb/shaf.svg)](https://badge.fury.io/rb/shaf)
 ![CI](https://github.com/sammyhenningsson/shaf/workflows/CI/badge.svg)  
-Shaf is a framework for building hypermedia driven REST APIs. Its goal is to be like a lightweight version of `rails new --api` with hypermedia as a first class citizen. Instead of reinventing the wheel Shaf uses [Sinatra](http://sinatrarb.com/) and adds a layer of conventions similar to [Rails](http://rubyonrails.org/). It uses [Sequel](http://sequel.jeremyevans.net/) as ORM and [HALPresenter](https://github.com/sammyhenningsson/hal_presenter) for policies and serialization (which means that the mediatype being used is [HAL](http://stateless.co/hal_specification.html)).  
+Shaf is a framework for building hypermedia driven REST APIs. Its goal is to be like a lightweight version of `rails new --api` with hypermedia as a first class citizen. Instead of reinventing the wheel Shaf uses [Sinatra](http://sinatrarb.com/) and adds a layer of conventions similar to [Rails](http://rubyonrails.org/). It uses [Sequel](http://sequel.jeremyevans.net/) as ORM and [HALPresenter](https://github.com/sammyhenningsson/hal_presenter) for policies and serialization (which means that the main mediatype is [HAL](http://stateless.co/hal_specification.html)).  
 Most APIs claiming to be RESTful completly lacks the concept of links and relies upon clients to construction urls to _known_ endpoints. Thoses APIs are missing some of the concepts that Roy Fielding put together in is dissertation about REST.  
-If you don't have full understanding of what REST is then that's fine. Though you are encouraged to read up on the basics. Perhaps [this blog](https://apisyouwonthate.com/blog/rest-and-hypermedia-in-2019) might make things a little bit more clear.  
-_TL;DR_: REST was "invented" by describing how the web is architectured. Browsers, servers, cache proxies etc all use the same interface, where URIs and mediatypes play a big part. This enables any browser to connect to any web server without prior knowledge about each other.  
-In my oppinion, the goal of REST APIs is to be a part of that web architecture. As an example this means that any hypermedia client, speaking HAL (or some other hypermedia type) should be able to communicate with any API which can return HAL responses without prior knowledge. Of course a developer and/or a user needs to guide the client into what actions to take, but it shouldn't require a special Foo Client to talk to a Foo API.  
+If you don't have full understanding of what REST is then that's fine. Though you are encouraged to read up on the basics. Check out [this blog](https://apisyouwonthate.com/blog/rest-and-hypermedia-in-2019) for a great explanation of the building blocks of REST.  
+A short version is: REST was "invented" by describing how the web is architectured. Web components (e.g browsers, servers, cache proxies etc) all use the same interface, where URIs and mediatypes play a big part. This enables any browser to connect to any web server without prior knowledge about each other. An important part of this is to use hypermedia links, which makes it possible for components to evolve independently.
 
-Building a REST API requires knowledge about standards and a lot of boring stuff. Shaf aims to reduce those prerequirements, minimize bikeshedding and to get up and running quickly. Some of the benefits of using Shaf is that you get:
+Building a REST API requires knowledge about standards and a lot of boring stuff. Shaf aims to reduce those prerequirements, minimize bikeshedding and to get you up and running quickly. Some of the benefits of using Shaf is that you get:
  - Scaffolding
  - Serialization
  - Authorization
@@ -19,6 +18,14 @@ Building a REST API requires knowledge about standards and a lot of boring stuff
  - Testing
  - HTTP caching
  - Link preloading (enables HTTP2 Push)
+
+## What's unique about Shaf?
+The list above could be implemented in any web framework. So why use Shaf? Well, if you are comfortable writing it yourself, then perhaps Shaf might not be for you. However it can still be nice to have some conventions to rely upon, instead of having to decide all basic details. Like choosing a mediatype for instance (this is something people have very strong/different opinions about).  
+I don't think there's another Ruby web framework that emphasizes the principles of REST as much as Shaf does.
+An example of a unique feature (AFAIK) is that mediatypes are separated from controller actions. In most other frameworks, each controller action specifies the possible content type to be returned.
+In Shaf, controller actions returns Ruby objects. Depending on what clients want to receive (specified by the `Accept` header),
+the appropriate serializer is looked up and used to respond with the right representation. (This is not 100% true, since there's actually a helper, `respond_with`, that produces the usual `[status_code, headers, response]`. However you would still see it as an object being returned and serialization takes place afterwards. Parsing inputs is done using a similar approach.  
+The most unique feature is probably the usage of mediatype profiles, which are used both for machine readable definitions and for generating documentation.(See [Mediatype profiles](doc/PROFILES.md) for more information.)
 
 ## Getting started
 Install Shaf with
@@ -46,6 +53,7 @@ Your newly created project should contain the following files:
 │   │   └── base_policy.rb
 │   └── serializers
 │       ├── base_serializer.rb
+│       ├── documentation_serializer.rb
 │       ├── error_serializer.rb
 │       ├── form_serializer.rb
 │       ├── root_serializer.rb
@@ -58,6 +66,7 @@ Your newly created project should contain the following files:
 │   ├── directories.rb
 │   ├── helpers.rb
 │   ├── initializers
+│   │   ├── authentication.rb
 │   │   ├── db_migrations.rb
 │   │   ├── hal_presenter.rb
 │   │   ├── logging.rb
@@ -72,9 +81,11 @@ Your newly created project should contain the following files:
 │   │       └── main.css
 │   └── views
 │       ├── form.erb
+│       ├── headers.erb
 │       ├── layout.erb
 │       └── payload.erb
 ├── Gemfile
+├── Gemfile.lock
 ├── Rakefile
 └── spec
     ├── integration
@@ -103,15 +114,18 @@ Which should return the following payload.
 ```
 
 _Hint_: The output will actually not have any newlines and will look a bit more dense. To make the output more readable pipe the
-curl command to `ruby -rjson -e "puts (JSON.pretty_generate JSON.parse(STDIN.read))"`. E.g.
+curl command to `jq` (which is a great a tool for dealing with json strings).
+```sh
+curl localhost:3000/ | jq
+```
+Or if you don't have `jq` installed, you can also pretty print json through Ruby. E.g:
 ```sh
 curl localhost:3000/ | ruby -rjson -e "puts JSON.pretty_generate(JSON.parse(STDIN.read))"
 ```
-(Or better yet, use `jq` which is a great a tool for dealing with json strings)
 
 The project also contains a few specs that you can run with `rake`
 ```sh
-rake test
+shaf test
 ```
 
 Currently your API is pretty useless. Let's fix that by generating some scaffolding. The following command will create a new resource with two attributes (`title` and `message`).
@@ -125,6 +139,7 @@ Added:      db/migrations/20180224225335_create_posts_table.rb
 Added:      api/serializers/post_serializer.rb
 Added:      spec/serializers/post_serializer_spec.rb
 Added:      api/policies/post_policy.rb
+Added:      api/profiles/post.rb
 Added:      api/forms/post_forms.rb
 Added:      api/controllers/posts_controller.rb
 Added:      spec/integration/posts_controller_spec.rb
@@ -152,7 +167,7 @@ Which should now return the following payload.
   }
 }
 ```
-The root payload now contains a link with rel _posts_. Lets follow that link..
+The root payload should now contain a link with rel _posts_. Lets follow that link..
 ```sh
 curl localhost:3000/posts | jq
 ```
@@ -172,7 +187,7 @@ The response looks like this
     "curies": [
       {
         "name": "doc",
-        "href": "http://localhost:3000/doc/post/rels/{rel}",
+        "href": "http://localhost:3000/doc/profiles/post{#rel}",
         "templated": true
       }
     ]
@@ -194,28 +209,35 @@ The response looks like this
   "title": "Create Post",
   "href": "http://localhost:3000/posts",
   "type": "application/json",
+  "submit": "save",
   "_links": {
+    "profile": {
+      "href": "http://localhost:3000/doc/profiles/shaf-form"
+    },
     "self": {
       "href": "http://localhost:3000/post/form"
     },
-    "profile": {
-      "href": "https://gist.githubusercontent.com/sammyhenningsson/39c8aafeaf60192b082762cbf3e08d57/raw/shaf-form.md"
-    }
+    "curies": [
+      {
+        "name": "doc",
+        "href": "http://localhost:3000/doc/profiles/shaf-form{#rel}",
+        "templated": true
+      }
+    ]
   },
   "fields": [
     {
       "name": "title",
-      "type": "string",
+      "type": "string"
     },
     {
       "name": "message",
-      "type": "string",
+      "type": "string"
     }
   ]
 }
-
 ```
-This form shows us how to create new post resources (see [Forms](doc/FORMS.md) and [the shaf-form media type profile](https://gist.github.com/sammyhenningsson/39c8aafeaf60192b082762cbf3e08d57) for more info on forms). A new post resource can be created with the following request 
+This form shows us how to create new post resources (see [Forms](doc/FORMS.md) for more info). A new post resource can be created with the following request 
 ```sh
 curl -H "Content-Type: application/json" \
      -d '{"title": "hello", "message": "lorem ipsum"}' \
@@ -227,6 +249,9 @@ The response shows us the new resource, with the attributes that we set as well 
   "title": "hello",
   "message": "lorem ipsum",
   "_links": {
+    "profile": {
+      "href": "http://localhost:3000/doc/profiles/post"
+    },
     "collection": {
       "href": "http://localhost:3000/posts"
     },
@@ -242,7 +267,7 @@ The response shows us the new resource, with the attributes that we set as well 
     "curies": [
       {
         "name": "doc",
-        "href": "http://localhost:3000/doc/post/rels/{rel}",
+        "href": "http://localhost:3000/doc/profiles/post{#rel}",
         "templated": true
       }
     ]
@@ -269,7 +294,7 @@ Response:
     "curies": [
       {
         "name": "doc",
-        "href": "http://localhost:3000/doc/post/rels/{rel}",
+        "href": "http://localhost:3000/doc/profiles/post{#rel}",
         "templated": true
       }
     ]
@@ -280,6 +305,9 @@ Response:
         "title": "hello",
         "message": "lorem ipsum",
         "_links": {
+          "profile": {
+            "href": "http://localhost:3000/doc/profiles/post"
+          },
           "collection": {
             "href": "http://localhost:3000/posts"
           },
@@ -291,7 +319,7 @@ Response:
           },
           "doc:delete": {
             "href": "http://localhost:3000/posts/1"
-          },
+          }
         }
       }
     ]
@@ -308,25 +336,29 @@ shaf generate scaffold post title:string message:string
 rake db:migrate
 ```
 
-## [Upgrading a shaf project](doc/UPGRADE.md)
-## [HAL mediatype](doc/HAL.md)
-## [Sinatra](doc/SINATRA.md)
-## [Generators](doc/GENERATORS.md)
-## [Routing/Controllers](doc/ROUTING.md)
-## [Models](doc/MODELS.md)
-## [Forms](doc/FORMS.md)
-## [Serializers](doc/SERIALIZERS.md)
-## [Policies](doc/POLICIES.md)
-## [Settings](doc/SETTINGS.md)
-## [Database](doc/DATABASE.md)
-## [Testing](doc/TESTING.md)
-## [API Documentation](doc/DOCUMENTATION.md)
-## [HTTP Caching](doc/HTTP_CACHING.md)
-## [Pagination](doc/PAGINATION.md)
-## [ShafClient](doc/SHAF_CLIENT.md)
-## [Frontend](doc/FRONTEND.md)
-## [Customizations](doc/CUSTOMIZATIONS.md)
-## [Business logic](doc/BUSINESS_LOGIC.md)
+## Documentation
+### [Sinatra](doc/SINATRA.md)
+### [HAL mediatype](doc/HAL.md)
+### [Mediatype profiles](doc/PROFILES.md)
+### [Generators](doc/GENERATORS.md)
+### [Routing/Controllers](doc/ROUTING.md)
+### [Models](doc/MODELS.md)
+### [Forms](doc/FORMS.md)
+### [Serializers](doc/SERIALIZERS.md)
+### [Policies](doc/POLICIES.md)
+### [Authentication](doc/AUTHENTICATION.md)
+### [Settings](doc/SETTINGS.md)
+### [Database](doc/DATABASE.md)
+### [Mediatype profiles](doc/PROFILES.md)
+### [API Documentation](doc/DOCUMENTATION.md)
+### [HTTP Caching](doc/HTTP_CACHING.md)
+### [Pagination](doc/PAGINATION.md)
+### [Upgrading a shaf project](doc/UPGRADE.md)
+### [Testing](doc/TESTING.md)
+### [ShafClient](doc/SHAF_CLIENT.md)
+### [Frontend](doc/FRONTEND.md)
+### [Customizations](doc/CUSTOMIZATIONS.md)
+### [Business logic](doc/BUSINESS_LOGIC.md)
 
 
 ## Contributing

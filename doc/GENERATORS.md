@@ -1,5 +1,6 @@
 ## Generators
-Shaf ships with a couple of generators to simplify creation of new files. Each generator has an _identifier_ and they are called with `shaf generate IDENTIFIER` plus zero or more arguments.
+Shaf ships with a couple of generators to simplify the creation of new files. Each generator has an _identifier_ and they are called with `shaf generate IDENTIFIER` plus zero or more arguments.
+(An _identifier_ is a string of one or more words that uniquely identifies a generator). Generators take the approach of rather generating too much than than too little, with the mindset that it's easier to delete than to write. If you prefer to not generate specs, then pass `--no-specs` as an option.
 
 
 Important: Always run `git [stash|commit]` before you generate new files. Generators may create/modify files and then delegate further work to another generator that happens to fail. In that case the generation is only partly performed and the project is in an unknown state. In such case, you would like to be able to easily restore the previous state (e.g `git checkout -- .`).
@@ -30,7 +31,7 @@ A new serializer is generated with the _serializer_ identifier, a resource name 
 ```sh
 shaf generate serializer some_resource attr1 attr2
 ```
-This will add a new serializer, a serializer spec and call the policy generator.
+This will add a new serializer, a serializer spec and call the policy generator and the profile generator.
 
 #### Policy
 A new policy is generated with the _policy_ identifier, a resource name and an arbitrary number of attribute arguments.
@@ -38,6 +39,13 @@ A new policy is generated with the _policy_ identifier, a resource name and an a
 shaf generate policy some_resource attr1 attr2
 ```
 This will add a new policy.
+
+#### Profile
+A new mediatype profile is generated with the _profile_ identifier, a resource name and an arbitrary number of attribute arguments.
+```sh
+shaf generate profile some_resource attr1 attr2
+```
+This will add a new profile.
 
 #### Migration
 Shaf currently supports 5 db migrations to be generated plus the possibility to generate an empty migration. These are:
