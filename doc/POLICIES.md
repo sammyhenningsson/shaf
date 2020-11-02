@@ -16,7 +16,7 @@ end
 ```
 Here `resource` is the object being serialized (in our case the `post` object). Used together with a serializer
 that specifies links with rels _edit_, _edit-form_ and _delete_, those links will only be serialized when the
-block returns `true`. The `resource` method is inherited and general for all policies. To make this a bit prettier
+block above returns `true`. The `resource` method is inherited and general for all policies. To make this a bit prettier
 it's recommended to create an alias for the name of the resource that the policy handles.
 Policies should also be used in Controllers (through the `authorize_with` class method). Since the links that
 should be serialized should coincide with which action should be allowed in the controller it makes sense to

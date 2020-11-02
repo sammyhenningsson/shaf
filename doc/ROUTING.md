@@ -9,7 +9,7 @@ When included the module is also extended so all _uri_-/_path_ helpers will be a
 ##### `::resource_uris_for(name, base: nil, plural_name: nil)`
 This method creates four pairs of uri helpers and adds them as class methods and instance methods to the caller. 
 The keyword argument `:base` is used to specify a path namespace (such as '/api') that will be prepended to the uri. This can also be used to nest resources (though this is in general considered bad), like `resource_uris_for :post, base: '/users/:id/'`.  
-The keyword argument `:plural_name` sets the pluralization of the name (when excluded the plural name will be `name` + 's').  
+The keyword argument `:plural_name` sets the pluralization of the name (when excluded the plural name will be `name` + 's'). If `plural_name` is the same as `name` then the helper corresponding to the collection will end with `_collection`.
 ```sh
 class PostsController < BaseController
   resource_uris_for :post
@@ -33,6 +33,13 @@ The optional `query_params` takes any given keyword arguments and appends a quer
 ```sh
   post_path(post, foo: 'bar')    #  => /posts/5?foo=bar
 ```
+
+If `query_params` contains the key `fragment_id` then that value will be used as a fragment identifier.
+
+```sh
+  post_path(post, fragment_id: 'foobar')    #  => /posts/5#foobar
+```
+
 Each helper also has a __path?_ version that can be used to check if a path matches the one of the helper. If given an argument it is matched against the helpers path else the caller must respond to `request` (returning an object responding to `path_info`). Use cases
 ```sh
 UriHelper.post_path?  "/posts/"     # => false
