@@ -11,15 +11,25 @@ module Shaf
       end
     end
 
+    class << self
+      def resource_uris_for(name, **kwargs)
+        CreateUriMethods.new(name, **kwargs).call
+      end
+
+      def register_uri(name, uri)
+        MethodBuilder.new(name, uri).call
+      end
+    end
+
     def resource_uris_for(name, **kwargs)
-      result = CreateUriMethods.new(name, **kwargs).call
+      result = ResourceUris.resource_uris_for(name, **kwargs)
       UriHelperMethods.add_path_helpers(self, result)
 
       include UriHelper unless self < UriHelper
     end
 
     def register_uri(name, uri)
-      result = MethodBuilder.new(name, uri).call
+      result = ResourceUris.register_uri(name, uri)
       UriHelperMethods.add_path_helpers(self, result)
 
       include UriHelper unless self < UriHelper

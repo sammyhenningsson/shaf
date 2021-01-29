@@ -9,10 +9,11 @@ module Shaf
           http_method: :delete,
           doc: <<~DOC
             When a resource contains a link with rel 'delete', this
-            means that the autenticated user or any user if the
-            current users has not been authenticated, may send a
-            DELETE request to the links href.  The result will be
-            that the resource containing this link will be deleted.
+            means that the autenticated user (or any user if the
+            current user has not been authenticated), may send a
+            DELETE request to the href of the link.
+            If a DELETE request is sent to this href then the corresponding
+            resource will be deleted.
           DOC
     end
   end

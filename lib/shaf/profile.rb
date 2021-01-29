@@ -63,24 +63,27 @@ module Shaf
         relations.find { |rel| rel.id.to_sym == id.to_sym }
       end
 
-      def use(*descriptors, from:)
+      def use(*descriptors, from:, doc: nil)
         descriptors.each do |id|
           desc = from.descriptor(id)
+          href = profile_path(from.name, fragment_id: id)
 
           case desc
           when Relation
-            relation id,
+            kwargs = {
+              doc: doc || desc&.doc,
+              href: href,
               http_methods: desc.http_methods,
-              href: profile_path(from.name, fragment_id: id),
-              doc: desc.doc
+              payload_type: desc.payload_type,
+              content_type: desc.content_type,
+            }
+            relation(id, **kwargs)
           when Attribute
-            attribute id,
-              href: profile_path(from.name, fragment_id: id),
-              doc: desc.doc
+            attribute(id, href: href, doc: doc)
           when NilClass
             raise "#{from.name} does not have a descriptor with id #{id}"
           else
-            raise "Unsupported descriptor: #{desc}"
+            raise Errors::ServerError, "Unsupported descriptor: #{desc}"
           end
         end
       end

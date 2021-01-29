@@ -9,15 +9,6 @@ module Shaf
         name 'test-profile'
       end
     end
-    let(:logger) do
-      mock = Minitest::Mock.new
-      def mock.warn(msg); end
-      mock
-    end
-
-    before do
-      $logger = logger
-    end
 
     after do
       Profiles.clear
@@ -137,8 +128,30 @@ module Shaf
       _(attr2.name).must_equal :attr2
       _(attr2.doc).must_equal 'nested attribute2'
       _(attr2.type).must_equal 'String'
+    end
 
-      logger.verify
+    it 'can use a descriptor from another profile' do
+      base = Class.new(Profile) do
+        name 'foobar'
+
+        rel :hello,
+            doc: 'hello link relation',
+            http_methods: ['GET', 'PUT'],
+            payload_type: 'application/json',
+            content_type: 'application/hal+json'
+      end
+
+      ResourceUris.register_uri :profile, 'test/:name'
+
+      profile.use(:hello, from: base)
+
+      relation = profile.find_relation(:hello)
+      _(relation.name).must_equal(:hello)
+      _(relation.doc).must_equal('hello link relation')
+      _(relation.http_methods).must_equal(['GET', 'PUT'])
+      _(relation.href).must_equal('test/foobar#hello')
+      _(relation.payload_type).must_equal('application/json')
+      _(relation.content_type).must_equal('application/hal+json')
     end
   end
 end
