@@ -29,11 +29,11 @@ module Shaf
         last_payload[:_embedded]&.keys || []
       end
 
-      def embedded(name = nil)
+      def embedded(name = nil, &block)
         assert_has_embedded name unless name.nil?
         keys = [:_embedded, name&.to_sym].compact
         return last_payload.dig(*keys) unless block_given?
-        exec_embed_block(last_payload.dig(*keys), Proc.new)
+        exec_embed_block(last_payload.dig(*keys), block)
       end
 
       def each_embedded(name, &block)
