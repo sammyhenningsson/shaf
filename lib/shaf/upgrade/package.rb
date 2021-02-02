@@ -26,8 +26,6 @@ module Shaf
       MANIFEST_FILENAME = 'manifest'.freeze
       IGNORE_FILE_PATTERNS = [/.rej\z/, /.orig\z/]
 
-      attr_reader :version
-
       class << self
         def all
           target_versions.map(&method(:new))
@@ -55,6 +53,8 @@ module Shaf
           file.sub('.tar.gz', '')
         end
       end
+
+      attr_reader :version, :manifest
 
       def initialize(version, manifest = nil, files = {})
         @version = Version.new(version)
@@ -88,21 +88,24 @@ module Shaf
             apply_drops(dir),
             apply_additions,
             apply_substitutes(dir),
+            print_messages,
           ]
           raise UpgradeError, 'Upgrade failed' unless result.all?
         end
+
+        true
       end
 
       def to_s
-        str = "Shaf::Upgrade::Package for version #{@version}"
-        return str if @manifest.nil?
-        "#{str} (#{@manifest.stats_str})"
+        str = "Shaf::Upgrade::Package for version #{version}"
+        return str if manifest.nil?
+        "#{str} (#{manifest.stats_str})"
       end
 
       private
 
       def tarball
-        file = File.join(UPGRADE_FILES_PATH, "#{@version}.tar.gz")
+        file = File.join(UPGRADE_FILES_PATH, "#{version}.tar.gz")
         return file if File.exist? file
         raise VersionNotFoundError
       end
@@ -121,24 +124,25 @@ module Shaf
       def parse_manifest(content)
         hash = YAML.safe_load(content)
         @manifest = Manifest.new(
-          target_version: hash["target_version"],
-          patches: hash["patches"],
-          add: hash["add"],
-          drop: hash["drop"],
-          substitutes: hash["substitutes"]
+          target_version: hash['target_version'],
+          patches: hash['patches'],
+          add: hash['add'],
+          drop: hash['drop'],
+          substitutes: hash['substitutes'],
+          messages: hash['messages']
         )
       end
 
       def validate
-        raise ManifestNotFoundError unless @manifest
-        raise VersionConflictError unless @version == @manifest.target_version
+        raise ManifestNotFoundError unless manifest
+        raise VersionConflictError unless version == manifest.target_version
 
         from_file = @files.keys.to_set
 
-        manifest_patches = @manifest.files[:patch].keys.to_set
+        manifest_patches = manifest.patches.keys.to_set
         raise MissingFileError if from_file < manifest_patches
 
-        to_add = @manifest.files[:add].keys.to_set
+        to_add = manifest.additions.keys.to_set
         raise MissingFileError if from_file < to_add
 
         @files.each do |md5, content|
@@ -163,7 +167,7 @@ module Shaf
 
       def apply_patches(dir = nil)
         files_in(dir).map do |file|
-          @manifest.patches_for(file).map do |name|
+          manifest.patches_for(file).map do |name|
             patch = @files[name]
             apply_patch(file, patch)
           end.all?
@@ -189,8 +193,8 @@ module Shaf
       end
 
       def apply_additions
-        puts '' unless @manifest.additions.empty?
-        @manifest.additions.all? do |chksum, filename|
+        puts '' unless manifest.additions.empty?
+        manifest.additions.all? do |chksum, filename|
           content = @files[chksum]
           puts "adding file: #{filename}"
           FT::CreateFileCommand.execute(filename) { content }
@@ -202,9 +206,9 @@ module Shaf
       end
 
       def apply_drops(dir = nil)
-        puts '' unless @manifest.removals.empty?
+        puts '' unless manifest.removals.empty?
         files_in(dir).all? do |file|
-          next true unless @manifest.drop?(file)
+          next true unless manifest.drop?(file)
           puts "removing file: #{file}"
           FT::DeleteFileCommand.execute file
           true
@@ -215,9 +219,9 @@ module Shaf
       end
 
       def apply_substitutes(dir = nil)
-        puts '' unless @manifest.regexps.empty?
+        puts '' unless manifest.regexps.empty?
         files_in(dir).map do |file|
-          @manifest.regexps_for(file).map do |name|
+          manifest.regexps_for(file).map do |name|
             params = YAML.safe_load(@files[name])
             params.transform_keys!(&:to_sym)
             apply_substitute(file, params)
@@ -231,9 +235,11 @@ module Shaf
         pattern = Regexp.new(params[:pattern])
         replacement = params[:replace]
 
+        changed = false
         tmp = Tempfile.open do |new_file|
           File.readlines(file).each do |line|
-            new_file << line.gsub(pattern, replacement)
+            changed = line.gsub!(pattern, replacement) || changed
+            new_file << line
           end
           new_file
         end

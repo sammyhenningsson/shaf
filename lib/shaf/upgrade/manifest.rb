@@ -12,6 +12,7 @@ module Shaf
         @files[:add] = params[:add] || {}
         @files[:drop] = (params[:drop] || []).map { |d| Regexp.new(d) }
         @files[:regexp] = build_patterns(params[:substitutes])
+        @files[:messages] = params[:messages] || []
       end
 
       def patches
@@ -28,6 +29,10 @@ module Shaf
 
       def regexps
         files[:regexp]
+      end
+
+      def messages
+        files[:messages]
       end
 
       def patches_for(file)
@@ -47,7 +52,8 @@ module Shaf
           additions: additions.size,
           removals: removals.size,
           patches: patches.size,
-          regexps: regexps.size
+          regexps: regexps.size,
+          messages: messages.size
         }
       end
 
@@ -55,7 +61,8 @@ module Shaf
         "Add: #{additions.size}, " \
           "Del: #{removals.size}, " \
           "Patch: #{patches.size}, " \
-          "Regexp: #{regexps.size}"
+          "Regexp: #{regexps.size}, " \
+          "Messages: #{messages.size}"
       end
 
       private
@@ -82,3 +89,5 @@ end
 # - api/policies/base_policy.rb
 # substitutes:
 #   d3b07384d113edec49eaa6238ad5ff00: api/models/.*.rb
+# messages:
+# - b1946ac92492d2347c6235b4d2611184
