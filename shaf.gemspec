@@ -26,6 +26,7 @@ Gem::Specification.new do |gem|
   gem.require_paths = ['lib']
 
   gem.required_ruby_version = '>= 2.5'
+  gem.add_runtime_dependency 'file_transactions', '~> 0.1.2'
   gem.add_development_dependency 'minitest', '~> 5', '~> 5.14'
   gem.add_development_dependency 'rack-test', '~> 1.0'
   gem.add_development_dependency 'rake', '~> 12.0'

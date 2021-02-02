@@ -43,11 +43,9 @@ module Shaf
     end
 
     let(:added_files) { {} }
-    let(:file_open_stub) do
-      mock = Minitest::Mock.new
-      def mock.write(content); content; end
-      lambda do |file, _flags, &block|
-        added_files[file] = block.call(mock)
+    let(:create_file_stub) do
+      lambda do |file, &block|
+        added_files[file] = block.call
       end
     end
 
@@ -70,7 +68,8 @@ module Shaf
       package = Upgrade::Package.new('0.4.0')
       assert package.load
       assert_equal(
-        'Shaf::Upgrade::Package for version 0.4.0 (Add: 0, Del: 0, Patch: 2, Regexp: 0)',
+        'Shaf::Upgrade::Package for version 0.4.0 ' \
+        '(Add: 0, Del: 0, Patch: 2, Regexp: 0, Messages: 0)',
         package.to_s
       )
     end
@@ -87,7 +86,8 @@ module Shaf
       package.send(:parse_manifest, manifest.to_yaml)
       assert_equal(
         package.to_s,
-        'Shaf::Upgrade::Package for version 1.2.3 (Add: 1, Del: 2, Patch: 1, Regexp: 1)'
+        'Shaf::Upgrade::Package for version 1.2.3 ' \
+        '(Add: 1, Del: 2, Patch: 1, Regexp: 1, Messages: 0)'
       )
     end
 
@@ -118,10 +118,8 @@ module Shaf
       package = Upgrade::Package.new('2.0.0', manifest, {'0123456789abcdef' => 'some_added_data'})
 
       Mutable.suppress_output do
-        FileUtils.stub :mkdir_p, true do
-          File.stub :open, file_open_stub do
-            package.apply
-          end
+        FT::CreateFileCommand.stub :execute, create_file_stub do
+          package.apply
         end
       end
 
@@ -137,7 +135,7 @@ module Shaf
 
       Mutable.suppress_output do
         package.stub :files_in, project_files do
-          File.stub :unlink, unlink_stub do
+          FT::DeleteFileCommand.stub :execute, unlink_stub do
             package.apply
           end
         end

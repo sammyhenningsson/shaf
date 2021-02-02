@@ -6,6 +6,9 @@ require 'open3'
 require 'fileutils'
 require 'tempfile'
 require 'yaml'
+require 'file_transactions'
+
+FT = FileTransactions
 
 module Shaf
   module Upgrade
@@ -78,12 +81,16 @@ module Shaf
 
       def apply(dir = nil)
         puts "Applying changes for version #{version}"
-        [
-          apply_patches(dir),
-          apply_drops(dir),
-          apply_additions,
-          apply_substitutes(dir),
-        ].all?
+
+        FT.transaction do
+          result = [
+            apply_patches(dir),
+            apply_drops(dir),
+            apply_additions,
+            apply_substitutes(dir),
+          ]
+          raise UpgradeError, 'Upgrade failed' unless result.all?
+        end
       end
 
       def to_s
@@ -164,25 +171,29 @@ module Shaf
       end
 
       def apply_patch(file, patch)
-        Open3.popen3('patch', file) do |i, o, e, t|
-          i.write patch
-          i.close
-          puts o.read
-          err = e.read
-          puts err unless err.empty?
-          result = t.value.success?
-          STDERR.puts "Failed to apply patch for: #{file}\n" unless result
-          result
+        result = nil
+
+        FT::ChangeFileCommand.execute(file) do
+          Open3.popen3('patch', file) do |i, o, e, t|
+            i.write patch
+            i.close
+            puts o.read
+            err = e.read
+            puts err unless err.empty?
+            result = t.value.success?
+          end
         end
+
+        STDERR.puts "Failed to apply patch for: #{file}\n" unless result
+        result
       end
 
       def apply_additions
         puts '' unless @manifest.additions.empty?
         @manifest.additions.all? do |chksum, filename|
           content = @files[chksum]
-          FileUtils.mkdir_p File.dirname(filename)
           puts "adding file: #{filename}"
-          File.open(filename, 'w') { |file| file.write(content) }
+          FT::CreateFileCommand.execute(filename) { content }
           true
         rescue StandardError => e
           STDERR.puts "Failed to add '#{filename}': #{e.message}\n"
@@ -195,7 +206,7 @@ module Shaf
         files_in(dir).all? do |file|
           next true unless @manifest.drop?(file)
           puts "removing file: #{file}"
-          File.unlink(file)
+          FT::DeleteFileCommand.execute file
           true
         rescue StandardError => e
           STDERR.puts "Failed to unlink '#{file}': #{e.message}\n"
@@ -227,7 +238,20 @@ module Shaf
           new_file
         end
 
-        FileUtils.mv(tmp.path, file)
+        return true unless changed
+
+        puts "modifying file: #{file}"
+        FT::MoveFileCommand.new(from: tmp.path, to: file).execute
+        true
+      end
+
+      def print_messages
+        manifest.messages.each do |chksum|
+          message = @files[chksum]
+          puts "\n#{message}"
+        end
+
+        true
       end
     end
   end
