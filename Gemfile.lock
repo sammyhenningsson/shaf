@@ -2,6 +2,7 @@ PATH
   remote: .
   specs:
     shaf (2.0.0)
+      file_transactions (~> 0.1.2)
 
 GEM
   remote: https://rubygems.org/
@@ -41,7 +42,6 @@ PLATFORMS
 DEPENDENCIES
   bundler (~> 2.1)
   faraday (~> 0.17)
-  file_transactions (~> 0.1.2)
   git (~> 1.5)
   hal_presenter (~> 1.6)
   minitest (~> 5.14, ~> 5)

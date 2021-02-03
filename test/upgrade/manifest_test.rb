@@ -43,7 +43,7 @@ module Shaf
 
     it "#files return all file" do 
       assert_equal(
-        %i(patch add drop regexp),
+        %i(patch add drop regexp messages),
         manifest.files.keys
       )
     end

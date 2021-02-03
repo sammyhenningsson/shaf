@@ -44,7 +44,19 @@ module Shaf
   module Test
     class << self
       def gem_lib_dir
-        File.expand_path('../../lib', __FILE__)
+        File.expand_path('../lib', __dir__)
+      end
+
+      def gem_path
+        File.expand_path('..', __dir__)
+      end
+
+      def patch_gemfile_shaf_path(gemfile_dir = '.')
+        Dir.chdir(gemfile_dir) do
+          gemfile = File.read 'Gemfile'
+          gemfile.sub!(/gem 'shaf'/, "\\0, path: '#{gem_path}'")
+          File.write('Gemfile', gemfile)
+        end
       end
 
       def bundle_install

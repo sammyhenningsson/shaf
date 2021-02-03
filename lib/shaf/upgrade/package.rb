@@ -80,7 +80,7 @@ module Shaf
       end
 
       def apply(dir = nil)
-        puts "Applying changes for version #{version}"
+        puts "\n ## Applying changes for Shaf version: #{version} ##"
 
         FT.transaction do
           result = [

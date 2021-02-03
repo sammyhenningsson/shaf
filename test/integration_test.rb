@@ -27,8 +27,7 @@ module Shaf
       Dir.chdir(tmp_dir) do
         Command::New.new(project_name).call
         Dir.chdir(project_name) do
-          gem_path = ENV['SHAF_GEM_PATH']
-          `sed -i "s#gem 'shaf'\\$#&, path: '#{gem_path}'#" Gemfile` if gem_path
+          Test.patch_gemfile_shaf_path
           Test.bundle_install
           setup_git_repo
         end
@@ -335,11 +334,6 @@ module Shaf
         assert Test.system('bundle exec rake db:seed')
 
         exit_status = Test.system('bundle exec shaf console', stdin: "User.count\n") do |out, err|
-          # FIXME: remove these ruby 2.7 related warnings when they have ben fixed in dependancies
-          err = String(err)
-          err.gsub!(/^.*warning: The last argument is used as the keyword parameter.*$/, "")
-          err.gsub!(/^.*warning: for .* defined here.*$/, "")&.strip!
-          ##################################################
           assert_empty String(err)
           assert_match %r{User\.count}, out
           output_rows = out.split("\n").map(&:strip)
