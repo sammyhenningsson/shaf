@@ -174,7 +174,7 @@ module Shaf
 
     it "adds a link to a new resource" do
       Dir.chdir(@@project_path) do
-        assert Test.system("bundle exec shaf generate scaffold post message:string:Meddelande author:integer:Författare")
+        assert Test.exec_shaf("generate scaffold post message:string:Meddelande author:integer:Författare")
         assert Test.system("bundle exec rake db:migrate")
 
         with_server do |port|
@@ -186,9 +186,9 @@ module Shaf
 
     it "passes specs" do
       Dir.chdir(@@project_path) do
-        assert Test.system("bundle exec shaf generate scaffold post message:string:Meddelande author:integer:Författare")
+        assert Test.exec_shaf("generate scaffold post message:string:Meddelande author:integer:Författare")
         assert Test.system("bundle exec rake db:migrate")
-        assert Test.system("bundle exec shaf test")
+        assert Test.exec_shaf("test")
       end
     end
 
@@ -209,7 +209,7 @@ module Shaf
           EOS
         end
 
-        exit_status =  Test.system("bundle exec shaf my_command") do |out, err|
+        exit_status =  Test.exec_shaf("my_command") do |out, err|
           assert_equal "hej", out
           assert err.empty?
         end
@@ -238,7 +238,7 @@ module Shaf
             end
           EOS
         end
-        assert Test.system("bundle exec shaf generate my_generator")
+        assert Test.exec_shaf("generate my_generator")
         assert File.exist?(filename)
         assert_equal content, File.read(filename)
       end
@@ -309,7 +309,7 @@ module Shaf
 
     it 'seeds the db' do
       Dir.chdir(@@project_path) do
-        assert Test.system('shaf generate scaffold user name:string')
+        assert Test.exec_shaf('generate scaffold user name:string')
 
         Dir.mkdir 'db/seeds'
         File.open('db/seeds.rb', 'w') do |f|
@@ -333,7 +333,7 @@ module Shaf
         assert Test.system('bundle exec rake db:migrate')
         assert Test.system('bundle exec rake db:seed')
 
-        exit_status = Test.system('bundle exec shaf console', stdin: "User.count\n") do |out, err|
+        exit_status = Test.exec_shaf('console', stdin: "User.count\n") do |out, err|
           assert_empty String(err)
           assert_match %r{User\.count}, out
           output_rows = out.split("\n").map(&:strip)
@@ -348,9 +348,8 @@ module Shaf
 
     it 'adds links to the profile from the resource' do
       Dir.chdir(@@project_path) do
-        assert Test.system(
-          "bundle exec shaf generate scaffold " \
-          "post message:string:Meddelande author:integer:Författare"
+        assert Test.exec_shaf(
+          "generate scaffold post message:string:Meddelande author:integer:Författare"
         )
         assert Test.system("bundle exec rake db:migrate")
 

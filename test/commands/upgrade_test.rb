@@ -37,8 +37,10 @@ module Shaf
     before do
       project_tar = File.expand_path('../data/1.0.0_project.tar.gz', __dir__)
       Dir.chdir(tmp_dir) { `tar xzf #{project_tar}` }
-      Test.patch_gemfile_shaf_path(project_path)
-      Dir.chdir(project_path) { Test.bundle_install }
+      Dir.chdir(project_path) do
+        Test.patch_gemfile_shaf_path
+        Test.bundle_install
+      end
     end
 
     after do
@@ -47,16 +49,20 @@ module Shaf
 
     it 'upgrades a 1.0.0 project to latest version' do
       Dir.chdir(project_path) do
-        Test.system("shaf version") do |out, _|
+        Test.exec_shaf("version") do |out, err|
+          assert_equal '', err
           assert_match(/Installed Shaf version: #{VERSION}/, out)
           assert_match(/Project .* created with Shaf version: 1.0.0/, out)
         end
 
-        Test.system("bundle exec shaf upgrade")
+        Test.exec_shaf("upgrade") do |_, err|
+          assert_equal '', err
+        end
 
         expected_new_version = Upgrade::Package.all.last.version
 
-        Test.system("shaf version") do |out, _|
+        Test.exec_shaf("version") do |out, err|
+          assert_equal '', err
           assert_match(/Installed Shaf version: #{VERSION}/, out)
           assert_match(/Project .* created with Shaf version: #{expected_new_version}/, out)
         end

@@ -51,6 +51,10 @@ module Shaf
         File.expand_path('..', __dir__)
       end
 
+      def shaf_cmd
+        File.join(gem_path, 'bin/shaf')
+      end
+
       def patch_gemfile_shaf_path(gemfile_dir = '.')
         Dir.chdir(gemfile_dir) do
           gemfile = File.read 'Gemfile'
@@ -64,7 +68,16 @@ module Shaf
         Bundler.with_unbundled_env { `bundle install` }
       end
 
-      def system(*args, stdin: nil, rack_env: 'development')
+      def exec_shaf(cmd, stdin: nil, rack_env: 'development', &block)
+        system(
+          "bundle exec #{shaf_cmd} #{cmd}",
+          stdin: stdin,
+          rack_env: rack_env,
+          &block
+        )
+      end
+
+      def system(*args, stdin: nil, rack_env: 'development', &block)
         return if args.size.zero?
         env = {'RUBYLIB' => gem_lib_dir, 'RACK_ENV' => rack_env}
         cmd = args.join(' ')
