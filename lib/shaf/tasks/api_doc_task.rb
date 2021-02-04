@@ -1,6 +1,3 @@
-require 'shaf/api_doc/document'
-require 'shaf/api_doc/comment'
-
 module Shaf
   module Tasks
     class ApiDocTask
@@ -9,6 +6,11 @@ module Shaf
       attr_accessor :document_class, :source_dir, :html_output_dir, :yaml_output_dir
 
       def initialize
+        return show_deprecation_message if RUBY_VERSION >= '3.0.0'
+
+        require 'shaf/api_doc/document'
+        require 'shaf/api_doc/comment'
+
         yield self if block_given?
         validate_attributes!
         @document_class ||= ApiDoc::Document
@@ -25,6 +27,8 @@ module Shaf
         namespace :doc do
           desc "Generate API documentation"
           task :generate do
+            show_deprecation_message
+
             files = Dir.glob(File.join(source_dir, "*.rb"))
             files.each do |file|
               read_file file do |doc|
@@ -45,6 +49,23 @@ module Shaf
             end
           end
         end
+      end
+
+      def show_deprecation_message
+        ruby3_msg = <<~RUBY3 if RUBY_VERSION >= '3.0.0'
+
+          Due to errors with the Redcarpet gem it's not possible to use this deprecated rake task with Ruby >= 3.0.0
+          If you need to continue with this task please use an older version of Ruby.
+        RUBY3
+
+        puts <<~MSG
+          This way of generating documentation is DEPRECATED.#{ruby3_msg}
+
+          Please move the documentation comments into profiles instead and run:
+          shaf generate doc
+          See https://github.com/sammyhenningsson/shaf/blob/main/doc/DOCUMENTATION.md for more info
+
+        MSG
       end
 
       def read_file(file)
