@@ -1,3 +1,27 @@
+## 2.0.0
+ * New framework for parsing input
+ * New framework for authentication
+ * Mediatype profiles
+ * API documentation using yard
+ * Improved routes rake task
+ * Shaf.log instead of global variable
+ * Allow routes to be declared without …_path
+ * \_collection uri helper
+ * Fixes for Ruby 3.0 keyword args
+ * profile helper for serializers
+ * Default to application/problem+json for errors
+ * Wrap non-HAL responses in HTML
+ * Use shaf form profile from lib instead of gist
+ * Use shaf error profile from lib instead of gist
+ * Curie links point to profile with fragment id
+ * Serialize profils with ALPS
+ * Project name in settings.yml
+ * Load initializers in their own contexts
+ * Module methods for adding uri helpers
+ * Use FileTransactions in upgrades
+ * Use FileTransactions in generators
+ * Remove X-Auth-Token header usage
+ * Vary helper
 ## 1.6.1
  * Fix bug when reading input from Rack
  * Minor fix in config.ru
