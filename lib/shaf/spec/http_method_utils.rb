@@ -7,6 +7,8 @@ module Shaf
 
       %i[get put patch post delete options head link unlink].each do |m|
         define_method m do |uri, payload = nil, options = {}|
+          set_authentication
+
           if payload
             payload = JSON.generate(payload) if payload.respond_to? :to_h
             options['CONTENT_TYPE'] ||= 'application/json'

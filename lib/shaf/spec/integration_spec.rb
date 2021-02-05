@@ -11,6 +11,17 @@ module Shaf
         args[:type].to_s == 'integration'
       end
 
+      private
+
+      attr_accessor :__authenticated_user_id
+
+      def set_authentication
+        id = __authenticated_user_id
+        authorization = "#{Authenticator.scheme} #{id}" if id
+
+        header 'Authorization', authorization
+      end
+
       def parse_response(body)
         return nil if body.empty?
         JSON.parse(body, symbolize_names: true)
@@ -20,6 +31,21 @@ module Shaf
 
       def app
         App.app
+      end
+
+      def authenticate(user)
+        self.__authenticated_user_id = user&.id
+      end
+
+      def unauthenticate
+        self.__authenticated_user_id = nil
+      end
+
+      def with_authenticated(user, &block)
+        authenticate(user)
+        yield
+      ensure
+        unauthenticate
       end
 
       def follow_rel(rel, method: nil)
