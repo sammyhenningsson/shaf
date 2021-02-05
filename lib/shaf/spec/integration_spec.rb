@@ -8,13 +8,7 @@ module Shaf
 
       register_spec_type self do |_desc, args|
         next unless args&.is_a?(Hash)
-        args[:type]&.to_s == 'integration'
-      end
-
-      def set_headers
-        if defined?(@__integration_test_auth_token) && @__integration_test_auth_token
-          header Settings.auth_token_header, @__integration_test_auth_token
-        end
+        args[:type].to_s == 'integration'
       end
 
       def parse_response(body)
@@ -36,14 +30,6 @@ module Shaf
         else
           get link[:href]
         end
-      end
-
-      def auth_token(token)
-        @__integration_test_auth_token = token
-      end
-
-      def clear_auth_token
-        @__integration_test_auth_token = nil
       end
     end
   end

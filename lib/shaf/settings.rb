@@ -12,7 +12,6 @@ module Shaf
       documents_dir: 'doc/api',
       migrations_dir: 'db/migrations',
       fixtures_dir: 'spec/fixtures',
-      auth_token_header: 'X-Auth-Token',
       paginate_per_page: 25
     }.freeze
 

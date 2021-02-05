@@ -14,8 +14,7 @@ describe <%= model_class_name %>, type: :integration do
   end
 
   it "lists all <%= plural_name %>" do
-    <%= model_class_name %>.create
-    <%= model_class_name %>.create
+    2.times { <%= model_class_name %>.create }
 
     get <%= plural_name %>_uri
     _(status).must_equal 200

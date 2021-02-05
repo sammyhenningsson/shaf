@@ -15,7 +15,6 @@ default: &default
   hostname: localhost
   protocol: http
   port: 3000
-  auth_token_header: X-Auth-Token
 
 production:
   <<: *default
