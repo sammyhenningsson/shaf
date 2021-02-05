@@ -5,8 +5,8 @@ module Shaf
 
       param :realm, required: false
 
-      def self.credentials(authorization, _)
-        authorization&.to_i
+      def self.credentials(authorization, _request)
+        { id: authorization&.to_i }
       end
     end
   end

@@ -5,13 +5,13 @@
 #
 # Examples:
 #
-# Shaf::Authenticator::BasicAuth.restricted realm: 'user' do |user, password|
+# Shaf::Authenticator::BasicAuth.restricted realm: 'user' do |user:, password:|
 #   return unless user && password
 #   password_hash = Digest::SHA256.hexdigest(password)
 #   User.where(username: user, password_hash: password_hash).first
 # end
 #
-# Shaf::Authenticator::BasicAuth.restricted realm: 'admin' do |user, password|
+# Shaf::Authenticator::BasicAuth.restricted realm: 'admin' do |user:, password:|
 #   return unless user && password
 #   password_hash = Digest::SHA256.hexdigest(password)
 #   User.where(username: user, password_hash: password_hash, admin: true).first

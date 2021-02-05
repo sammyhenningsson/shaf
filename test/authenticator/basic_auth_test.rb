@@ -11,17 +11,20 @@ module Shaf
 
 
       before do
-        BasicAuth.restricted realm: 'r1' do |user, password|
+        BasicAuth.restricted realm: 'r1' do |user:, password:|
           OpenStruct.new(realm: realm, user: user, password: password) if user == password
         end
-        BasicAuth.restricted realm: 'r2' do |user, password|
+        BasicAuth.restricted realm: 'r2' do |user:, password:|
           OpenStruct.new(realm: realm, user: user, password: password) if user == password
         end
       end
 
       it "parses credentials" do
         credentials = BasicAuth.credentials(cred, nil)
-        assert_equal ['foo', 'foo'], credentials
+
+        assert_kind_of Hash, credentials
+        assert_equal 'foo', credentials[:user]
+        assert_equal 'foo', credentials[:password]
       end
 
       it "returns a user when credentials is correct" do

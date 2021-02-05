@@ -4,4 +4,4 @@ require 'minitest/autorun'
 require 'minitest/hooks'
 require 'shaf/spec'
 
-Shaf::Spec::Authenticator.restricted { |id| User[id] }
+Shaf::Spec::Authenticator.restricted { |id:| User[id] }

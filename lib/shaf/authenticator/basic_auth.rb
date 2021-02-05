@@ -10,7 +10,14 @@ module Shaf
         return unless authorization
 
         decoded = String(authorization.unpack("m*").first)
-        decoded.split(/:/, 2) unless decoded.empty?
+        return {} if decoded.empty?
+
+        user, password = decoded.split(/:/, 2)
+
+        {
+          user: user,
+          password: password
+        }
       end
     end
   end

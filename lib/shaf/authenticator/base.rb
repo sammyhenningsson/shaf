@@ -1,6 +1,6 @@
 require 'shaf/authenticator/challenge'
 require 'shaf/authenticator/parameter'
-
+require 'shaf/errors'
 
 module Shaf
   module Authenticator
@@ -15,6 +15,16 @@ module Shaf
         def initialize(authenticator, *args)
           str = args.map { |key, value| "#{key}: #{value}" }.join(', ')
           super("Invalid parameters for #{authenticator}: #{str}")
+        end
+      end
+
+      class WrongCredentialsReturnTypeError < Error
+        def initialize(authenticator, clazz)
+          super <<~ERR
+            #{authenticator}.credentials return an instance of #{clazz}
+              It must return an instance of Hash.
+              Location: #{authenticator.method(:credentials).source_location})
+          ERR
         end
       end
 
@@ -64,11 +74,13 @@ module Shaf
 
         def user(request, realm: nil)
           auth = authorization(request)
-          cred = credentials(auth, request)
-          return unless cred
+          cred = credentials(auth, request) || {}
+          raise WrongCredentialsReturnTypeError.new(self, cred.class) unless cred.kind_of? Hash
+
+          return if cred.compact.empty?
 
           challenges_for(realm).each do |challenge|
-            user = challenge.test(*cred)
+            user = challenge.test(**cred)
             return user if user
           end
 

@@ -251,7 +251,7 @@ module Shaf
             require 'shaf'
             require 'ostruct'
 
-            Shaf::Authenticator::BasicAuth.restricted realm: 'MyApi' do |user, password|
+            Shaf::Authenticator::BasicAuth.restricted realm: 'MyApi' do |user:, password:|
               return unless user && user == password
               OpenStruct.new(name: user)
             end
