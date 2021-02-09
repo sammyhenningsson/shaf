@@ -2,7 +2,7 @@ PATH
   remote: .
   specs:
     shaf (2.0.0)
-      file_transactions (~> 0.1.2)
+      file_transactions
 
 GEM
   remote: https://rubygems.org/

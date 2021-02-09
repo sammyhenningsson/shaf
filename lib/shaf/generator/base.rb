@@ -2,6 +2,7 @@
 
 require 'fileutils'
 require 'erb'
+require 'file_transactions'
 require 'shaf/generator/helper'
 
 module Shaf
@@ -56,9 +57,7 @@ module Shaf
       end
 
       def write_output(file, content)
-        dir = File.dirname(file)
-        FileUtils.mkdir_p(dir) unless Dir.exist?(dir)
-        File.write(file, content)
+        FileTransactions::CreateFileCommand.execute(file) { content }
         puts "Added:      #{file}"
       end
     end

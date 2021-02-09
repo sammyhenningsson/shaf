@@ -1,3 +1,4 @@
+require 'file_transactions'
 require 'shaf/generator'
 
 module Shaf
@@ -19,7 +20,9 @@ module Shaf
 
       def call
         in_project_root do
-          Generator::Factory.create(*args, **options).call
+          FileTransactions.transaction do
+            Generator::Factory.create(*args, **options).call
+          end
         end
       rescue StandardError => e
         raise Command::ArgumentError, e.message

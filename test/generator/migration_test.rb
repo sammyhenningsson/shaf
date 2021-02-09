@@ -1,26 +1,15 @@
 require 'test_helper'
+require 'generator/stubbed_output'
 
 module Shaf
   module Generator
     module Migration
       describe Generator do
-        let(:output_file) { "" }
-        let(:output) { "" }
+        extend StubbedOutput
 
-        let(:write_stub) do
-          lambda do |file, content|
-            output_file << file
-            output << content
-          end
-        end
-
-        before do
-          File.stub :write, write_stub do
-            Dir.stub :exist?, true do
-              DB.stub :table_exists?, true do
-                Mutable.suppress_output { generator.call }
-              end
-            end
+        let(:subject) do
+          DB.stub :table_exists?, true do
+            generator.call
           end
         end
 
@@ -39,26 +28,28 @@ module Shaf
           end
 
           it "creates file in db/migrations" do
-            assert output_file.start_with? "db/migrations"
+            assert output.keys.first.start_with? "db/migrations"
           end
 
           it "adds timestamp to filename" do
-            file = File.basename output_file
+            file = File.basename output.keys.first
             assert_match %r(\A\d{14}_), file
           end
 
           it "names the migration file correctly" do
-            file = File.basename output_file
+            file = File.basename output.keys.first
             assert_match %r(_create_#{table_name}_table\.rb\Z), file
           end
 
           it "has the right content" do
-            assert_match %r(create_table\(:#{table_name}\) do$), output
-            assert_match %r(primary_key :id$), output
-            assert_match %r(String :message$), output
-            assert_match %r(Integer :word_count$), output
-            assert_match %r(foreign_key :user_id, :users), output
-            assert_match %r(index :message, unique: true), output
+            assert_equal 1, output.size
+            content = output.values.first
+            assert_match %r(create_table\(:#{table_name}\) do$), content
+            assert_match %r(primary_key :id$), content
+            assert_match %r(String :message$), content
+            assert_match %r(Integer :word_count$), content
+            assert_match %r(foreign_key :user_id, :users), content
+            assert_match %r(index :message, unique: true), content
           end
         end
 
@@ -69,13 +60,15 @@ module Shaf
           end
 
           it "names the migration file correctly" do
-            file = File.basename output_file
+            file = File.basename output.keys.first
             assert_match %r(_add_comment_to_#{table_name}\.rb\Z), file
           end
 
           it "has the right content" do
-            assert_match %r(alter_table\(:#{table_name}\) do$), output
-            assert_match %r(add_column :comment, String), output
+            assert_equal 1, output.size
+            content = output.values.first
+            assert_match %r(alter_table\(:#{table_name}\) do$), content
+            assert_match %r(add_column :comment, String), content
           end
         end
 
@@ -86,13 +79,15 @@ module Shaf
           end
 
           it "names the migration file correctly" do
-            file = File.basename output_file
+            file = File.basename output.keys.first
             assert_match %r(_add_user_id_to_#{table_name}\.rb\Z), file
           end
 
           it "has the right content" do
-            assert_match %r(alter_table\(:#{table_name}\) do$), output
-            assert_match %r(add_foreign_key :user_id, :users), output
+            assert_equal 1, output.size
+            content = output.values.first
+            assert_match %r(alter_table\(:#{table_name}\) do$), content
+            assert_match %r(add_foreign_key :user_id, :users), content
           end
         end
 
@@ -103,13 +98,15 @@ module Shaf
           end
 
           it "names the migration file correctly" do
-            file = File.basename output_file
+            file = File.basename output.keys.first
             assert_match %r(_add_user_id_index_to_#{table_name}\.rb\Z), file
           end
 
           it "has the right content" do
-            assert_match %r(alter_table\(:#{table_name}\) do$), output
-            assert_match %r(add_index :user_id), output
+            assert_equal 1, output.size
+            content = output.values.first
+            assert_match %r(alter_table\(:#{table_name}\) do$), content
+            assert_match %r(add_index :user_id), content
           end
         end
 
@@ -120,13 +117,15 @@ module Shaf
           end
 
           it "names the migration file correctly" do
-            file = File.basename output_file
+            file = File.basename output.keys.first
             assert_match %r(_drop_comment_from_#{table_name}\.rb\Z), file
           end
 
           it "has the right content" do
-            assert_match %r(alter_table\(:#{table_name}\) do$), output
-            assert_match %r(drop_column :comment), output
+            assert_equal 1, output.size
+            content = output.values.first
+            assert_match %r(alter_table\(:#{table_name}\) do$), content
+            assert_match %r(drop_column :comment), content
           end
         end
 
@@ -137,13 +136,15 @@ module Shaf
           end
 
           it "names the migration file correctly" do
-            file = File.basename output_file
+            file = File.basename output.keys.first
             assert_match %r(_rename_#{table_name}_comment_to_tweet\.rb\Z), file
           end
 
           it "has the right content" do
-            assert_match %r(alter_table\(:#{table_name}\) do$), output
-            assert_match %r(rename_column :comment, :tweet), output
+            assert_equal 1, output.size
+            content = output.values.first
+            assert_match %r(alter_table\(:#{table_name}\) do$), content
+            assert_match %r(rename_column :comment, :tweet), content
           end
         end
       end

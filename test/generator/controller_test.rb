@@ -1,23 +1,14 @@
 require 'test_helper'
+require 'generator/stubbed_output'
 
 module Shaf
   module Generator
     describe Controller do
-      let(:output) { {} }
+      extend StubbedOutput
 
-      let(:write_stub) do
-        lambda do |file, content|
-          output[file] = content
-        end
-      end
-
-      before do
-        File.stub :write, write_stub do
-          Dir.stub :exist?, true do
-            generator.stub :add_link_to_root, nil do
-              Mutable.suppress_output { generator.call }
-            end
-          end
+      let(:subject) do
+        generator.stub :add_link_to_root, nil do
+          generator.call
         end
       end
 

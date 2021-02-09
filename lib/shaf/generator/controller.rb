@@ -1,3 +1,5 @@
+require 'file_transactions'
+
 module Shaf
   module Generator
     class Controller < Base
@@ -81,15 +83,17 @@ module Shaf
         end
         added = false
         content = []
-        File.readlines(file).reverse_each do |line|
-          if match = !added && line.match(/^(\s*)link /)
-            content.unshift link_content(match[1].to_s)
-            added = true
+        FileTransactions::ChangeFileCommand.execute(file) do
+          File.readlines(file).reverse_each do |line|
+            if match = !added && line.match(/^(\s*)link /)
+              content.unshift link_content(match[1].to_s)
+              added = true
+            end
+            content.unshift(line)
           end
-          content.unshift(line)
+          File.open(file, 'w') { |f| f.puts content }
+          puts "Modified:   #{file}"
         end
-        File.open(file, 'w') { |f| f.puts content }
-        puts "Modified:   #{file}"
       end
 
       def link_content(indentation = '')
