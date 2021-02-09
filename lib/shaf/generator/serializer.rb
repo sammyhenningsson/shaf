@@ -68,7 +68,7 @@ module Shaf
         attribute_names.map { |attr| ["attribute :#{attr}"] }
       end
 
-      def links
+      def link_relations
         %w(collection self edit-form doc:delete)
       end
 
@@ -79,8 +79,8 @@ module Shaf
           # change this.
           # Note: the target of the profile link and the curie will be set to
           # `profile_uri('#{name}')` resp. `doc_curie_uri('#{name}')`. To
-          # create links for external profiles or curies, use `::link` and/or
-          # `::curie` instead.
+          # create links for external profiles or curies, delete the next line
+          # and use `::link` and/or `::curie` instead.
         DOC
 
         doc.split("\n") << %Q(profile #{Utils.symbol_string(name)})
@@ -98,10 +98,6 @@ module Shaf
       def collection_link
         link(
           rel: "collection",
-          desc: "Link to the collection of all #{plural_name}. " \
-          "Send a POST request to this uri to create a new #{name}",
-          method: "GET or POST",
-          uri: "/#{plural_name}",
           uri_helper: "#{plural_name}_uri",
           kwargs: {embed_depth: 0}
         )
@@ -110,8 +106,6 @@ module Shaf
       def self_link
         link(
           rel: "self",
-          desc: "Link to this #{name}",
-          uri: "/#{plural_name}/5",
           uri_helper: "#{name}_uri(resource)"
         )
       end
@@ -119,8 +113,6 @@ module Shaf
       def edit_link
         link(
           rel: "edit-form",
-          desc: "Link to a form to edit this resource",
-          uri: "/#{plural_name}/5/edit",
           uri_helper: "edit_#{name}_uri(resource)"
         )
       end
@@ -128,9 +120,6 @@ module Shaf
       def delete_link
         link(
           rel: "delete",
-          desc: "Link to delete this #{name}",
-          method: "DELETE",
-          uri: "/#{plural_name}/5",
           uri_helper: "#{name}_uri(resource)",
           kwargs: {curie: :doc}
         )
@@ -139,46 +128,19 @@ module Shaf
       def create_link
         link(
           rel: "create-form",
-          desc: "Link to a form used to create new #{name} resources",
-          uri: "/#{plural_name}/form",
           uri_helper: "new_#{name}_uri"
         )
       end
 
-      def link(rel:, method: "GET", desc:, uri:, uri_helper:, kwargs: {})
+      def link(rel:, uri_helper:, kwargs: {})
         kwargs_str = kwargs.inject('') do |s, (k,v)|
           "#{s}, #{k}: #{Utils.symbol_or_quoted_string(v)}"
         end
 
         <<~EOS.split("\n")
-          # Auto generated doc:  
-          # #{desc}.  
-          # Method: #{method}  
-          #{example(method, uri)}
           link #{Utils.symbol_string(rel)}#{kwargs_str} do
             #{uri_helper}
           end
-        EOS
-      end
-
-      def example(method, uri)
-        curl_args = +'-H "Authorization: abcdef \\"'
-        case method
-        when "POST"
-          curl_args << "\n#      -d@payload \\"
-        when "PUT"
-          curl_args << "\n#      -X PUT -d@payload \\"
-        when "DELETE"
-          curl_args << "\n#      -X DELETE \\"
-        end
-
-        <<~EOS.chomp
-          # Example:
-          # ```
-          # curl -H "Accept: application/hal+json" \\
-          #      #{curl_args}
-          #      #{uri}
-          #```
         EOS
       end
 
@@ -203,8 +165,8 @@ module Shaf
           policy_class_name: policy_class_name,
           policy_name: "#{name}_policy",
           attribute_names: attribute_names,
+          link_relations: link_relations,
           profile_with_doc: profile_with_doc,
-          links: links,
           attributes_with_doc: attributes_with_doc,
           links_with_doc: links_with_doc,
           collection_with_doc: collection_with_doc

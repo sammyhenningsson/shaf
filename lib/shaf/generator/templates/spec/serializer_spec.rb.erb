@@ -39,7 +39,7 @@ describe <%= class_name %> do
     end
 
     it "serializes links" do
-<% links.each do |rel| -%>
+<% link_relations.each do |rel| -%>
       _(link_rels).must_include(:'<%= rel %>')
 <% end -%>
     end
