@@ -21,13 +21,14 @@ module Shaf
         parent.attributes << attr
       end
 
-      def rel(name, **kwargs, &block)
+      def relation(name, **kwargs, &block)
         return unless allow? :rel
 
         rel = Relation.new(name, parent: parent, **kwargs)
         self.class.new(parent: rel, allowed: [:attribute]).instance_exec(&block) if block
         parent.relations << rel
       end
+      alias rel relation
 
       private
 
