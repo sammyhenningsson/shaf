@@ -65,8 +65,6 @@ module Shaf
         end
 
         def challenges_for(realm)
-          return challenges if realm.nil?
-
           challenges.select do |challenge|
             challenge.realm? realm
           end
@@ -152,7 +150,9 @@ module Shaf
         end
 
         def authorization(request)
-          request.authorization&.delete_prefix "#{scheme} "
+          return unless request.authorization
+
+          request.authorization.sub(/^#{scheme} /i, '')
         end
       end
     end

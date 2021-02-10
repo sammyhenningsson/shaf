@@ -28,9 +28,10 @@ module Shaf
       end
 
       it "returns a user when credentials is correct" do
-        user = BasicAuth.user(request)
+        user = BasicAuth.user(request, realm: :r1)
         assert user
         assert_equal 'foo', user.user
+        assert_equal 'r1', user.realm
       end
 
       it "returns a user for the correct realm" do
@@ -40,10 +41,34 @@ module Shaf
         assert_equal 'r2', user.realm
       end
 
+      it "returns nil when realm is not given" do
+        refute BasicAuth.user(request)
+      end
+
+      it "returns nil when realm is unknown" do
+        refute BasicAuth.user(request, realm: 'r27')
+      end
+
       it "returns nil when credentials is incorrect" do
         cred = ['foo:bar'].pack('m*').chomp
         request = Request.new('HTTP_AUTHORIZATION' => "Basic #{cred}")
         refute BasicAuth.user(request)
+      end
+
+      it "recognizes scheme in upper case" do
+        request = Request.new('HTTP_AUTHORIZATION' => "BASIC #{cred}")
+        user = BasicAuth.user(request, realm: :r1)
+        assert user
+        assert_equal 'foo', user.user
+        assert_equal 'r1', user.realm
+      end
+
+      it "recognizes scheme in lower case" do
+        request = Request.new('HTTP_AUTHORIZATION' => "basic #{cred}")
+        user = BasicAuth.user(request, realm: :r1)
+        assert user
+        assert_equal 'foo', user.user
+        assert_equal 'r1', user.realm
       end
     end
   end

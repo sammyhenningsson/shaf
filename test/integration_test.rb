@@ -273,7 +273,7 @@ module Shaf
               end
 
               get '/bar' do
-                authenticate!
+                authenticate! realm: 'MyApi'
                 respond_with current_user, status: 200, serializer: UserSerializer
               end
             end

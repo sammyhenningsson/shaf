@@ -7,7 +7,7 @@ module Shaf
 
       def initialize(scheme, **parameters, &block)
         @scheme = scheme
-        @realm = parameters.delete(:realm)
+        @realm = parameters.delete(:realm)&.to_s
         @parameters = parameters
         define_singleton_method(:test, &block)
       end
@@ -17,7 +17,7 @@ module Shaf
       end
 
       def realm?(arg)
-        realm == arg
+        realm&.to_s == arg&.to_s
       end
 
       private
