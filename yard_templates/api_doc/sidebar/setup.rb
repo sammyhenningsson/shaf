@@ -41,6 +41,10 @@ def resource?
   object.is_a? Shaf::Yard::ResourceObject
 end
 
+def index?
+  object.type == :doc_index
+end
+
 def resource_active?(name)
   return false unless resource?
   object.resource_name == name

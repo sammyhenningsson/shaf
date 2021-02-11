@@ -1,5 +1,6 @@
 # frozen_string_literal: true
 
+require 'ostruct'
 require 'shaf/yard/profile_object'
 
 def init
@@ -11,9 +12,16 @@ def init
   generate_profiles
 end
 
-
 def generate_index
-  puts 'TODO: generate index.html'
+  serialize(index_object)
+end
+
+def index_object
+  OpenStruct.new(
+    path: :index,
+    name: :index,
+    type: :doc_index
+  )
 end
 
 def generate_assets

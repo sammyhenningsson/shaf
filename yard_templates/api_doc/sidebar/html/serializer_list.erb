@@ -1,4 +1,4 @@
-<div id="serializer-list" class="list sidebar-content <%= 'active' if resource? %>">
+<div id="serializer-list" class="list sidebar-content <%= 'active' if resource? || index? %>">
   <ul>
     <% @resources.each do |name:, path:| %>
       <li class="sidebar-link <%= 'active' if resource_active?(name) %>">
