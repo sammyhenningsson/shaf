@@ -54,5 +54,6 @@ def assets
   [
     'css/api-doc.css',
     'js/switch_tab.js',
+    'favicon.ico',
   ]
 end

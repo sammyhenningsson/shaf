@@ -4,7 +4,7 @@ def init
   super
   return unless object
 
-  sections :layout, %i[header sidebar main]
+  sections :layout, %i[header sidebar main footer]
 end
 
 def sidebar
