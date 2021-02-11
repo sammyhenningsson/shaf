@@ -89,7 +89,12 @@ module Shaf
       assert body, "Failed to get response from server"
       assert_equal expected_status, response.status, <<~MSG
         Server responded with status #{response.status} (expected: #{expected_status})
-        Response: #{body}
+
+        Response:
+        #{body}
+
+        Backtrace:
+        #{caller[0..15].join("\n")}
       MSG
       @response = response
       @body = JSON.parse(body)
@@ -251,7 +256,14 @@ module Shaf
             require 'shaf'
             require 'ostruct'
 
+            Shaf::Settings.default_authentication_realm = 'MyApi'
+
             Shaf::Authenticator::BasicAuth.restricted realm: 'MyApi' do |user:, password:|
+              return unless user && user == password
+              OpenStruct.new(name: user)
+            end
+
+            Shaf::Authenticator::BasicAuth.restricted realm: 'VIP' do |user:, password:|
               return unless user && user == password
               OpenStruct.new(name: user)
             end
@@ -273,7 +285,12 @@ module Shaf
               end
 
               get '/bar' do
-                authenticate! realm: 'MyApi'
+                authenticate!
+                respond_with current_user, status: 200, serializer: UserSerializer
+              end
+
+              get '/baz' do
+                authenticate! realm: 'VIP'
                 respond_with current_user, status: 200, serializer: UserSerializer
               end
             end
@@ -304,6 +321,15 @@ module Shaf
         )
         assert_includes @response.headers.keys, 'www-authenticate'
         assert_equal 'Basic realm="MyApi"', @response.headers['www-authenticate']
+
+        bad_credentials = ['bob:123'].pack("m*").chomp
+        get(
+          "#{base_uri}/baz",
+          expected_status: 401,
+          headers: {'Authorization': "Basic #{bad_credentials}"}
+        )
+        assert_includes @response.headers.keys, 'www-authenticate'
+        assert_equal 'Basic realm="VIP"', @response.headers['www-authenticate']
       end
     end
 

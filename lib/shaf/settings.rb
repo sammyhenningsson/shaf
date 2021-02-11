@@ -16,19 +16,37 @@ module Shaf
     }.freeze
 
     class << self
-      def load
+      def env
+        (ENV['APP_ENV'] || ENV['RACK_ENV'] || 'development').to_sym
+      end
+
+      def key?(key)
+        settings.key? key
+      end
+
+      def to_h
+        settings.dup
+      end
+
+      def loaded?
+        !!defined? @settings
+      end
+
+      private
+
+      def settings
+        load_config unless loaded?
+        @settings
+      end
+
+      def load_config
         @settings = DEFAULTS.dup
         config = Utils.read_config(SETTINGS_FILE, erb: true)
         @settings.merge! config.fetch(env, {})
       end
 
-
-      def env
-        (ENV['APP_ENV'] || ENV['RACK_ENV'] || 'development').to_sym
-      end
-
       def method_missing(method, *args)
-        load unless defined? @settings
+        load_config unless loaded?
 
         if method.to_s.end_with? '='
           define_setter(method)
@@ -54,10 +72,6 @@ module Shaf
         define_singleton_method(method) do |arg|
           @settings[key] = arg
         end
-      end
-
-      def to_h
-        @settings.dup
       end
     end
   end
