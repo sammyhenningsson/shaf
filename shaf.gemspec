@@ -21,6 +21,7 @@ Gem::Specification.new do |gem|
   gem.executables   = ['shaf']
   gem.files         = Dir['lib/**/*rb'] \
                     + Dir['templates/**/*'] \
+                    + Dir['yard_templates/**/*'] \
                     + Dir['upgrades/*.tar.gz'] \
                     + ['iana_link_relations.csv.gz']
   gem.require_paths = ['lib']

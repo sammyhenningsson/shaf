@@ -42,10 +42,11 @@ a:hover {
 .grid-container {
   display: grid;
   grid-template-columns: 320px auto 320px;
-  grid-template-rows: 4em auto;
+  grid-template-rows: 4em auto 2em;
   grid-template-areas:
-    'header-sidebar header-main header-none'
-    'sidebar        resource    none';
+    "header-sidebar header-main header-none"
+    "sidebar        resource    none"
+    "footer         footer      footer";
   height: 100%;
 }
 
@@ -136,9 +137,10 @@ li.sidebar-link.active a {
 
 .footer {
   grid-area: footer;
-  padding: 2em;
-  /* background-color: #e0e0e0; */
+  text-align: right;
+  width: 100%;
   background-color: #ffffff; 
+  font-size: 0.75em;
 }
 
 .resource-section {
