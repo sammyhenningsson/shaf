@@ -16,6 +16,10 @@ module Shaf
         end
       end
 
+      def name
+        super.sub(/[^:]+:/, '')
+      end
+
       def curie
         m = name.match(/([^:]+):/)
         return m[1] if m
