@@ -1,7 +1,7 @@
 ## Mediatype profiles
 When choosing a mediatype, there are basically two approaches. Select (or invent) a mediatype that match all your requirements or select a generic mediatype that works on a broad range of use cases.
 Shaf favors the use of HAL which is a generic mediatype that most certainly will be capable of rendering your resources. The advantage of using a generic (and well-know) mediatype is that it will be easy to find libraries that can serialize and deserialize payloads. The downside is that, even though clients can parse payloads, they wont necessarily understand what they mean.
-This is were mediatype profiles comes into use. Profiles describe the attributes of a resource and what you can with it.
+This is were mediatype profiles comes into use. Profiles describe the attributes of a resource and what you can do with it.
 Note that mediatype profiles are agnostic to mediatypes, i.e we can use the same profile regardless if clients wants the response formatted as `application/hal+json` or `application/vnd.collection+json` etc.  
 By inheriting from `Shaf::Profile` we get a DSL for creating mediatype profiles. These profiles can then be serialized into [ALPS](https://tools.ietf.org/html/draft-amundsen-richardson-foster-alps-04) and they are also used to generate human readable documentation. Classes inheriting from `Shaf::Profile` gets the following methods:
  - `::name(str)`  
@@ -103,5 +103,5 @@ The profile above defines the `message` attribute and two link relations - `dele
 ```
 Note: ALPS is not specific for HTTP and doesn't have native support for specifying HTTP methods. Thus, the _http_method_ extension is used so that we can specify the available HTTP methods.
 
-The ALPS response is mostly served as machine readble documentation. If we generate api documentation (see [Documentation](DOCUMENTATION.md)), then we get the human friendly version which looks like this:  
+The ALPS response is mostly served as machine readable documentation. If we generate api documentation (see [Documentation](DOCUMENTATION.md)), then we get the human friendly version which looks like this:  
 ![Post profile](post_profile.png)
