@@ -14,6 +14,10 @@ module Shaf
         profiles << clazz
       end
 
+      def unregister(clazz)
+        profiles.delete(clazz)
+      end
+
       def find(name)
         name = String(name)
         return if name.empty?

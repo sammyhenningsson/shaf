@@ -25,7 +25,7 @@ module Shaf
       end
 
       after do
-	Profiles.clear
+	Profiles.unregister(profile)
       end
 
       it 'sets version to 1.0' do

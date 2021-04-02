@@ -11,7 +11,7 @@ module Shaf
     end
 
     after do
-      Profiles.clear
+      Profiles.unregister(profile)
     end
 
     it 'registers profile' do
