@@ -22,6 +22,11 @@ module Shaf
         @doc if defined? @doc
       end
 
+      def urn(value = nil)
+        @urn = value if value
+        @urn if defined? @urn
+      end
+
       def example(str)
         examples << str
       end

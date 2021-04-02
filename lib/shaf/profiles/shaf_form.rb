@@ -4,6 +4,7 @@ module Shaf
   module Profiles
     class ShafForm < Shaf::Profile
       name 'shaf-form'
+      urn 'urn:shaf:form'
 
       doc 'This profile describes how a set of descriptors should be interpreted to ' \
           'turn a generic media type into a form (similar to HTML forms). For ' \

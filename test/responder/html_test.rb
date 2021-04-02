@@ -76,7 +76,7 @@ module Shaf
           request_headers: {},
           response_headers: {
             'X-Custom-A' => 'hello',
-            'Content-Type' => 'application/hal+json;profile=gulo',
+            'Content-Type' => 'application/hal+json; profile="gulo"',
             'ETag' => '"mocked_etag"'
           },
           serialized: {name: 'Bengt'}

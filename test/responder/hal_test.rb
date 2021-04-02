@@ -9,19 +9,33 @@ module Shaf
       let(:resource)  { OpenStruct.new(name: 'bengt') }
       let(:mock_controller) do
         mock = Minitest::Mock.new
-        def mock.content_type(*); nil; end
         def mock.body(content); content; end
+        def mock.content_type(value = nil)
+          @content_type = value if value
+          @content_type
+        end
         mock
       end
 
       let(:serializer) do
-        Class.new do
-          extend HALPresenter
+        Class.new(Serializer) do
           attribute :name do
             resource.name.capitalize
           end
+
+          profile :foo
+
+          # Override these uri helpers
+          def self.profile_uri(_name)
+            'http://foo.bar/profile/foo'
+          end
+
+          def self.doc_curie_uri(_name)
+            'http://foo.bar/curie/foo{#rel}'
+          end
         end
       end
+
       let(:serialized_response) do
         {
           _links: {
@@ -45,7 +59,38 @@ module Shaf
       it 'serializes response' do
         response = Hal.call(mock_controller, resource, serializer: serializer)
 
-        _(response).must_equal '{"name":"Bengt"}'
+        _(JSON.parse(response)).must_equal(
+          {
+            'name' => 'Bengt',
+            '_links' => {
+              'profile' => {
+                'href' => "http://foo.bar/profile/foo"
+              },
+              'curies' => [
+                {
+                  'name' => 'doc',
+                  'href' => "http://foo.bar/curie/foo{#rel}",
+                  'templated' => true
+                  }
+              ]
+            }
+          }
+        )
+      end
+
+      it 'specifies a mediatype profile with URI' do
+        Hal.call(mock_controller, resource, serializer: serializer)
+
+        _(mock_controller.content_type).must_equal 'application/hal+json; profile="http://foo.bar/profile/foo"'
+      end
+
+      it 'specifies a mediatype profile' do
+        form_serializer = Class.new(serializer)
+        form_serializer.profile 'shaf-form'
+
+        Hal.call(mock_controller, resource, serializer: form_serializer)
+
+        _(mock_controller.content_type).must_equal 'application/hal+json; profile="urn:shaf:form"'
       end
 
       it 'preloads links' do

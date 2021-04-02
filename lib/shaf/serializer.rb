@@ -16,6 +16,10 @@ module Shaf
       # @param name [String] the name of the profile
       # @param curie_prefix [Symbol] the prefix used for the Curie
       def profile(name, curie_prefix: :doc)
+        profile = Profiles.find name
+
+        super { profile&.urn || profile_uri(name) }
+
         link :profile do
           profile_uri(name)
         end

@@ -36,7 +36,7 @@ module Shaf
 
       def mime_type
         type = super
-        type = "#{type};profile=#{profile}" if profile
+        type = "#{type}; profile=\"#{profile}\"" if profile
         type
       end
 

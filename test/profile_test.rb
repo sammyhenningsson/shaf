@@ -19,6 +19,12 @@ module Shaf
       _(Profiles.find name).must_equal profile
     end
 
+    it 'can set a urn' do
+      _(profile.urn).must_be_nil
+      profile.urn 'urn:foo:bar'
+      _(profile.urn).must_equal 'urn:foo:bar'
+    end
+
     it 'can add attributes' do
       profile.attribute('attr1', doc: 'doc for attr1', type: 'String')
       profile.attribute(:attr2, doc: 'doc for attr2', type: 'Integer')

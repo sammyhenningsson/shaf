@@ -4,6 +4,7 @@ module Shaf
   module Profiles
     class ShafError < Shaf::Profile
       name 'shaf-error'
+      urn 'urn:shaf:error'
 
       doc  'This profile describes a set of descriptors for generic error messages.'
       example <<~EXAMPLE
