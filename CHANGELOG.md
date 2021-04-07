@@ -1,3 +1,5 @@
+## 2.1.0
+ * Use URNs as profile parameter for shaf forms and errors
 ## 2.0.0
  * New framework for parsing input
  * New framework for authentication
