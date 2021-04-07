@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    shaf (2.0.0)
+    shaf (2.1.0)
       file_transactions
 
 GEM
@@ -9,7 +9,7 @@ GEM
   specs:
     faraday (0.17.3)
       multipart-post (>= 1.2, < 3)
-    file_transactions (0.1.2)
+    file_transactions (1.1.4)
     git (1.8.1)
       rchardet (~> 1.8)
     hal_presenter (1.6.0)
@@ -55,4 +55,4 @@ DEPENDENCIES
   yard (~> 0.9)
 
 BUNDLED WITH
-   2.1.2
+   2.2.14
