@@ -1,23 +1,24 @@
 ---
 default: &default
-  project_name: <%= project_name %>
-  public_folder: frontend/assets
-  views_folder: frontend/views
+  default_authentication_realm: api
   documents_dir: doc/api
-  migrations_dir: db/migrations
   fixtures_dir: spec/fixtures
-  paginate_per_page: 25
+  hostname: localhost
   http_cache: on
   http_cache_max_age_long: 86400 # 60 * 60 * 24 = 1 day
   http_cache_max_age_short: 3600 #      60 * 60 = 1 hour
-  hostname: localhost
-  protocol: http
+  migrations_dir: db/migrations
+  paginate_per_page: 25
   port: 3000
+  project_name: <%= project_name %>
+  protocol: http
+  public_folder: frontend/assets
+  views_folder: frontend/views
 
 production:
   <<: *default
-  port: <%= ENV.fetch('PORT', 443) %>
   base_uri: https://my.public.shaf.api.com
+  port: <%= ENV.fetch('PORT', 443) %>
 
 development:
   <<: *default
