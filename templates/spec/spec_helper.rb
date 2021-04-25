@@ -4,4 +4,7 @@ require 'minitest/autorun'
 require 'minitest/hooks'
 require 'shaf/spec'
 
-Shaf::Spec::Authenticator.restricted { |id:| User[id] }
+realm = Shaf::Settings.default_authentication_realm
+Shaf::Spec::Authenticator.restricted realm: realm do |id:|
+  User[id]
+end
