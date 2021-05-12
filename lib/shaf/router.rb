@@ -1,7 +1,8 @@
 # frozen_string_literal: true
 
-require 'shaf/middleware'
 require 'set'
+require 'sinatra'
+require 'shaf/errors'
 
 module Shaf
   class Router
@@ -21,16 +22,56 @@ module Shaf
       end
     end
 
+    class NullController
+      def call(env)
+        request = request(env)
+        responder = Responder.for(request, error)
+        responder.call(self, error)
+
+        response.finish
+      end
+
+      # Called from responder
+      def content_type(mime)
+        response["Content-Type"] = mime
+      end
+
+      # Called from responder
+      def body(body)
+        response.body  = body
+      end
+
+      private
+
+      def status
+        500
+      end
+
+      def request(env)
+        Sinatra::Request.new(env)
+      end
+
+      def response
+        @response ||= Sinatra::Response.new(nil, status)
+      end
+
+      def error
+        @error ||= Errors::ServerError.new(
+          'Internal error: No controller has been mounted on Router',
+          code: 'NO_MOUNTED_CONTROLLERS',
+          title: 'Shaf::Router must have at least one mounted controller',
+        )
+      end
+    end
+
     class << self
       def mount(controller, default: false)
         @default_controller = controller if default
-        @controllers ||= []
-        @controllers << controller
+        controllers << controller
       end
 
       def routes
-        init_routes unless defined? @routes
-        @routes
+        @routes ||= init_routes
       end
 
       # This controller will be used when no other can handle the request
@@ -41,23 +82,26 @@ module Shaf
 
       private
 
-      attr_reader :controllers
-
-      def init_routes
-        @routes = Hash.new do |hash, key|
-          hash[key] = Hash.new { |h, k| h[k] = Set.new }
-        end
-        controllers.each { |controller| init_routes_for(controller) }
+      def controllers
+        @controllers ||= []
       end
 
-      def init_routes_for(controller)
+      def init_routes
+        routes = Hash.new do |hash, key|
+          hash[key] = Hash.new { |h, k| h[k] = Set.new }
+        end
+        controllers.each { |controller| init(controller, routes) }
+        routes
+      end
+
+      def init(controller, routes)
         controller.routes.each do |method, controller_routes|
           routes[method][controller] += controller_routes.map(&:first)
         end
       end
     end
 
-    def initialize(app)
+    def initialize(app = NullController.new)
       @app = app
     end
 
@@ -66,7 +110,7 @@ module Shaf
 
       result = nil
 
-      controllers_for(http_method, path) do |controller|
+      each_controller_for(http_method, path) do |controller|
         result = controller.call(env)
         break unless cascade? result
       end
@@ -80,7 +124,7 @@ module Shaf
       [env['REQUEST_METHOD'], env['PATH_INFO']]
     end
 
-    def controllers_for(http_method, path)
+    def each_controller_for(http_method, path)
       find_cached(http_method, path).each { |ctrlr| yield ctrlr }
 
       if controller = find(http_method, path)

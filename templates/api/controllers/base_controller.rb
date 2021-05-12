@@ -13,8 +13,6 @@ class BaseController < Sinatra::Base
     set :show_exceptions, :after_handler
   end
 
-  use Rack::Deflater
-
   Shaf::Router.mount(self, default: true)
 
   register(*Shaf.extensions)

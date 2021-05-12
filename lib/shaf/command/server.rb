@@ -1,4 +1,5 @@
 # frozen_string_literal: true
+require 'rack'
 
 module Shaf
   module Command
@@ -16,7 +17,10 @@ module Shaf
       def call
         Settings.port = options[:port] if options[:port]
         bootstrap
-        App.run!
+        Rack::Server.start(
+          app: App,
+          Port: Settings.port
+        )
       end
     end
   end

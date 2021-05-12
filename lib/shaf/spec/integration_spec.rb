@@ -30,7 +30,7 @@ module Shaf
       end
 
       def app
-        App.app
+        App.instance
       end
 
       def authenticate(user)

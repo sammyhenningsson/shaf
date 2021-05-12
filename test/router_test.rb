@@ -6,12 +6,13 @@ require "rack/test"
 module Shaf
   describe Router do
     include ::Rack::Test::Methods
+
     def app
       router
     end
 
     let(:router_class) { Class.new(Router) }
-    let(:router) { router_class.new(controller3) }
+    let(:router) { router_class.new }
     let(:controller1) do
       Class.new(Sinatra::Base) do
         get '/one' do

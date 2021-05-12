@@ -16,7 +16,7 @@ module Shaf
 
       def hash
         {
-          status: controller.status,
+          status: status,
           type: code,
           title: title,
           detail: resource.message,
