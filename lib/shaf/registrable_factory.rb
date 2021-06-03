@@ -1,15 +1,58 @@
 module Shaf
   module RegistrableFactory
-
     class NotFoundError < StandardError; end
+    class NoIdentifiersError < StandardError
 
-    def all
-      reg.dup
+      def initialize(clazz)
+        super <<~ERR
+          #{clazz} does not have an @identifiers ivar.
+          Did you perhaps forget to call `#{clazz}.identifier`?
+        ERR
+      end
     end
 
-    def each
+    class Entry
+      attr_reader :clazz
+
+      def initialize(clazz)
+        @clazz = clazz
+      end
+
+      def match?(strings)
+        raise NoIdentifiersError, clazz unless identifiers
+        return false if strings.size < identifiers.size
+        identifiers.zip(strings).all? { |pattern, str| matching_identifier? str, pattern }
+      end
+
+      def identifier_count
+        identifiers&.size || 0
+      end
+
+      def usage
+        clazz.instance_variable_get(:@usage)
+      end
+
+      private
+
+      def identifiers
+        clazz.instance_variable_get(:@identifiers)
+      end
+
+      def matching_identifier?(str, pattern)
+        return false if pattern.nil? || str.nil? || str.empty?
+        pattern = pattern.to_s if pattern.is_a? Symbol
+        return str == pattern if pattern.is_a? String
+        !!str.match(pattern)
+      end
+    end
+
+    def all
+      reg.map(&:clazz)
+    end
+
+    def each(&block)
       return all.each unless block_given?
-      all.each { |c| yield c }
+      all.each(&block)
     end
 
     def size
@@ -17,34 +60,31 @@ module Shaf
     end
 
     def register(clazz)
-      reg << clazz
+      reg << Entry.new(clazz)
     end
 
     def unregister(*str)
       return if str.empty? || !str.all?
-      reg.delete_if { |clazz| matching_class? str, clazz }
+      reg.delete_if { |entry| entry.match? str }
     end
 
     def lookup(*str)
-      return if str.empty? || !str.all?
-      reg.select { |clazz| matching_class? str, clazz }
-        .sort_by(&method(:identifier_count))
-        .last
+      lookup_entry(*str)&.clazz
     end
 
     def usage
       reg.compact.map do |entry|
-        usage = entry.instance_variable_get(:@usage)
+        usage = entry.usage
         usage.respond_to?(:call) ? usage.call : usage
       end
     end
 
     def create(*params, **options)
-      clazz = lookup(*params)
-      raise NotFoundError.new(%Q(Command '#{ARGV}' is not supported)) unless clazz
+      entry = lookup_entry(*params)
+      raise NotFoundError.new(%Q(Command '#{ARGV}' is not supported)) unless entry
 
-      args = init_args(clazz, params)
-      clazz.new(*args, **options)
+      args = init_args(entry, params)
+      entry.clazz.new(*args, **options)
     end
 
     private
@@ -53,25 +93,15 @@ module Shaf
       @reg ||= []
     end
 
-    def matching_class?(strings, clazz)
-      identifiers = clazz.instance_variable_get(:@identifiers)
-      return false if strings.size < identifiers.size
-      identifiers.zip(strings).all? { |pattern, str| matching_identifier? str, pattern }
+    def lookup_entry(*str)
+      return if str.empty? || !str.all?
+      reg.select { |entry| entry.match? str }
+        .sort_by { |entry| entry.identifier_count }
+        .last
     end
 
-    def matching_identifier?(str, pattern)
-      return false if pattern.nil? || str.nil? || str.empty?
-      pattern = pattern.to_s if pattern.is_a? Symbol
-      return str == pattern if pattern.is_a? String
-      str.match(pattern) || false
-    end
-
-    def identifier_count(clazz)
-      clazz.instance_variable_get(:@identifiers)&.size || 0
-    end
-
-    def init_args(clazz, params)
-      first_non_id = identifier_count(clazz)
+    def init_args(entry, params)
+      first_non_id = entry.identifier_count
       params[first_non_id..-1]
     end
   end
