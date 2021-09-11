@@ -35,7 +35,7 @@ module Shaf
       private
 
       def identifiers
-        clazz.instance_variable_get(:@identifiers)
+        clazz.identified_by
       end
 
       def matching_identifier?(str, pattern)

@@ -23,6 +23,10 @@ module Shaf
           @usage = str || block
         end
 
+        def identified_by
+          @identifiers
+        end
+
         def exit_with_error(msg, status)
           STDERR.puts msg
           exit status

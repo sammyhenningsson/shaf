@@ -19,6 +19,10 @@ module Shaf
           def usage(str = nil, &block)
             @usage = str || block
           end
+
+          def identified_by
+            @identifiers
+          end
         end
 
         def initialize(*args, **options)

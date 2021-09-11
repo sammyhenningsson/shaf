@@ -12,31 +12,25 @@ module Shaf
         create_forms
       end
 
-      def model_name
-        n = args.first || ''
-        return n unless n.empty?
-        raise Command::ArgumentError,
-          'Please provide a model name when using the model generator!'
-      end
-
-      def model_class_name
-        Utils.model_name(model_name)
-      end
-
       def table_name
-        Utils.pluralize model_name
+        Utils.pluralize name_arg
       end
 
       def template
         'api/model.rb'
       end
 
-      def target
-        "api/models/#{model_name}.rb"
+      def target_dir
+        'api/models'
+      end
+
+      def target_name
+        "#{name}.rb"
       end
 
       def create_model
         content = render(template, opts)
+        content = wrap_in_module(content, module_name)
         write_output(target, content)
       end
 
@@ -52,12 +46,12 @@ module Shaf
       end
 
       def create_serializer
-        serializer_args = %W(serializer #{model_name}) + args[1..-1]
+        serializer_args = %W(serializer #{name_arg}) + args[1..-1]
         Generator::Factory.create(*serializer_args, **options).call
       end
 
       def create_forms
-        form_args = %W(forms #{model_name}) + args[1..-1]
+        form_args = %W(forms #{name_arg}) + args[1..-1]
         Generator::Factory.create(*form_args, **options).call
       end
     end

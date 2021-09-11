@@ -11,19 +11,8 @@ module Shaf
         create_profile
       end
 
-      def name
-        n = args.first || ""
-        return n unless n.empty?
-        raise Command::ArgumentError,
-          "Please provide a model name when using the serializer generator!"
-      end
-
-      def plural_name
-        Utils.pluralize(name)
-      end
-
-      def model_class_name
-        Utils.model_name(name)
+      def serializer_class_name
+        "#{model_class_name}Serializer"
       end
 
       def policy_class_name
@@ -38,21 +27,31 @@ module Shaf
         'spec/serializer_spec.rb'
       end
 
-      def target
-        "api/serializers/#{name}_serializer.rb"
+      def target_dir
+        'api/serializers'
+      end
+
+      def target_name
+        "#{name}_serializer.rb"
       end
 
       def spec_target
-        "spec/serializers/#{name}_serializer_spec.rb"
+        target(directory: 'spec/serializers', name: "#{name}_serializer_spec.rb")
+      end
+
+      def policy_file
+        File.join(['policies', namespace, "#{name}_policy"].compact)
       end
 
       def create_serializer
         content = render(template, opts)
+        content = wrap_in_module(content, module_name)
         write_output(target, content)
       end
 
       def create_serializer_spec
         content = render(spec_template, opts)
+        content = wrap_in_module(content, module_name, search: "describe #{serializer_class_name}")
         write_output(spec_target, content)
       end
 
@@ -160,10 +159,10 @@ module Shaf
       def opts
         {
           name: name,
-          class_name: "#{model_class_name}Serializer",
+          class_name: serializer_class_name,
           model_class_name: model_class_name,
           policy_class_name: policy_class_name,
-          policy_name: "#{name}_policy",
+          policy_file: policy_file,
           attribute_names: attribute_names,
           link_relations: link_relations,
           profile_with_doc: profile_with_doc,

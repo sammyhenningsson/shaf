@@ -8,27 +8,21 @@ module Shaf
         create_policy
       end
 
-      def policy_name
-        n = args.first || ""
-        return n unless n.empty?
-        raise Command::ArgumentError,
-          "Please provide a policy name when using the policy generator!"
-      end
-
-      def model_class_name
-        Utils::model_name(policy_name)
-      end
-
       def template
         'api/policy.rb'
       end
 
-      def target
-        "api/policies/#{policy_name}_policy.rb"
+      def target_dir
+        'api/policies'
+      end
+
+      def target_name
+        "#{name}_policy.rb"
       end
 
       def create_policy
         content = render(template, opts)
+        content = wrap_in_module(content, module_name)
         write_output(target, content)
       end
 
@@ -39,7 +33,7 @@ module Shaf
       def opts
         {
           policy_class_name: "#{model_class_name}Policy",
-          name: policy_name,
+          name: name,
           attributes: attributes,
         }
       end

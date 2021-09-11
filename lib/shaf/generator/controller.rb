@@ -13,24 +13,7 @@ module Shaf
         add_link_to_root
       end
 
-      def params
-        args[1..-1].map { |param| param.split(':')}
-      end
-
-      def name
-        n = args.first || ''
-        return n unless n.empty?
-        raise Command::ArgumentError,
-          'Please provide a controller name when using the controller generator!'
-      end
-
-      def model_class_name
-        Utils.model_name(name)
-      end
-
-      def plural_name
-        Utils.pluralize(name)
-      end
+      private
 
       def pluralized_model_name
         Utils.pluralize(model_class_name)
@@ -44,21 +27,31 @@ module Shaf
         'spec/integration_spec.rb'
       end
 
-      def target
-        "api/controllers/#{plural_name}_controller.rb"
+      def target_dir
+        'api/controllers'
+      end
+
+      def target_name
+        "#{plural_name}_controller.rb"
       end
 
       def spec_target
-        "spec/integration/#{plural_name}_controller_spec.rb"
+        target(directory: 'spec/integration', name: "#{plural_name}_controller_spec.rb")
+      end
+
+      def policy_file
+        File.join(['policies', namespace, "#{name}_policy"].compact)
       end
 
       def create_controller
         content = render(template, opts)
+        content = wrap_in_module(content, module_name)
         write_output(target, content)
       end
 
       def create_integration_spec
         content = render(spec_template, opts)
+        content = wrap_in_module(content, module_name, search: "describe #{model_class_name}")
         write_output(spec_target, content)
       end
 
@@ -70,7 +63,8 @@ module Shaf
           model_class_name: model_class_name,
           controller_class_name: "#{pluralized_model_name}Controller",
           policy_class_name: "#{model_class_name}Policy",
-          policy_file: "policies/#{name}_policy",
+          policy_file: policy_file,
+          namespace: namespace,
           params: params
         }
       end
@@ -97,6 +91,7 @@ module Shaf
       end
 
       def link_content(indentation = '')
+        # FIXME: remove comment!
         <<~DOC.split("\n").map { |line| "#{indentation}#{line}" }
 
           # Auto generated doc:  

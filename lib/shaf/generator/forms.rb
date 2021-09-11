@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 module Shaf
   module Generator
     class Forms < Base
@@ -8,17 +10,6 @@ module Shaf
         create_forms
       end
 
-      def model_name
-        n = args.first || ''
-        return n unless n.empty?
-        raise Command::ArgumentError,
-          'Please provide a model name when using the forms generator!'
-      end
-
-      def model_class_name
-        Utils.model_name(model_name)
-      end
-
       def class_name
         "#{model_class_name}Forms"
       end
@@ -27,19 +18,24 @@ module Shaf
         'api/forms.rb'
       end
 
-      def target
-        "api/forms/#{model_name}_forms.rb"
+      def target_dir
+        'api/forms'
+      end
+
+      def target_name
+        "#{name}_forms.rb"
       end
 
       def create_forms
         content = render(template, opts)
+        content = wrap_in_module(content, module_name)
         # FIXME: Append if file exists!
         write_output(target, content)
       end
 
       def opts
         {
-          model_name: model_name,
+          model_name: name,
           class_name: class_name,
           model_class_name: model_class_name,
           fields: fields

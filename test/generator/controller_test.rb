@@ -30,6 +30,21 @@ module Shaf
           assert_match %r(^\s*resource_uris_for :blog$), output[file]
         end
       end
+
+      describe "empty controller with namespace" do
+        let(:file) { "api/controllers/foo/bars_controller.rb" }
+        let(:generator) do
+          Factory.create(*%w(controller foo/bar))
+        end
+
+        it "creates file in directory api/controllers/foo" do
+          assert_includes output.keys, file
+        end
+
+        it "nests class under module" do
+          assert_match(/module Foo\n  class BarsController < BaseController/m, output[file])
+        end
+      end
     end
   end
 end

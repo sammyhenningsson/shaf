@@ -6,21 +6,18 @@ module Shaf
       usage 'generate scaffold RESOURCE_NAME [attribute:type] [..]'
 
       def call
-        if name.empty?
-          raise "Please provide a resource name when using the scaffold generator!"
-        end
+        check_name_arg!
 
         options[:specs] = true if options[:specs].nil? 
         Generator::Factory.create('model', *args, **options).call
-        Generator::Factory.create('controller', *controller_args, **options).call
+        Generator::Factory.create('controller', *args, **options).call
       end
 
-      def name
-        args.first || ""
-      end
+      def check_name_arg!
+        return if args.first && !args.first.empty?
 
-      def controller_args
-        [name] + args[1..-1]
+        raise Command::ArgumentError,
+          "Please provide a name when using the scaffold generator!"
       end
     end
   end

@@ -35,6 +35,21 @@ module Shaf
           assert_match %r(class Blog < Sequel::Model), output["api/models/blog.rb"]
         end
       end
+
+      describe "empty model with namespace" do
+        let(:file) { "api/models/foo/bar.rb" }
+        let(:generator) do
+          Factory.create(*%w(model foo/bar))
+        end
+
+        it "creates file in directory api/models/foo" do
+          assert_includes output.keys, file
+        end
+
+        it "nests class under module" do
+          assert_match(/module Foo\n  class Bar < Sequel::Model/m, output[file])
+        end
+      end
     end
   end
 end
