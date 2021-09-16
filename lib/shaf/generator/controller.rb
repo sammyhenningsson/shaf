@@ -91,20 +91,7 @@ module Shaf
       end
 
       def link_content(indentation = '')
-        # FIXME: remove comment!
-        <<~DOC.split("\n").map { |line| "#{indentation}#{line}" }
-
-          # Auto generated doc:  
-          # Link to the collection of #{plural_name}.  
-          # Method: GET  
-          # Example:
-          # ```
-          # curl -H "Accept: application/hal+json" \\
-          #      -H "Authorization: abcdef" \\
-          #      /#{plural_name}
-          #```
-          link :#{plural_name}, #{plural_name}_uri
-        DOC
+        "#{indentation}link :#{plural_name}, #{plural_name}_uri"
       end
     end
   end
