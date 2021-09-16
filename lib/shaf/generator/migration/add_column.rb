@@ -21,10 +21,6 @@ module Shaf
           "add_#{cols.join('_')}_to_#{table_name}"
         end
 
-        def table_name
-          args.first
-        end
-
         def compile_changes
           add_change add_columns_change
         end

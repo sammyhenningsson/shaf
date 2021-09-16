@@ -39,6 +39,10 @@ module Shaf
           raise Command::ArgumentError, e.message
         end
 
+        def table_name
+          (args.first || '').tr('/', '_')
+        end
+
         def add_change(change)
           @changes ||= []
           @changes << change if change

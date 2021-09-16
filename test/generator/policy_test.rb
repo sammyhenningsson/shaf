@@ -26,6 +26,21 @@ module Shaf
         end
       end
 
+      describe "empty policy with namespace" do
+        let(:file) { "api/policies/foo/bar_policy.rb" }
+        let(:generator) do
+          Factory.create(*%w(policy foo/bar))
+        end
+
+        it "creates file in directory api/policies/foo" do
+          assert_includes output.keys, file
+        end
+
+        it "nests class under module" do
+          assert_match(/module Foo\n  class BarPolicy < BasePolicy/m, output[file])
+        end
+      end
+
       describe "model with properties" do
         let(:generator) do
           Factory.create(*%w(policy blog user_id message))

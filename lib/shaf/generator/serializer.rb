@@ -173,12 +173,12 @@ module Shaf
       end
 
       def create_policy
-        policy_args = ["policy", name, *attribute_names]
+        policy_args = ["policy", name_arg, *attribute_names]
         Generator::Factory.create(*policy_args, **options).call
       end
 
       def create_profile
-        profile_args = ["profile", name, *attributes]
+        profile_args = ["profile", name_arg, *attributes]
         Generator::Factory.create(*profile_args, **options).call
       end
     end

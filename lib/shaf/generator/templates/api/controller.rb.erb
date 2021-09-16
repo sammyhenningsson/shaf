@@ -4,7 +4,7 @@ class <%= controller_class_name %> < BaseController
 
   authorize_with <%= policy_class_name %>
 
-  resource_uris_for :<%= name %>
+  resource_uris_for :<%= name %><%= namespace ? ", base: '/#{namespace}'" : "" %>
 
   get :<%= plural_name %>_path do
     authorize! :read

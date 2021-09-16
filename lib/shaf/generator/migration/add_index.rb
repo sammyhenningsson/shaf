@@ -16,10 +16,6 @@ module Shaf
           "add_#{column}_index_to_#{table_name}"
         end
 
-        def table_name
-          args.first
-        end
-
         def compile_changes
           add_change add_index_change
         end

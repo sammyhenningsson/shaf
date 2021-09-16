@@ -24,10 +24,6 @@ module Shaf
           add_change drop_column_change
         end
 
-        def table_name
-          args.first || ""
-        end
-
         def column
           args[1] || ""
         end

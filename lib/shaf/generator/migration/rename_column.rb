@@ -23,10 +23,6 @@ module Shaf
           add_change rename_column_change
         end
 
-        def table_name
-          args.first || ""
-        end
-
         def from_col
           args[1] || ""
         end
