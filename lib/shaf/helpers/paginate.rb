@@ -12,7 +12,7 @@ module Shaf
       unless collection.respond_to? :paginate
         log.warn "Trying to paginate a collection that doesn't " \
                     "support pagination: #{collection}"
-        return
+        return collection
       end
 
       per_page = params[:per_page].to_i if params[:per_page]
