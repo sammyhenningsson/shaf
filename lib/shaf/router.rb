@@ -106,6 +106,15 @@ module Shaf
     end
 
     def call(env)
+      # When the api is mounted in Rails then the mount point will be not be
+      # present in PATH_INFO but it will instead be available in SCRIPT_NAME
+      # Shaf need to know about the full path in order to make all path helpers
+      # work, so we need to add the mountpoint back to PATH_INFO.
+      unless String(env['SCRIPT_NAME']).empty?
+        env['PATH_INFO'] = '' if env['PATH_INFO'] == '/'
+        env['PATH_INFO'] = "#{env['SCRIPT_NAME']}#{env['PATH_INFO']}"
+      end
+
       http_method, path = http_details(env)
 
       result = nil
