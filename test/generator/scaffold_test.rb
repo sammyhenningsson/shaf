@@ -75,6 +75,18 @@ module Shaf
           assert_includes output.keys, "api/forms/api/book_forms.rb"
         end
       end
+
+      describe "it can skip generating a model" do
+        let(:generator) do
+          Factory.create(*%w(scaffold book title:string pages:integer), skip_model: true)
+        end
+
+        it "creates a controller but no model or migration" do
+          assert_includes output.keys, "api/controllers/books_controller.rb"
+          refute_includes output.keys, "api/models/book.rb"
+          assert_empty output.keys.grep(/migrations\/.*create_books_table\.rb/)
+        end
+      end
     end
   end
 end
