@@ -106,10 +106,12 @@ module Shaf
   # edit_book_uri_template         => /books/:id/edit
   #
   class CreateUriMethods
-    def initialize(name, base: nil, plural_name: nil, only: nil, except: nil)
+    def initialize(name, plural_name: nil, base: nil, namespace: nil, only: nil, except: nil)
       @name = name.to_s
-      @base = base&.sub(%r(/\Z), '') || ''
       @plural_name = plural_name&.to_s || Utils::pluralize(name.to_s)
+      @base = base&.sub(%r(/\Z), '') || ''
+      @base = "/#{namespace}" if namespace && !base
+      @namespace = namespace
       @only = only
       @except = except
       @added_path_methods = []
@@ -125,36 +127,38 @@ module Shaf
 
     private
 
-    attr_reader :name, :base, :plural_name, :only, :except
+    attr_reader :name, :plural_name, :base, :namespace, :only, :except
 
     def register_collection_helper
       return if skip? :collection
 
+      method = method_name(plural_name, name == plural_name)
       template_uri = "#{base}/#{plural_name}".freeze
-      method_name = plural_name
-      method_name = "#{name}_collection" if name == @plural_name
-      register(method_name, template_uri)
+      register(method, template_uri)
     end
 
     def register_resource_helper
       return if skip? :resource
 
+      method = method_name(name)
       template_uri = "#{base}/#{plural_name}/:id".freeze
-      register(name, template_uri)
+      register(method, template_uri)
     end
 
     def register_new_resource_helper
       return if skip? :new
 
+      method = method_name(name)
       template_uri = "#{base}/#{name}/form".freeze
-      register("new_#{name}", template_uri)
+      register("new_#{method}", template_uri)
     end
 
     def register_edit_resource_helper
       return if skip? :edit
 
+      method = method_name(name)
       template_uri = "#{base}/#{plural_name}/:id/edit".freeze
-      register("edit_#{name}", template_uri)
+      register("edit_#{method}", template_uri)
     end
 
     def register(name, template_uri)
@@ -170,6 +174,11 @@ module Shaf
       else
         false
       end
+    end
+
+    def method_name(name, collection = false)
+      collection_str = "collection" if collection
+      [namespace, name, collection_str].compact.join('_')
     end
   end
 

@@ -115,6 +115,45 @@ module Shaf
       end
     end
 
+    describe "uri methods with a namespace" do
+
+      before do
+        CreateUriMethods.new(:bar, namespace: 'api').call
+      end
+
+      it "adds namespace to collection metods" do
+        assert_methods_registered :api_bars_uri, :api_bars_path
+        assert_equal "#{base_uri}/api/bars", Shaf::UriHelper.api_bars_uri
+        assert_equal "/api/bars", Shaf::UriHelper.api_bars_path
+        assert_equal '/api/bars', Shaf::UriHelper.api_bars_path_template
+        assert_equal "#{base_uri}/api/bars?bar=5&baz=fem", Shaf::UriHelper.api_bars_uri(bar: 5, baz: "fem")
+      end
+
+      it "adds namespace to resource methods" do
+        assert_methods_registered :api_bar_uri, :api_bar_path
+        assert_equal "#{base_uri}/api/bars/5", Shaf::UriHelper.api_bar_uri(resrc)
+        assert_equal "/api/bars/5", Shaf::UriHelper.api_bar_path(resrc)
+        assert_equal '/api/bars/:id', Shaf::UriHelper.api_bar_path_template
+        assert_equal "#{base_uri}/api/bars/5?bar=5&baz=fem", Shaf::UriHelper.api_bar_uri(resrc, bar: 5, baz: "fem")
+      end
+
+      it "adds namespace to new resource methods" do
+        assert_methods_registered :new_api_bar_uri, :new_api_bar_path
+        assert_equal "#{base_uri}/api/bar/form", Shaf::UriHelper.new_api_bar_uri
+        assert_equal "/api/bar/form", Shaf::UriHelper.new_api_bar_path
+        assert_equal '/api/bar/form', Shaf::UriHelper.new_api_bar_path_template
+        assert_equal "#{base_uri}/api/bar/form?bar=5&baz=fem", Shaf::UriHelper.new_api_bar_uri(bar: 5, baz: "fem")
+      end
+
+      it "adds namespace to edit resource methods" do
+        assert_methods_registered :edit_api_bar_uri, :edit_api_bar_path
+        assert_equal "#{base_uri}/api/bars/5/edit", Shaf::UriHelper.edit_api_bar_uri(resrc)
+        assert_equal "/api/bars/5/edit", Shaf::UriHelper.edit_api_bar_path(resrc)
+        assert_equal '/api/bars/:id/edit', Shaf::UriHelper.edit_api_bar_path_template
+        assert_equal "#{base_uri}/api/bars/5/edit?bar=5&baz=fem", Shaf::UriHelper.edit_api_bar_uri(resrc, bar: 5, baz: "fem")
+      end
+    end
+
     describe "nested resource uris" do
 
       before do
