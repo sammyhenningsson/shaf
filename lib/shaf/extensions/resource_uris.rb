@@ -116,16 +116,8 @@ module Shaf
     end
 
     def call
-      if plural_name == name
-        # Deprecated code path
-        # Remove this branch and only keep the `else` behavior when dropping
-        # support for this
-        register_resource_helper_by_arg
-      else
-        register_collection_helper
-        register_resource_helper
-      end
-
+      register_collection_helper
+      register_resource_helper
       register_new_resource_helper
       register_edit_resource_helper
       @added_path_methods
@@ -149,21 +141,6 @@ module Shaf
 
       template_uri = "#{base}/#{plural_name}/:id".freeze
       register(name, template_uri)
-    end
-
-    # If a resource has the same singular and plural names, then this method
-    # should be used. It will return the resource uri when a resource is given
-    # as argument and the resources uri when no arguments are provided.
-    def register_resource_helper_by_arg
-      return register_resource_helper if skip? :collection
-      register_collection_helper
-      return if skip? :new
-
-      resource_template_uri =   "#{base}/#{plural_name}/:id"
-      collection_template_uri = "#{base}/#{plural_name}"
-
-      builder = MethodBuilder.new(name, resource_template_uri, alt_uri: collection_template_uri)
-      @added_path_methods << builder.call
     end
 
     def register_new_resource_helper
@@ -197,8 +174,6 @@ module Shaf
   end
 
   class MethodBuilder
-    NO_GIVEN_VALUE = Object.new
-
     def self.query_string(query)
       return '' unless query&.any?
 
@@ -211,10 +186,9 @@ module Shaf
       [query_str, fragment_str].join
     end
 
-    def initialize(name, uri, alt_uri: nil)
+    def initialize(name, uri)
       @name = name
       @uri = uri.dup.freeze
-      @alt_uri = alt_uri.dup.freeze
     end
 
     def call
@@ -223,29 +197,16 @@ module Shaf
         raise exception.new(name, uri_method_name)
       end
 
-      if alt_uri.nil?
-        build_methods
-      else
-        build_methods_with_optional_arg
-      end
+      build_methods
     end
 
     private
 
-    attr_reader :name, :uri, :alt_uri
+    attr_reader :name, :uri
 
     def build_methods
       UriHelperMethods.eval_method uri_method_string
       UriHelperMethods.eval_method path_method_string
-      UriHelperMethods.register(template_method_name, &template_proc)
-      UriHelperMethods.register(legacy_template_method_name, &template_proc)
-      UriHelperMethods.register(path_matcher_name, &path_matcher_proc)
-      path_method_name.to_sym
-    end
-
-    def build_methods_with_optional_arg
-      UriHelperMethods.eval_method uri_method_with_optional_arg_string
-      UriHelperMethods.eval_method path_method_with_optional_arg_string
       UriHelperMethods.register(template_method_name, &template_proc)
       UriHelperMethods.register(legacy_template_method_name, &template_proc)
       UriHelperMethods.register(path_matcher_name, &path_matcher_proc)
@@ -309,53 +270,6 @@ module Shaf
       RUBY
     end
 
-    def uri_method_with_optional_arg_string
-      base_uri = UriHelper.base_uri
-      arg_no = extract_symbols(alt_uri).size
-      <<~RUBY
-        def #{uri_signature(uri: alt_uri, optional_args: 1)}
-          query_str = Shaf::MethodBuilder.query_string(query)
-          if arg#{arg_no}.nil?
-            warn <<~DEPRECATION
-
-              Deprecated use of collection uri helper:
-              To get the collection uri use ##{name}_collection_uri instead of ##{uri_method_name}.
-              Or pass an argument to ##{uri_method_name} to get the uri to a resource.
-                \#{caller.find { |s| !s.match? %r{lib/shaf/extensions/resource_uris.rb} }}
-
-            DEPRECATION
-
-            \"#{base_uri}#{interpolated_uri_string(alt_uri)}\#{query_str}\".freeze
-          else
-            \"#{base_uri}#{interpolated_uri_string(uri)}\#{query_str}\".freeze
-          end
-        end
-      RUBY
-    end
-
-    def path_method_with_optional_arg_string
-      arg_no = extract_symbols(alt_uri).size
-      <<~RUBY
-        def #{path_signature(uri: alt_uri, optional_args: 1)}
-          query_str = Shaf::MethodBuilder.query_string(query)
-          if arg#{arg_no}.nil?
-            warn <<~DEPRECATION
-
-              Deprecated use of collection path helper:
-              To get the collection path use ##{name}_collection_path instead of ##{path_method_name}.
-              Or pass an argument to ##{path_method_name} to get the path to a resource.
-                \#{caller.find { |s| !s.match? %r{lib/shaf/extensions} }}
-
-            DEPRECATION
-
-            \"#{interpolated_uri_string(alt_uri)}\#{query_str}\".freeze
-          else
-            \"#{interpolated_uri_string(uri)}\#{query_str}\".freeze
-          end
-        end
-      RUBY
-    end
-
     def extract_symbols(uri = @uri)
       uri.split('/').grep(/\A:.+/).map { |t| t[1..-1].to_sym }
     end
@@ -384,70 +298,29 @@ module Shaf
     end
 
     def template_proc
-      uri, alt_uri = @uri, @alt_uri
-
-      if alt_uri.nil?
-        -> { uri }
-      else
-        deprecated_method = template_method_name
-        replacing_method = "#{name}_collection_path_template"
-
-        lambda do |collection = NO_GIVEN_VALUE|
-          if collection != NO_GIVEN_VALUE
-            warn <<~DEPRECATION
-
-              Deprecated use of uri template helper with `collection` argument:
-              Use #{replacing_method} instead of #{deprecated_method}"
-                #{caller.find { |s| !s.match? %r{lib/shaf/extensions} }}
-
-            DEPRECATION
-          else
-            collection = false
-          end
-
-          collection ? alt_uri : uri
-        end
-      end
+      uri = @uri
+      -> { uri }
     end
 
-    def path_mather_patterns
-      [
-        uri.gsub(%r{:[^/]*}, '\w+'),
-        alt_uri&.gsub(%r{:[^/]*}, '\w+')
-      ].compact.map { |str| Regexp.new("\\A#{str}\\Z") }
+    def path_mather_pattern
+      pattern = uri.gsub(%r{:[^/]*}, '\w+')
+      Regexp.new("\\A#{pattern}\\Z")
     end
 
     def path_matcher_proc
-      patterns = path_mather_patterns
+      pattern = path_mather_pattern
 
-      deprecated_method = path_matcher_name
-      replacing_method = "#{name}_collection_path?"
-
-      lambda do |path = nil, collection: NO_GIVEN_VALUE|
-        if collection != NO_GIVEN_VALUE
-          warn <<~DEPRECATION
-
-            Deprecated use of uri predicate helper with `collection` argument:
-            Use #{replacing_method} instead of #{deprecated_method}(collection: true)
-              #{caller.find { |s| !s.match? %r{lib/shaf/extensions} }}
-
-          DEPRECATION
-        else
-          collection = false
-        end
-
+      lambda do |path = nil|
         unless path
           r = request if respond_to? :request
-          path = r.path_info if r&.respond_to? :path_info
+          path = r.path_info if r.respond_to? :path_info
 
-          unless path
-            raise(
-              ArgumentError,
-              "Uri must be given (or #{self} should respond to :request)"
-            )
-          end
+          raise(
+            ArgumentError,
+            "Uri must be given (or #{self} should respond to :request)"
+          ) unless path
         end
-        pattern = collection ? patterns.last : patterns.first
+
         !!(pattern =~ path)
       end
     end
