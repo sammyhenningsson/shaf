@@ -4,45 +4,45 @@ class <%= controller_class_name %> < BaseController
 
   authorize_with <%= policy_class_name %>
 
-  resource_uris_for :<%= name %><%= namespace ? ", base: '/#{namespace}'" : "" %>
+  resource_uris_for :<%= name %><%= namespace ? ", namespace: '#{namespace}'" : "" %>
 
-  get :<%= plural_name %>_path do
+  get :<%= collection_name %>_path do
     authorize! :read
     collection = paginate(<%= model_class_name %>.order(:created_at).reverse)
     respond_with_collection collection, serializer: <%= serializer_class_name %>
   end
 
-  get :new_<%= name %>_path do
+  get :new_<%= resource_name %>_path do
     authorize! :read
     cache_control(:private, http_cache_max_age: :short)
     respond_with create_form
   end
 
-  post :<%= plural_name %>_path do
+  post :<%= collection_name %>_path do
     authorize! :write
     <%= name %> = <%= model_class_name %>.create(<%= name %>_params)
-    headers('Location' => <%= name %>_uri(<%= name %>))
+    headers('Location' => <%= resource_name %>_uri(<%= name %>))
     respond_with <%= name %>, status: 201
   end
 
-  get :<%= name %>_path do
+  get :<%= resource_name %>_path do
     authorize! :read
     respond_with <%= name %>
   end
 
-  get :edit_<%= name %>_path do
+  get :edit_<%= resource_name %>_path do
     authorize! :write
     cache_control(:private, http_cache_max_age: :short)
     respond_with edit_form
   end
 
-  put :<%= name %>_path do
+  put :<%= resource_name %>_path do
     authorize! :write
     <%= name %>.update(<%= name %>_params)
     respond_with <%= name %>
   end
 
-  delete :<%= name %>_path do
+  delete :<%= resource_name %>_path do
     authorize! :write
     <%= name %>.destroy
     status 204
@@ -62,15 +62,15 @@ class <%= controller_class_name %> < BaseController
 
   def create_form
     <%= model_class_name %>.create_form.tap do |form|
-      form.self_link = new_<%= name %>_uri
-      form.href = <%= plural_name %>_uri
+      form.self_link = new_<%= resource_name %>_uri
+      form.href = <%= collection_name %>_uri
     end
   end
 
   def edit_form
     <%= name %>.edit_form.tap do |form|
-      form.self_link = edit_<%= name %>_uri(<%= name %>)
-      form.href = <%= name %>_uri(<%= name %>)
+      form.self_link = edit_<%= resource_name %>_uri(<%= name %>)
+      form.href = <%= resource_name %>_uri(<%= name %>)
     end
   end
 end

@@ -66,6 +66,14 @@ module Shaf
         Utils.pluralize(name)
       end
 
+      def resource_name
+        [namespace, name].compact.join('_')
+      end
+
+      def collection_name
+        [namespace, plural_name].compact.join('_')
+      end
+
       def namespace
         names = name_arg.split('/')
         return if names.size == 1

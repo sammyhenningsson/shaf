@@ -4,10 +4,10 @@ describe <%= model_class_name %>, type: :integration do
 
   it "returns a <%= name %>" do
     <%= name %> = <%= model_class_name %>.create
-    get <%= name %>_uri(<%= name %>)
+    get <%= resource_name %>_uri(<%= name %>)
     _(status).must_equal 200
     _(link_rels).must_include(:self)
-    _(links[:self][:href]).must_equal <%= name %>_uri(<%= name %>)
+    _(links[:self][:href]).must_equal <%= resource_name %>_uri(<%= name %>)
 <% params.each do |param| -%>
     _(attributes).must_include(:'<%= param[0] %>')
 <% end -%>
@@ -16,10 +16,10 @@ describe <%= model_class_name %>, type: :integration do
   it "lists all <%= plural_name %>" do
     2.times { <%= model_class_name %>.create }
 
-    get <%= plural_name %>_uri
+    get <%= collection_name %>_uri
     _(status).must_equal 200
     _(link_rels).must_include(:self)
-    _(links[:self][:href]).must_include <%= plural_name %>_uri
+    _(links[:self][:href]).must_include <%= collection_name %>_uri
     _(embedded(:'<%= plural_name %>').size).must_equal 2
 
     each_embedded :'<%= plural_name %>' do
@@ -31,12 +31,12 @@ describe <%= model_class_name %>, type: :integration do
   end
 <% if params.size > 0 %>
   it "can create <%= plural_name %>" do
-    get <%= plural_name %>_uri
+    get <%= collection_name %>_uri
 
     _(link_rels).must_include(:'create-form')
     follow_rel :'create-form'
-    _(links[:self][:href]).must_equal new_<%= name %>_uri
-    _(attributes[:href]).must_equal <%= plural_name %>_uri
+    _(links[:self][:href]).must_equal new_<%= resource_name %>_uri
+    _(attributes[:href]).must_equal <%= collection_name %>_uri
     _(attributes[:method]).must_equal "POST"
     _(attributes[:name]).must_equal "create-<%= name %>"
     _(attributes[:title]).must_equal "Create <%= model_class_name %>"
@@ -49,9 +49,9 @@ describe <%= model_class_name %>, type: :integration do
     _(link_rels).must_include(:self)
     _(headers["Location"]).must_equal links[:self][:href]
 
-    get <%= plural_name %>_uri
+    get <%= collection_name %>_uri
     _(status).must_equal 200
-    _(links[:self][:href]).must_include <%= plural_name %>_uri
+    _(links[:self][:href]).must_include <%= collection_name %>_uri
     _(embedded(:'<%= plural_name %>').size).must_equal 1
 
     embedded :'<%= plural_name %>' do
@@ -68,14 +68,14 @@ describe <%= model_class_name %>, type: :integration do
 
   it "<%= plural_name %> can be updated" do
     <%= name %> = <%= model_class_name %>.create
-    get <%= name %>_uri(<%= name %>)
+    get <%= resource_name %>_uri(<%= name %>)
     _(status).must_equal 200
 
     _(link_rels).must_include(:'edit-form')
     follow_rel :'edit-form'
 
-    _(links[:self][:href]).must_equal edit_<%= name %>_uri(<%= name %>)
-    _(attributes[:href]).must_equal <%= name %>_uri(<%= name %>)
+    _(links[:self][:href]).must_equal edit_<%= resource_name %>_uri(<%= name %>)
+    _(attributes[:href]).must_equal <%= resource_name %>_uri(<%= name %>)
     _(attributes[:method]).must_equal "PUT"
     _(attributes[:name]).must_equal "update-<%= name %>"
     _(attributes[:title]).must_equal "Update <%= model_class_name %>"
@@ -91,14 +91,14 @@ describe <%= model_class_name %>, type: :integration do
 
   it "<%= plural_name %> can be deleted" do
     <%= name %> = <%= model_class_name %>.create
-    get <%= name %>_uri(<%= name %>)
+    get <%= resource_name %>_uri(<%= name %>)
     _(status).must_equal 200
     _(link_rels).must_include(:'doc:delete')
 
     follow_rel(:'doc:delete', method: :delete)
     _(status).must_equal 204
 
-    get <%= name %>_uri(<%= name %>)
+    get <%= resource_name %>_uri(<%= name %>)
     _(status).must_equal 404
   end
 

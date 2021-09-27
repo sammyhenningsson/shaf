@@ -57,6 +57,7 @@ module Shaf
       def opts
         {
           class_name: model_class_name,
+          table_name: [namespace, plural_name].compact.join('_')
         }
       end
 

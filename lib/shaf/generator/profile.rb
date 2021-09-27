@@ -39,6 +39,7 @@ module Shaf
           profile_name: name,
           profile_class_name: "#{model_class_name}",
           attributes: attributes,
+          resource_name: resource_name,
         }
       end
     end

@@ -73,16 +73,16 @@ module Shaf
 
       def profile_with_doc
         doc = <<~DOC
-          # Adds a link to the '#{name}' profile and a curie. By default the
+          # Adds a link to the '#{resource_name}' profile and a curie. By default the
           # curie prefix is 'doc', use the `curie_prefix` keyword argument to
           # change this.
           # Note: the target of the profile link and the curie will be set to
-          # `profile_uri('#{name}')` resp. `doc_curie_uri('#{name}')`. To
+          # `profile_uri('#{resource_name}')` resp. `doc_curie_uri('#{resource_name}')`. To
           # create links for external profiles or curies, delete the next line
           # and use `::link` and/or `::curie` instead.
         DOC
 
-        doc.split("\n") << %Q(profile #{Utils.symbol_string(name)})
+        doc.split("\n") << %Q(profile #{Utils.symbol_string(resource_name)})
       end
 
       def links_with_doc
@@ -97,7 +97,7 @@ module Shaf
       def collection_link
         link(
           rel: "collection",
-          uri_helper: "#{plural_name}_uri",
+          uri_helper: "#{collection_name}_uri",
           kwargs: {embed_depth: 0}
         )
       end
@@ -105,21 +105,21 @@ module Shaf
       def self_link
         link(
           rel: "self",
-          uri_helper: "#{name}_uri(resource)"
+          uri_helper: "#{resource_name}_uri(resource)"
         )
       end
 
       def edit_link
         link(
           rel: "edit-form",
-          uri_helper: "edit_#{name}_uri(resource)"
+          uri_helper: "edit_#{resource_name}_uri(resource)"
         )
       end
 
       def delete_link
         link(
           rel: "delete",
-          uri_helper: "#{name}_uri(resource)",
+          uri_helper: "#{resource_name}_uri(resource)",
           kwargs: {curie: :doc}
         )
       end
@@ -127,7 +127,7 @@ module Shaf
       def create_link
         link(
           rel: "create-form",
-          uri_helper: "new_#{name}_uri"
+          uri_helper: "new_#{resource_name}_uri"
         )
       end
 
@@ -146,9 +146,9 @@ module Shaf
       def collection_with_doc
         <<~EOS.split("\n")
           collection of: '#{plural_name}' do
-            curie(:doc) { doc_curie_uri('#{name}') }
+            curie(:doc) { doc_curie_uri('#{resource_name}') }
 
-            link :self, #{plural_name}_uri
+            link :self, #{collection_name}_uri
             link :up, root_uri
 
             #{create_link.join("\n  ")}
@@ -159,6 +159,8 @@ module Shaf
       def opts
         {
           name: name,
+          resource_name: resource_name,
+          collection_name: collection_name,
           class_name: serializer_class_name,
           model_class_name: model_class_name,
           policy_class_name: policy_class_name,

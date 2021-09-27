@@ -5,6 +5,14 @@ require 'shaf/extensions/resource_uris'
 
 module Shaf
   class Profile
+    module NormalizeName
+      private def normalize(name)
+        name.to_s.downcase.tr('-', '_')
+      end
+    end
+
+    extend NormalizeName
+    include NormalizeName
     include Shaf::UriHelper
 
     class << self
@@ -98,18 +106,10 @@ module Shaf
       def evaluator
         Evaluator.new(parent: self)
       end
-
-      def normalize(name)
-        name.to_s.downcase.tr('-', '_')
-      end
     end
 
     def name
       normalize(self.class.name)
-    end
-
-    def normalize(str)
-      self.class.normalize(str)
     end
   end
 end

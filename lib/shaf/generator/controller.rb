@@ -59,6 +59,8 @@ module Shaf
         {
           name: name,
           plural_name: plural_name,
+          resource_name: resource_name,
+          collection_name: collection_name,
           serializer_class_name: "#{model_class_name}Serializer",
           model_class_name: model_class_name,
           controller_class_name: "#{pluralized_model_name}Controller",
@@ -91,7 +93,7 @@ module Shaf
       end
 
       def link_content(indentation = '')
-        "#{indentation}link :#{plural_name}, #{plural_name}_uri"
+        "#{indentation}link :#{plural_name}, #{collection_name}_uri"
       end
     end
   end
