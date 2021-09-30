@@ -356,6 +356,7 @@ rake db:migrate
 ### [Upgrading a shaf project](doc/UPGRADE.md)
 ### [Testing](doc/TESTING.md)
 ### [ShafClient](doc/SHAF_CLIENT.md)
+### [Rails](doc/RAILS.md)
 ### [Frontend](doc/FRONTEND.md)
 ### [Customizations](doc/CUSTOMIZATIONS.md)
 ### [Business logic](doc/BUSINESS_LOGIC.md)
