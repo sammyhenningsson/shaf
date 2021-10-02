@@ -12,14 +12,15 @@ module Shaf
       DEFAULT_SUBMIT = 'save'.freeze
 
       attr_accessor :resource
-      immutable_accessor :title, :name, :href, :type, :submit, :self_link
-      immutable_reader :fields, :action
+      attr_writer :name, :action
+      immutable_accessor :title, :href, :type, :submit, :self_link
+      immutable_reader :fields
 
       def initialize(params = {})
         @title = params[:title]
         @action = params[:action]
-        @name = params[:name]&.to_sym || name_from(@action)
-        @method = params[:method] ||= http_method_from(@action)
+        @name = params[:name]
+        @method = params[:method]
         @type = params[:type] || DEFAULT_TYPE
         @submit = params[:submit] || DEFAULT_SUBMIT
         @fields = (params[:fields] || {}).map do |name, args|
@@ -27,23 +28,25 @@ module Shaf
         end
       end
 
+      def name
+        (@name || name_from(action))&.to_sym
+      end
+
       def method=(http_method)
         @method = http_method.to_s.upcase
       end
 
       def method
-        return unless @method
-        @method.to_s.upcase
+        _method = @method || http_method_from(action)
+        _method.to_s.upcase if _method
       end
 
       def fields=(fields)
         @fields = fields.map { |name, args| Field.new(name, args) }
       end
 
-      def action=(action)
-        @action = action
-        @name ||= name_from action
-        @method ||= http_method_from action
+      def action
+        @action&.to_sym
       end
 
       def add_field(name, opts)

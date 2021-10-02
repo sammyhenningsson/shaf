@@ -43,13 +43,13 @@ module Shaf
         end
 
         it "sets title and name for create form" do
-          assert_match %r(^\s*create do$), output['api/forms/blog_forms.rb']
+          assert_match %r(^\s*create_form do$), output['api/forms/blog_forms.rb']
           assert_match %r(^\s*title 'Create Blog'$), output['api/forms/blog_forms.rb']
           assert_match %r(^\s*name  'create-blog'$), output['api/forms/blog_forms.rb']
         end
 
         it "sets title and name for edit form" do
-          assert_match %r(^\s*edit do$), output['api/forms/blog_forms.rb']
+          assert_match %r(^\s*edit_form do$), output['api/forms/blog_forms.rb']
           assert_match %r(^\s*title 'Update Blog'$), output['api/forms/blog_forms.rb']
           assert_match %r(^\s*name  'update-blog'$), output['api/forms/blog_forms.rb']
         end

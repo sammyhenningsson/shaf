@@ -1,18 +1,19 @@
 require 'test_helper'
 
 describe Shaf::Formable do
-  let(:clazz) do
+  let(:clazz) { Class.new }
+  let(:subject) do
     Class.new do
       extend Shaf::Formable
     end
   end
 
-  it 'adds form class method' do
-    assert clazz.respond_to? :form
+  it 'adds form_for class method' do
+    assert subject.respond_to? :form_for
   end
 
   it 'creates a create form' do
-    clazz.form do
+    subject.forms_for(clazz) do
       title 'Create Form'
       action :create
     end
@@ -24,10 +25,9 @@ describe Shaf::Formable do
   end
 
   it 'creates a create form from a nested block' do
-    clazz.form do
-      create do
+    subject.form_for(clazz) do
+      create_form do
         title 'Create Form'
-        action :create
       end
     end
 
@@ -37,8 +37,35 @@ describe Shaf::Formable do
     assert_equal :create, clazz.create_form.action
   end
 
+  it 'adds _form when not provided (legacy)' do
+    subject.form_for(clazz) do
+      create do
+        title 'Create Form'
+      end
+    end
+
+    assert_instance_of(Shaf::Formable::Form, clazz.create_form)
+    assert_equal 'Create Form', clazz.create_form.title
+    assert_equal :'create-form', clazz.create_form.name
+    assert_equal :create, clazz.create_form.action
+  end
+
+  it 'can override action' do
+    subject.form_for(clazz) do
+      create_form do
+        title 'Some form'
+        action 'archive'
+      end
+    end
+
+    assert_instance_of(Shaf::Formable::Form, clazz.create_form)
+    assert_equal 'Some form', clazz.create_form.title
+    assert_equal :'archive-form', clazz.create_form.name
+    assert_equal :archive, clazz.create_form.action
+  end
+
   it 'does not create a create form without action' do
-    clazz.form do
+    subject.form_for(clazz) do
       title 'Create Form'
     end
 
@@ -46,7 +73,7 @@ describe Shaf::Formable do
   end
 
   it 'is possible to set name' do
-    clazz.form do
+    subject.form_for(clazz) do
       title 'Create Form'
       action :create
       name :"foo-form"
@@ -57,7 +84,7 @@ describe Shaf::Formable do
   end
 
   it 'is possible to set submit' do
-    clazz.form do
+    subject.form_for(clazz) do
       title 'Create Form'
       action :create
       submit :spara
@@ -68,8 +95,8 @@ describe Shaf::Formable do
   end
 
   it 'creates an edit form' do
-    clazz.form do
-      edit do
+    subject.form_for(clazz) do
+      edit_form do
         title 'Edit Form'
         action :edit
       end
@@ -82,14 +109,14 @@ describe Shaf::Formable do
   end
 
   it 'creates different create and edit forms' do
-    clazz.form do
+    subject.forms_for(clazz) do
       title 'Common label'
-      create do
+      create_form do
         method :post
         type :foo
       end
 
-      edit do
+      edit_form do
         method :patch
         type :bar
       end
@@ -107,10 +134,9 @@ describe Shaf::Formable do
   end
 
   it 'is possible to get the edit form from instances' do
-    clazz.form do
-      edit do
+    subject.form_for(clazz) do
+      edit_form do
         title 'Edit Form'
-        action :edit
         instance_accessor
       end
     end
@@ -119,5 +145,36 @@ describe Shaf::Formable do
     assert_instance_of(Shaf::Formable::Form, object.edit_form)
     assert_equal 'Edit Form', object.edit_form.title
     assert_equal object, object.edit_form.resource
+  end
+
+  it 'prefills form from an instance' do
+    clazz.define_method(:foo) { 5 }
+
+    subject.form_for(clazz) do
+      some_form do
+        instance_accessor prefill: true
+        field :bar, accessor_name: :foo
+      end
+    end
+
+    object = clazz.new
+    assert_equal 5, object.some_form[:bar].value
+
+    # Form from class is still empty
+    assert_nil clazz.some_form[:bar].value
+  end
+
+  it 'returns an empty form from an instance' do
+    clazz.define_method(:foo) { 5 }
+
+    subject.form_for(clazz) do
+      some_form do
+        instance_accessor prefill: false
+        field :foo
+      end
+    end
+
+    object = clazz.new
+    assert_nil object.some_form[:foo].value
   end
 end

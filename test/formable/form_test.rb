@@ -26,7 +26,7 @@ module Shaf
         form1.add_field('new_field', {})
 
         assert_equal 'title', form2.title
-        assert_equal 'action', form2.action
+        assert_equal :action, form2.action
         assert_equal :name, form2.name
         assert_equal 'POST', form2.method
         assert_equal 'type', form2.type
