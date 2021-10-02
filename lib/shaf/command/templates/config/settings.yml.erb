@@ -9,7 +9,7 @@ default: &default
   http_cache_max_age_short: 3600 #      60 * 60 = 1 hour
   migrations_dir: db/migrations
   paginate_per_page: 25
-  port: 3000
+  port: <%= default_port %>
   project_name: <%= project_name %>
   protocol: http
   public_folder: frontend/assets

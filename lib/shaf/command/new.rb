@@ -47,8 +47,12 @@ module Shaf
         settings_file = 'config/settings.yml'
         template_file = File.expand_path("../templates/#{settings_file}.erb", __FILE__)
         content = File.read(template_file)
+        locals = {
+          project_name: project_name.capitalize,
+          default_port: "<%= ENV.fetch('PORT', 3000) %>"
+        }
         File.write settings_file,
-                   erb(content, project_name: project_name.capitalize)
+                   erb(content, locals)
       end
 
       def erb(content, locals = {})
