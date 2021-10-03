@@ -1,3 +1,11 @@
+## 3.0.0
+ * Minor tweaks to make it possible to mount inside Rails
+ * Make generators support namespaces
+ * Add namespace option to uri helpers
+ * Option to skip generation of models and migrations
+ * Drop support for generating api docs from comments
+ * Drop support for collection routes with same name resource routes
+ * Drop support for `Shaf::Formable.form` (use `form_for(model)` instead)
 ## 2.1.0
  * Use URNs as profile parameter for shaf forms and errors
 ## 2.0.0
