@@ -236,18 +236,16 @@ module Shaf
         replacement = params[:replace]
 
         changed = false
-        tmp = Tempfile.open do |new_file|
+        new_content = ""
+        FT::ChangeFileCommand.execute(file) do
           File.readlines(file).each do |line|
             changed = line.gsub!(pattern, replacement) || changed
-            new_file << line
+            new_content << line
           end
-          new_file
+          new_content
         end
 
-        return true unless changed
-
-        puts "modifying file: #{file}"
-        FT::MoveFileCommand.new(from: tmp.path, to: file).execute
+        puts "modifying file: #{file}" if changed
         true
       end
 
