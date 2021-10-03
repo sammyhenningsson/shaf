@@ -5,12 +5,6 @@ $LOAD_PATH.unshift __dir__ unless $LOAD_PATH.include? __dir__
 require 'shaf/rake'
 require 'shaf/settings'
 
-Shaf::ApiDocTask.new do |api_doc|
-  api_doc.source_dir = File.join(%w(api serializers))
-  api_doc.html_output_dir = File.join(Shaf::Settings.public_folder, "doc")
-  api_doc.yaml_output_dir = Shaf::Settings.documents_dir || "doc/api"
-end
-
 namespace :test do
   Shaf::TestTask.new(:integration) do |t|
     t.pattern = "spec/integration/**/*_spec.rb"

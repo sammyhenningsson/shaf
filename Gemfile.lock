@@ -25,7 +25,6 @@ GEM
       rack (>= 1.0, < 3)
     rake (12.3.3)
     rchardet (1.8.0)
-    redcarpet (3.5.1)
     ruby2_keywords (0.0.4)
     sequel (5.40.0)
     sinatra (2.1.0)
@@ -49,7 +48,6 @@ DEPENDENCIES
   minitest (~> 5.14, ~> 5)
   rack-test (~> 1.0)
   rake (~> 12.0)
-  redcarpet (~> 3.5)
   sequel (~> 5)
   shaf!
   sinatra (~> 2.0)
