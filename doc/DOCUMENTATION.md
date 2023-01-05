@@ -17,7 +17,6 @@ module Profiles
               doc: 'The text content of the post'
 
     relation :foobar,
-             type: Integer,
              doc: 'Lorem ipsum',
              href: '/hello/world',
              content_type: 'appliation/hal+json'
