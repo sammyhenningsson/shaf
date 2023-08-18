@@ -107,9 +107,9 @@ module Shaf
         end
       end
 
-      def iana_link_relations_csv
+      def iana_link_relations
         zip_file = File.join(gem_root, 'iana_link_relations.csv.gz')
-        Zlib::GzipReader.open(zip_file) { |content| CSV.new(content.read) }
+        Zlib::GzipReader.open(zip_file) { |content| content.read }
       end
 
       private

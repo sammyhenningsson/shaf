@@ -1,7 +1,5 @@
 # frozen_string_literal: true
 
-require 'shaf/api_doc/link_relations'
-
 module Shaf
   module Yard
     class LinkObject < ::YARD::CodeObjects::Base
@@ -52,8 +50,7 @@ module Shaf
       end
 
       def iana_doc
-        ApiDoc::LinkRelations.load_iana
-        ApiDoc::LinkRelations[name.to_sym]&.description
+        LinkRelations.get(name)&.description
       end
     end
   end
