@@ -1,5 +1,7 @@
 # frozen_string_literal: true
 
+require 'shaf/link_relations'
+
 module Shaf
   module Yard
     class LinkObject < ::YARD::CodeObjects::Base

@@ -70,7 +70,7 @@ module Shaf
       end
 
       it 'adds headers' do
-        mock_controller.expect :headers, 'X-Custom-A' => 'hello'
+        mock_controller.expect :headers, {'X-Custom-A' => 'hello'}
 
         expected_erb_locals = {
           request_headers: {},
@@ -85,7 +85,7 @@ module Shaf
         class << mock_controller
           remove_method :erb
         end
-        mock_controller.expect :erb, nil, [:payload, {locals: expected_erb_locals}]
+        mock_controller.expect :erb, nil, [:payload], locals: expected_erb_locals
 
         Html.call(mock_controller, resource, serializer: serializer)
 

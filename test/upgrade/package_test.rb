@@ -157,7 +157,7 @@ module Shaf
       Mutable.suppress_output do
         package.stub :files_in, project_files do
           package.stub :apply_substitute, apply_substitute_stub do
-            YAML.stub :safe_load, pattern: :foo, replace: :bar do
+            YAML.stub :safe_load, {pattern: :foo, replace: :bar} do
               package.apply
             end
           end
