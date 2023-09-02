@@ -1,0 +1,11 @@
+#!/bin/bash
+
+certificate='certs/sammyhenningsson.pem'
+private_key=~/.ssh/gem-private_key.pem
+old_certificate=${certificate}.old
+
+mv $certificate $old_certificate
+openssl x509 -days 730 -in $old_certificate -signkey $private_key -out $certificate
+
+# To view the difference between them, run:
+# vimdiff <(openssl x509 -in certs/sammyhenningsson.pem.old -text -noout) <(openssl x509 -in certs/sammyhenningsson.pem -text -noout)
