@@ -1,3 +1,5 @@
+## 3.0.1
+ * Fix problem with generating documentation
 ## 3.0.0
  * Minor tweaks to make it possible to mount inside Rails
  * Make generators support namespaces
