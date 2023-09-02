@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    shaf (3.0.0)
+    shaf (3.0.1)
       file_transactions
 
 GEM
