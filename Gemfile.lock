@@ -38,7 +38,7 @@ GEM
       tilt (~> 2.0)
     sqlite3 (1.4.2)
     tilt (2.0.11)
-    yard (0.9.34)
+    yard (0.9.36)
 
 PLATFORMS
   ruby
